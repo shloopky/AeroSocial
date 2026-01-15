@@ -168,4 +168,29 @@
 
     async function sendChat() {
         const input = document.getElementById('chat-input');
-        if (!input.value
+        if (!input.value.trim()) return;
+        await _supabase.from('messages').insert([{ username: currentUser, content: input.value }]);
+        input.value = "";
+    }
+
+    function displayMessage(user, content) {
+        const box = document.getElementById('chat-messages');
+        // Smart scroll: Check if user is at bottom before adding message
+        const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
+
+        const msg = document.createElement('div');
+        msg.className = "chat-msg";
+        msg.innerHTML = `<b>${user}:</b> ${content}`;
+        box.appendChild(msg);
+
+        if (isAtBottom) {
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+
+    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
+        displayMessage(p.new.username, p.new.content);
+    }).subscribe();
+</script>
+</body>
+</html>
