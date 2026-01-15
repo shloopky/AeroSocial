@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroStream - Pro</title>
+    <title>AeroStream - Pro Direct</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -11,20 +10,18 @@
 
 <header>
     <div class="logo">AeroStream 🫧</div>
-    <div id="conn-status" style="font-size: 12px; color: #0078d7;">📡 Initializing Sync...</div>
+    <div id="conn-status" style="font-size: 12px; color: #0078d7;">📡 Syncing...</div>
     <div id="user-display">Connecting...</div>
 </header>
 
 <div class="main-layout">
     <div class="stream-container glass-panel">
-        <div id="live-indicator">● LIVE</div>
-        <video id="global-player" autoplay playsinline></video>
+        <div id="live-indicator" style="display:none;">● LIVE</div>
+        <video id="global-player" autoplay playsinline muted></video>
         <div class="stream-info">
-            <div id="status-text">Waiting for host...</div>
-            <div id="admin-tools" style="display: none; gap: 10px;">
+            <div id="status-text">Ready to Sync</div>
+            <div id="admin-tools" style="display: none;">
                 <button id="start-btn" class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
-                <button id="stop-btn" class="aero-btn" onclick="stopGlobalStream()" style="display:none; background: #ff4d4d;">End Broadcast</button>
-                <button class="aero-btn" style="background: orange;" onclick="clearChat()">Clear Chat</button>
             </div>
         </div>
     </div>
@@ -44,61 +41,44 @@
         <h2 id="auth-title">Welcome to Aero</h2>
         <input type="text" id="user-in" placeholder="Username">
         <input type="password" id="pass-in" placeholder="Password">
-        <button class="aero-btn" id="submit-btn" onclick="handleAuth()">Login</button>
-        <p onclick="toggleAuth()" id="toggle-text" style="cursor:pointer; margin-top:15px; font-size:14px;">Don't have an account? <span>Sign Up</span></p>
+        <button class="aero-btn" onclick="handleAuth()">Login</button>
     </div>
 </div>
 
 <script>
-    // --- DATABASE CONFIG ---
     const SUPABASE_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- WebRTC CONFIG ---
     let currentUser = null;
     let localStream = null;
     let peerConnections = {}; 
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-    let isSignUp = false;
-    let localUsers = JSON.parse(localStorage.getItem('aero_users')) || { "Shloopky": "admin123" };
 
-    // --- 1. SIGNALING CHANNEL (Step B Logic) ---
-    _supabase
-        .channel('signaling')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
-            const data = payload.new;
-            if (data.to_user !== currentUser) return;
+    // --- WebRTC SIGNALING (FOLLOWING STEP B) ---
+    _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
+        const data = payload.new;
+        if (data.to_user !== currentUser) return;
 
-            if (data.type === 'join-request' && currentUser === 'Shloopky') {
-                // Admin side: Create connection when someone joins
-                createPeerConnection(data.from_user);
-            } else if (data.type === 'offer') {
-                // Client side: Receive offer
-                handleOffer(data.from_user, JSON.parse(data.message));
-            } else if (data.type === 'answer') {
-                // Admin side: Finalize connection
-                const pc = peerConnections[data.from_user];
-                if (pc) await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.message)));
-            } else if (data.type === 'candidate') {
-                const pc = peerConnections[data.from_user];
-                if (pc) await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(data.message)));
-            }
-        })
-        .subscribe((status) => {
-            if (status === 'SUBSCRIBED') document.getElementById('conn-status').innerText = "🟢 Sync Active";
-        });
+        if (data.type === 'join-request' && currentUser === 'Shloopky') {
+            createPeerConnection(data.from_user);
+        } else if (data.type === 'offer') {
+            handleOffer(data.from_user, JSON.parse(data.message));
+        } else if (data.type === 'answer') {
+            const pc = peerConnections[data.from_user];
+            if (pc) await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.message)));
+        } else if (data.type === 'candidate') {
+            const pc = peerConnections[data.from_user];
+            if (pc) await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(data.message)));
+        }
+    }).subscribe();
 
-    // --- 2. STREAMING ENGINE ---
+    // --- ADMIN LOGIC ---
     async function initiateGlobalStream() {
-        try {
-            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            document.getElementById('global-player').srcObject = localStream;
-            document.getElementById('status-text').innerText = "🔴 BROADCASTING LIVE";
-            document.getElementById('start-btn').style.display = "none";
-            document.getElementById('stop-btn').style.display = "inline-block";
-            document.getElementById('live-indicator').style.display = "block";
-        } catch(e) { alert("Stream failed."); }
+        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        document.getElementById('global-player').srcObject = localStream;
+        document.getElementById('status-text').innerText = "Streaming Active";
+        document.getElementById('live-indicator').style.display = "block";
     }
 
     async function createPeerConnection(viewerId) {
@@ -115,13 +95,14 @@
         sendSignal(viewerId, 'offer', JSON.stringify(offer));
     }
 
+    // --- CLIENT LOGIC ---
     async function handleOffer(adminId, offer) {
         const pc = new RTCPeerConnection(rtcConfig);
         peerConnections[adminId] = pc;
         pc.ontrack = (e) => {
             document.getElementById('global-player').srcObject = e.streams[0];
-            document.getElementById('status-text').innerText = "Watching Shloopky Live";
             document.getElementById('live-indicator').style.display = "block";
+            document.getElementById('status-text').innerText = "Watching Shloopky Live";
         };
         pc.onicecandidate = (e) => {
             if (e.candidate) sendSignal(adminId, 'candidate', JSON.stringify(e.candidate));
@@ -136,55 +117,27 @@
         await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: to, type: type, message: message }]);
     }
 
-    // --- 3. AUTH & CHAT ---
+    // --- AUTH & CHAT ---
     function handleAuth() {
-        const u = document.getElementById('user-in').value.trim();
-        const p = document.getElementById('pass-in').value;
-        if (isSignUp) {
-            localUsers[u] = p;
-            localStorage.setItem('aero_users', JSON.stringify(localUsers));
-            alert("Account created!"); toggleAuth();
-        } else {
-            if (localUsers[u] === p) {
-                currentUser = u;
-                document.getElementById('auth-overlay').style.display = "none";
-                document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
-                if (currentUser === "Shloopky") document.getElementById('admin-tools').style.display = "flex";
-                else sendSignal('Shloopky', 'join-request', '{}');
-                loadOldMessages();
-            } else { alert("Wrong password."); }
-        }
-    }
-
-    function toggleAuth() {
-        isSignUp = !isSignUp;
-        document.getElementById('auth-title').innerText = isSignUp ? "Create Account" : "Welcome to Aero";
-        document.getElementById('submit-btn').innerText = isSignUp ? "Sign Up" : "Login";
+        currentUser = document.getElementById('user-in').value || "Guest";
+        document.getElementById('auth-overlay').style.display = "none";
+        document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
+        if (currentUser === "Shloopky") document.getElementById('admin-tools').style.display = "block";
+        else sendSignal('Shloopky', 'join-request', '{}');
     }
 
     async function sendChat() {
         const input = document.getElementById('chat-input');
-        if (!input.value.trim()) return;
         await _supabase.from('messages').insert([{ username: currentUser, content: input.value }]);
         input.value = "";
     }
 
-    function displayMessage(user, content) {
-        const box = document.getElementById('chat-messages');
+    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
         const msg = document.createElement('div');
         msg.className = "chat-msg";
-        msg.innerHTML = `<b>${user}:</b> ${content}`;
-        box.appendChild(msg);
-        box.scrollTop = box.scrollHeight;
-    }
-
-    async function loadOldMessages() {
-        const { data } = await _supabase.from('messages').select('*').order('created_at', { ascending: true });
-        if (data) data.forEach(m => displayMessage(m.username, m.content));
-    }
-
-    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => displayMessage(p.new.username, p.new.content)).subscribe();
-
+        msg.innerHTML = `<b>${p.new.username}:</b> ${p.new.content}`;
+        document.getElementById('chat-messages').appendChild(msg);
+    }).subscribe();
 </script>
 </body>
 </html>
