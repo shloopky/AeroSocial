@@ -11,47 +11,50 @@
 
     <div id="auth-overlay" class="overlay">
         <div class="auth-card glass-panel">
-            <h2 style="color: #0078d7; text-align: center;">AeroSocial</h2>
+            <h2 style="color: #0078d7; text-align: center; margin-bottom: 20px;">AeroSocial</h2>
             <div id="auth-form">
                 <input type="email" id="email-in" placeholder="Email">
                 <input type="password" id="pass-in" placeholder="Password">
                 <div id="signup-fields">
-                    <input type="text" id="username-in" placeholder="Display Name">
+                    <input type="text" id="username-in" placeholder="Display Name (e.g. User#1234)">
                     <input type="text" id="bio-in" placeholder="Your Bio">
                 </div>
-                <button class="aero-btn" id="auth-main-btn" onclick="handleAuth()">Sign Up</button>
-                <p id="auth-toggle" onclick="toggleAuthMode()">Already have an account? Login</p>
+                <button class="aero-btn" id="auth-main-btn" onclick="handleAuth()" style="width: 100%; margin-top: 10px;">Sign Up</button>
+                <p id="auth-toggle" onclick="toggleAuthMode()" style="text-align: center; font-size: 12px; margin-top: 15px; cursor: pointer; color: #0078d7;">Already have an account? Login</p>
             </div>
         </div>
     </div>
 
-    <nav class="server-rail">
-        <div class="server-icon active" id="nav-dm" onclick="setView('dm')">✉️</div>
-        <div class="server-icon" id="nav-friends" onclick="setView('friends')">👥</div>
-        <hr style="width:30px; opacity:0.2; margin: 10px 0;">
-        <div id="server-list"></div>
-        <div class="server-icon" onclick="addServer()" style="color: #2ecc71;">+</div>
-    </nav>
+    <div class="app-container">
+        <nav class="server-rail">
+            <div class="server-icon active" id="nav-dm" onclick="setView('dm')">✉️</div>
+            <div class="server-icon" id="nav-friends" onclick="setView('friends')">👥</div>
+            <hr style="width:30px; opacity:0.2; margin: 10px 0;">
+            <div id="server-list">
+                </div>
+            <div class="server-icon add-btn" onclick="addServer()" style="color: #2ecc71;">+</div>
+        </nav>
 
-    <aside class="sub-sidebar">
-        <div id="sidebar-header">Direct Messages</div>
-        <div id="sidebar-content"></div>
-        
-        <div class="user-bar">
-            <img id="my-pfp" src="https://via.placeholder.com/32">
-            <div class="user-info">
-                <span id="my-name">User</span>
-                <span id="my-status">Online</span>
+        <aside class="sub-sidebar">
+            <div id="sidebar-header">Direct Messages</div>
+            <div id="sidebar-content"></div>
+            
+            <div class="user-bar">
+                <img id="my-pfp" src="https://via.placeholder.com/32" class="pfp-img">
+                <div class="user-info">
+                    <span id="my-name">Loading...</span>
+                    <span id="my-status">Online</span>
+                </div>
             </div>
-        </div>
-    </aside>
+        </aside>
 
-    <main class="chat-window">
-        <div id="chat-messages"></div>
-        <div class="input-area">
-            <input type="text" id="chat-in" class="input-box" placeholder="Message..." onkeypress="if(event.key==='Enter') sendMessage()">
-        </div>
-    </main>
+        <main class="chat-window">
+            <div id="chat-messages"></div>
+            <div class="input-area">
+                <input type="text" id="chat-in" class="input-box" placeholder="Message..." onkeypress="if(event.key==='Enter') sendMessage()">
+            </div>
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
