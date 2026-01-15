@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Chat Scroller Styling */
         #chat-messages {
             height: 400px;
             overflow-y: auto;
@@ -19,17 +18,34 @@
             scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
         }
 
-        /* Custom scrollbar for Chrome/Safari */
-        #chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
+        #chat-messages::-webkit-scrollbar { width: 6px; }
         #chat-messages::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
         }
+
+        /* Jumpscare Overlay Styles */
+        #jumpscare-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: black;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        #jumpscare-overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
+
+<div id="jumpscare-overlay">
+    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndzRxd3JndzRxd3JndzRxd3JndzRxd3JndzRxd3JndzRxd3JndzRxd3ImZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/3o7TKv6MgQxc9f89vG/giphy.gif" alt="BOO">
+</div>
 
 <header>
     <div class="logo">AeroStream 🫧</div>
@@ -43,8 +59,9 @@
         <video id="global-player" autoplay playsinline muted></video>
         <div class="stream-info">
             <div id="status-text">Ready to Sync</div>
-            <div id="admin-tools" style="display: none;">
+            <div id="admin-tools" style="display: none; flex-direction: column; gap: 10px;">
                 <button id="start-btn" class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
+                <button class="aero-btn" style="background: red; font-weight: bold;" onclick="triggerJumpscare()">TRAP VIEWERS 😱</button>
             </div>
             <div id="viewer-tools" style="display: none; margin-top: 10px;">
                 <button class="aero-btn" style="background: #4a90e2;" onclick="refreshStreamConnection()">Refresh Video 🔄</button>
@@ -56,7 +73,7 @@
         <div class="chat-header">Global Chat</div>
         <div id="chat-messages"></div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendChat()">
+            <input type="text" id="chat-input" maxlength="100" placeholder="Type a message (100 chars)..." onkeypress="if(event.key==='Enter') sendChat()">
             <button class="aero-btn" onclick="sendChat()">Send</button>
         </div>
     </div>
@@ -81,9 +98,16 @@
     let peerConnections = {}; 
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    // --- WebRTC SIGNALING ---
+    // --- SIGNALING & JUMPSCARE LISTENER ---
     _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
         const data = payload.new;
+
+        // GLOBAL JUMPSCARE (everyone sees it if to_user is 'ALL')
+        if (data.type === 'jumpscare' && data.to_user === 'ALL' && currentUser !== 'Shloopky') {
+            activateJumpscareEffect();
+            return;
+        }
+
         if (data.to_user !== currentUser) return;
 
         if (data.type === 'join-request' && currentUser === 'Shloopky') {
@@ -97,18 +121,32 @@
             const pc = peerConnections[data.from_user];
             if (pc) await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(data.message)));
         }
-    }).subscribe((status) => {
-        if (status === 'SUBSCRIBED') document.getElementById('conn-status').innerText = "🟢 Sync Active";
-    });
+    }).subscribe();
 
-    // --- REFRESH LOGIC ---
+    // --- JUMPSCARE LOGIC ---
+    async function triggerJumpscare() {
+        if (currentUser !== 'Shloopky') return;
+        await sendSignal('ALL', 'jumpscare', '{}');
+    }
+
+    function activateJumpscareEffect() {
+        const overlay = document.getElementById('jumpscare-overlay');
+        const audio = new Audio('https://www.soundjay.com/human/sounds/scream-01.mp3'); // Replace with scary sound
+        
+        overlay.style.display = 'flex';
+        audio.play().catch(e => console.log("Audio block by browser"));
+
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 3000); // Lasts for 3 seconds
+    }
+
+    // --- STREAMING ENGINE ---
     function refreshStreamConnection() {
         if (currentUser === "Shloopky") return;
-        document.getElementById('status-text').innerText = "Re-syncing with Shloopky...";
         sendSignal('Shloopky', 'join-request', '{}');
     }
 
-    // --- ADMIN LOGIC ---
     async function initiateGlobalStream() {
         try {
             localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -128,7 +166,6 @@
         sendSignal(viewerId, 'offer', JSON.stringify(offer));
     }
 
-    // --- CLIENT LOGIC ---
     async function handleOffer(adminId, offer) {
         if (peerConnections[adminId]) peerConnections[adminId].close();
         const pc = new RTCPeerConnection(rtcConfig);
@@ -159,7 +196,7 @@
         document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
         
         if (currentUser === "Shloopky") {
-            document.getElementById('admin-tools').style.display = "block";
+            document.getElementById('admin-tools').style.display = "flex";
         } else {
             document.getElementById('viewer-tools').style.display = "block";
             sendSignal('Shloopky', 'join-request', '{}');
@@ -175,19 +212,20 @@
 
     function displayMessage(user, content) {
         const box = document.getElementById('chat-messages');
-        // Smart scroll: Check if user is at bottom before adding message
         const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
-
         const msg = document.createElement('div');
         msg.className = "chat-msg";
         msg.innerHTML = `<b>${user}:</b> ${content}`;
         box.appendChild(msg);
-
-        if (isAtBottom) {
-            box.scrollTop = box.scrollHeight;
-        }
+        if (isAtBottom) box.scrollTop = box.scrollHeight;
     }
 
+    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
+        displayMessage(p.new.username, p.new.content);
+    }).subscribe();
+</script>
+</body>
+</html>
     _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
         displayMessage(p.new.username, p.new.content);
     }).subscribe();
