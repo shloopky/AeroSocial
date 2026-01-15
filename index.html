@@ -50,7 +50,6 @@
 
 <script>
     // --- DATABASE CONFIG ---
-    // FIXED: Added .supabase.co and fixed the initialization typo
     const SUPABASE_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -62,6 +61,9 @@
     let isSignUp = false;
     let currentUser = null;
     let localStream = null;
+    
+    // Load existing users from local storage
+    let localUsers = JSON.parse(localStorage.getItem('aero_users')) || { "Shloopky": "admin123" };
 
     // --- REAL-TIME CHAT SYNC ---
     _supabase
@@ -71,35 +73,73 @@
         })
         .subscribe();
 
-    async function handleAuth() {
-        const u = document.getElementById('user-in').value.trim();
-        const p = document.getElementById('pass-in').value;
-        if (!u || !p) return;
+    // AUTO-REFRESH BACKUP (Runs every 2 seconds in case Realtime fails)
+    setInterval(() => {
+        loadNewMessages();
+    }, 2000);
 
-        currentUser = u;
-        document.getElementById('auth-overlay').style.display = "none";
-        document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
-        
-        if (currentUser === "Shloopky") {
-            document.getElementById('admin-tools').style.display = "block";
-            document.getElementById('status-text').innerText = "Admin Ready";
-        } else {
-            connectToStream();
+    let lastTimestamp = new Date().toISOString();
+
+    async function loadNewMessages() {
+        const { data } = await _supabase
+            .from('messages')
+            .select('*')
+            .gt('created_at', lastTimestamp)
+            .order('created_at', { ascending: true });
+
+        if (data && data.length > 0) {
+            data.forEach(m => {
+                displayMessage(m.username, m.content, false);
+                lastTimestamp = m.created_at;
+            });
         }
-        loadOldMessages();
     }
 
+    // --- AUTHENTICATION ---
     function toggleAuth() {
         isSignUp = !isSignUp;
         document.getElementById('auth-title').innerText = isSignUp ? "Create Account" : "Welcome to Aero";
         document.getElementById('submit-btn').innerText = isSignUp ? "Sign Up" : "Login";
     }
 
+    function handleAuth() {
+        const u = document.getElementById('user-in').value.trim();
+        const p = document.getElementById('pass-in').value;
+
+        if (!u || !p) return alert("Fill in all fields");
+
+        if (isSignUp) {
+            localUsers[u] = p;
+            localStorage.setItem('aero_users', JSON.stringify(localUsers));
+            alert("Signed up! Now login.");
+            toggleAuth();
+        } else {
+            // FIXED PASSWORD CHECK
+            if (localUsers[u] && localUsers[u] === p) {
+                currentUser = u;
+                document.getElementById('auth-overlay').style.display = "none";
+                document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
+                
+                if (currentUser === "Shloopky") {
+                    document.getElementById('admin-tools').style.display = "block";
+                } else {
+                    connectToStream();
+                }
+                loadOldMessages();
+            } else {
+                alert("Wrong username or password!");
+            }
+        }
+    }
+
     async function loadOldMessages() {
-        const { data, error } = await _supabase.from('messages').select('*').order('created_at', { ascending: true }).limit(50);
+        const { data } = await _supabase.from('messages').select('*').order('created_at', { ascending: true }).limit(50);
         if (data) {
-            document.getElementById('chat-messages').innerHTML = ''; // Clear box
-            data.forEach(m => displayMessage(m.username, m.content, false));
+            document.getElementById('chat-messages').innerHTML = '';
+            data.forEach(m => {
+                displayMessage(m.username, m.content, false);
+                lastTimestamp = m.created_at;
+            });
         }
     }
 
@@ -107,12 +147,16 @@
         const input = document.getElementById('chat-input');
         const val = input.value.trim();
         if (!val) return;
-
         await _supabase.from('messages').insert([{ username: currentUser, content: val }]);
         input.value = "";
     }
 
     function displayMessage(user, content, shouldSpeak = true) {
+        // Prevent duplicate local display
+        const existingMessages = Array.from(document.querySelectorAll('.chat-msg'));
+        const isDuplicate = existingMessages.some(m => m.innerText.includes(`${user}: ${content}`));
+        if (isDuplicate && shouldSpeak) return;
+
         const msg = document.createElement('div');
         msg.className = "chat-msg";
         msg.innerHTML = `<b>${user}:</b> ${content}`;
@@ -126,6 +170,7 @@
         }
     }
 
+    // --- STREAMING LOGIC ---
     async function initiateGlobalStream() {
         try {
             localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -133,21 +178,15 @@
             document.getElementById('live-indicator').style.display = "block";
             document.getElementById('start-btn').style.display = "none";
             document.getElementById('stop-btn').style.display = "inline-block";
-            
-            peer.on('call', call => {
-                call.answer(localStream);
-            });
-            document.getElementById('status-text').innerText = "Broadcasting Live";
+            peer.on('call', call => call.answer(localStream));
         } catch(e) { alert("Error sharing screen."); }
     }
 
     function connectToStream() {
-        document.getElementById('status-text').innerText = "Connecting to stream...";
         const call = peer.call(STREAM_ID, null); 
         call.on('stream', remoteStream => {
             document.getElementById('global-player').srcObject = remoteStream;
             document.getElementById('live-indicator').style.display = "block";
-            document.getElementById('status-text').innerText = "Watching Live";
         });
     }
 </script>
