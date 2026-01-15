@@ -2,211 +2,152 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroStream - Pro Fix</title>
+    <title>AeroChat Social</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(187, 222, 251, 0.7); backdrop-filter: blur(20px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        #jumpscare-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 9999; overflow: hidden; justify-content: center; align-items: center; }
-        #matrix-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; opacity: 0.8; }
-        #chat-messages { height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 20px; }
-        .chat-msg { background: white; padding: 12px 16px; border-radius: 18px; border-bottom-left-radius: 4px; max-width: 85%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 14px; color: #333; }
-        .viewer-count { background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-left: 10px; }
-    </style>
 </head>
 <body>
 
-<div id="auth-overlay" class="overlay">
-    <div class="auth-card glass-panel">
-        <h2 style="color: #0078d7; margin-bottom: 20px;">Aero Login</h2>
-        <input type="text" id="user-in" placeholder="Enter Username" style="width: 85%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 20px;">
-        <button class="aero-btn" onclick="handleAuth()" style="width: 95%;">Join Stream</button>
+<div id="auth-overlay" class="overlay" style="display: flex; position: fixed; width: 100%; height: 100%; z-index: 10000; background: var(--glass); backdrop-filter: blur(30px); justify-content: center; align-items: center;">
+    <div class="glass-panel" style="padding: 40px; text-align: center; border-radius: 24px; background: white; width: 320px;">
+        <h2 style="color: var(--accent);">Welcome to Aero</h2>
+        <p style="color: #666; font-size: 14px;">Connect with GitHub to save your progress</p>
+        <button class="aero-btn" onclick="loginWithGitHub()" style="width: 100%; padding: 12px; border: none; border-radius: 10px; background: #24292e; color: white; cursor: pointer; font-weight: 600;">Login with GitHub</button>
     </div>
 </div>
 
-<div id="jumpscare-overlay">
-    <canvas id="matrix-canvas"></canvas>
-    <img src="https://media.giphy.com/media/107lYCYebCwWDC/giphy.gif" alt="FOXY">
+<div id="invite-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10001; background:white; padding:25px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+    <h3>Join a Server</h3>
+    <input type="text" id="invite-in" placeholder="Enter Invite Code" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd;">
+    <button class="aero-btn" onclick="joinServer()" style="width:100%;">Join</button>
 </div>
 
-<header>
-    <div class="logo">AeroStream 🫧 <span id="view-count" class="viewer-count">0 Viewers</span></div>
-    <div id="conn-status" style="font-size: 12px; color: #0078d7;">🟢 Online</div>
-    <div id="user-display">Connecting...</div>
-</header>
+<nav class="server-rail">
+    <div class="server-icon active" onclick="switchServer('home')">🏠</div>
+    <div id="server-list"></div>
+    <div class="server-icon" style="background: rgba(0,255,100,0.1); color: green;" onclick="toggleInviteModal()">+</div>
+</nav>
 
-<div class="main-layout">
-    <div class="stream-container glass-panel">
-        <div id="live-indicator" style="display:none;">● LIVE</div>
-        <video id="global-player" autoplay playsinline muted onclick="this.play(); this.muted=false;"></video>
-        <div class="stream-info">
-            <div id="status-text">Waiting for Shloopky...</div>
-            <div id="admin-tools" style="display: none; gap: 10px; margin-top: 10px;">
-                <button id="start-btn" class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
-                <button class="aero-btn" style="background: #00ff41; color: black; font-weight: bold;" onclick="triggerJumpscare()">GLITCH JUMPSCARE 👾</button>
-            </div>
-            <div id="viewer-tools" style="display: none; margin-top: 10px;">
-                <button class="aero-btn" style="background: #4a90e2;" onclick="forceClientReconnect()">Fix My Stream 🔄</button>
-            </div>
-        </div>
+<aside class="sidebar-channels">
+    <div style="padding: 20px; font-weight: 800; font-size: 18px; color: var(--accent);">AeroChat</div>
+    <div id="channel-list">
+        <div class="channel-item active"># general</div>
+        <div class="channel-item"># gaming</div>
+        <div class="channel-item"># development</div>
     </div>
-    <div class="chat-sidebar glass-panel">
-        <div class="chat-header">Global Chat</div>
-        <div id="chat-messages"></div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" maxlength="100" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendChat()">
-            <button class="aero-btn" onclick="sendChat()">Send</button>
-        </div>
+    
+    <div style="margin-top:auto; padding: 15px; display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.03);">
+        <img id="my-pfp" src="" class="msg-pfp" style="width:32px; height:32px;">
+        <span id="my-username" style="font-size: 13px; font-weight: 600;">User</span>
     </div>
-</div>
+</aside>
+
+<main class="chat-window">
+    <div id="chat-messages"></div>
+    <div class="input-area">
+        <input type="text" id="chat-in" class="input-box" placeholder="Message #general..." onkeypress="if(event.key==='Enter') sendChat()">
+    </div>
+</main>
 
 <script>
-    const SUPABASE_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co'; 
-    const SUPABASE_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
+    const SUPABASE_URL = 'YOUR_URL';
+    const SUPABASE_KEY = 'YOUR_KEY';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentUser = null;
-    let localStream = null;
-    let peerConnections = {}; 
-    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+    let user = null;
+    let currentServer = 'home';
 
-    // --- VIEW COUNT LOGIC ---
-    function setupPresence() {
-        const channel = _supabase.channel('room1');
-        channel
-            .on('presence', { event: 'sync' }, () => {
-                const state = channel.presenceState();
-                document.getElementById('view-count').innerText = `${Object.keys(state).length} Viewers`;
-            })
-            .subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    await channel.track({ user: currentUser, joined_at: new Date().toISOString() });
-                }
-            });
+    // --- GITHUB AUTH ---
+    async function loginWithGitHub() {
+        const { error } = await _supabase.auth.signInWithOAuth({
+            provider: 'github'
+        });
     }
 
-    // --- SIGNALING ---
-    _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
-        const data = payload.new;
-        if (data.type === 'jumpscare' && data.to_user === 'ALL' && currentUser !== 'Shloopky') { runGlitchJumpscare(); return; }
-        if (data.to_user !== currentUser) return;
-
-        try {
-            if (data.type === 'join-request' && currentUser === 'Shloopky') {
-                if (localStream) createPeerConnection(data.from_user);
-            } else if (data.type === 'offer') {
-                handleOffer(data.from_user, JSON.parse(data.message));
-            } else if (data.type === 'answer') {
-                const pc = peerConnections[data.from_user];
-                if (pc) await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.message)));
-            } else if (data.type === 'candidate') {
-                const pc = peerConnections[data.from_user];
-                // Wait until description is set
-                if (pc && pc.remoteDescription) {
-                    await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(data.message)));
-                }
-            }
-        } catch (e) { console.warn("RTC Sync issue:", e); }
-    }).subscribe();
-
-    async function createPeerConnection(viewerId) {
-        const pc = new RTCPeerConnection(rtcConfig);
-        peerConnections[viewerId] = pc;
-        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-        pc.onicecandidate = (e) => { if (e.candidate) sendSignal(viewerId, 'candidate', JSON.stringify(e.candidate)); };
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        sendSignal(viewerId, 'offer', JSON.stringify(offer));
-    }
-
-    async function handleOffer(adminId, offer) {
-        const pc = new RTCPeerConnection(rtcConfig);
-        peerConnections[adminId] = pc;
-        pc.ontrack = (e) => { 
-            const vid = document.getElementById('global-player');
-            vid.srcObject = e.streams[0];
-            document.getElementById('live-indicator').style.display = "block";
-            document.getElementById('status-text').innerText = "Streaming Live (Click video if silent)";
-            vid.play().catch(err => {
-                document.getElementById('status-text').innerText = "Click Video to Start Audio!";
-            });
-        };
-        pc.onicecandidate = (e) => { if (e.candidate) sendSignal(adminId, 'candidate', JSON.stringify(e.candidate)); };
-        await pc.setRemoteDescription(new RTCSessionDescription(offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        sendSignal(adminId, 'answer', JSON.stringify(answer));
-    }
-
-    async function sendSignal(to, type, message) {
-        await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: to, type: type, message: message }]);
-    }
-
-    function handleAuth() {
-        const u = document.getElementById('user-in').value.trim();
-        if(!u) return alert("Enter a name!");
-        currentUser = u;
-        document.getElementById('auth-overlay').style.display = "none";
-        document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
-        
-        setupPresence();
-
-        if (currentUser === "Shloopky") {
-            document.getElementById('admin-tools').style.display = "flex";
-        } else {
-            document.getElementById('viewer-tools').style.display = "block";
-            sendSignal('Shloopky', 'join-request', '{}');
+    // Check login state on load
+    window.onload = async () => {
+        const { data } = await _supabase.auth.getUser();
+        if (data.user) {
+            user = data.user;
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('my-pfp').src = user.user_metadata.avatar_url;
+            document.getElementById('my-username').innerText = user.user_metadata.full_name;
+            loadServers();
+            loadMessages();
         }
-    }
+    };
 
-    async function initiateGlobalStream() {
-        try {
-            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            document.getElementById('global-player').srcObject = localStream;
-            document.getElementById('live-indicator').style.display = "block";
-            document.getElementById('status-text').innerText = "Streaming Active";
-            document.getElementById('start-btn').style.display = "none";
-        } catch (e) { alert("Enable Screen Recording!"); }
-    }
-
-    function forceClientReconnect() {
-        sendSignal('Shloopky', 'join-request', '{}');
+    // --- CHAT LOGIC ---
+    async function loadMessages() {
+        const { data } = await _supabase
+            .from('messages')
+            .select('*')
+            .eq('server_id', currentServer)
+            .order('created_at', { ascending: true });
+        
+        const box = document.getElementById('chat-messages');
+        box.innerHTML = '';
+        if (data) data.forEach(msg => appendMessage(msg));
+        box.scrollTop = box.scrollHeight;
     }
 
     async function sendChat() {
-        const input = document.getElementById('chat-input');
+        const input = document.getElementById('chat-in');
         if (!input.value.trim()) return;
-        await _supabase.from('messages').insert([{ username: currentUser, content: input.value }]);
-        input.value = "";
+
+        const msgObj = {
+            profile_id: user.id,
+            username: user.user_metadata.full_name,
+            pfp: user.user_metadata.avatar_url,
+            content: input.value,
+            server_id: currentServer
+        };
+
+        await _supabase.from('messages').insert([msgObj]);
+        input.value = '';
     }
 
-    function displayMessage(user, content) {
+    function appendMessage(msg) {
         const box = document.getElementById('chat-messages');
-        const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
-        const msg = document.createElement('div');
-        msg.className = "chat-msg";
-        msg.innerHTML = `<b>${user}:</b> ${content}`;
-        box.appendChild(msg);
-        if (isAtBottom) box.scrollTop = box.scrollHeight;
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.innerHTML = `
+            <img src="${msg.pfp}" class="msg-pfp">
+            <div class="msg-body">
+                <span class="msg-user">${msg.username}</span>
+                <span class="msg-text">${msg.content}</span>
+            </div>
+        `;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
     }
 
-    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
-        displayMessage(p.new.username, p.new.content);
+    // Real-time listener
+    _supabase.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        if (payload.new.server_id === currentServer) {
+            appendMessage(payload.new);
+        }
     }).subscribe();
 
-    function runGlitchJumpscare() {
-        const overlay = document.getElementById('jumpscare-overlay');
-        const audio = new Audio('https://www.myinstants.com/media/sounds/fnaf-foxy-jumpscare.mp3');
-        overlay.style.display = 'flex'; startMatrixEffect();
-        audio.play().catch(() => {}); 
-        setTimeout(() => { overlay.style.display = 'none'; clearInterval(matrixInterval); ctx.clearRect(0, 0, canvas.width, canvas.height); }, 3500);
+    // --- INVITE SYSTEM ---
+    function toggleInviteModal() {
+        const m = document.getElementById('invite-modal');
+        m.style.display = m.style.display === 'none' ? 'block' : 'none';
     }
-    const canvas = document.getElementById('matrix-canvas'); const ctx = canvas.getContext('2d'); let matrixInterval;
-    function startMatrixEffect() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; const columns = canvas.width / 20; const drops = Array(Math.floor(columns)).fill(1);
-    matrixInterval = setInterval(() => { ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#0F0'; ctx.font = '20px monospace';
-    for (let i = 0; i < drops.length; i++) { const text = Math.floor(Math.random() * 2); ctx.fillText(text, i * 20, drops[i] * 20); if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } }, 33); }
-    async function triggerJumpscare() { await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: 'ALL', type: 'jumpscare', message: '{}' }]); }
+
+    async function joinServer() {
+        const code = document.getElementById('invite-in').value;
+        const { data, error } = await _supabase.from('servers').select('*').eq('invite_code', code).single();
+        
+        if (data) {
+            // Logic to add server to user's list
+            alert(`Joined ${data.name}!`);
+            toggleInviteModal();
+            loadServers();
+        } else {
+            alert("Invalid Code");
+        }
+    }
 </script>
 </body>
 </html>
