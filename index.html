@@ -18,29 +18,18 @@
         }
         #jumpscare-overlay img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* Animated Code Ticker */
-        #bottom-code-bar {
-            position: fixed;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            color: #00ff00;
-            font-family: monospace;
-            padding: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            z-index: 100;
-        }
-        .ticker-text {
-            display: inline-block;
-            padding-left: 100%;
-            animation: ticker 20s linear infinite;
-        }
-        @keyframes ticker {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
+        /* Chat Layout */
+        #chat-messages { 
+            height: 400px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            padding: 10px; 
         }
 
-        #chat-messages { height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+        /* Ensure the main layout fills the space since bar is gone */
+        body { margin-bottom: 0; padding-bottom: 0; }
     </style>
 </head>
 <body>
@@ -81,12 +70,6 @@
     </div>
 </div>
 
-<div id="bottom-code-bar">
-    <div class="ticker-text">
-        _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => { displayMessage(p.new.username, p.new.content); }).subscribe();
-    </div>
-</div>
-
 <div id="auth-overlay" class="overlay">
     <div class="auth-card glass-panel">
         <h2 id="auth-title">Welcome to Aero</h2>
@@ -106,15 +89,11 @@
     let peerConnections = {}; 
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
+    // --- WebRTC SIGNALING ---
     _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
         const data = payload.new;
         if (data.type === 'jumpscare' && data.to_user === 'ALL' && currentUser !== 'Shloopky') {
-            const overlay = document.getElementById('jumpscare-overlay');
-            const audio = new Audio('https://www.myinstants.com/media/sounds/fnaf-foxy-jumpscare.mp3');
-            overlay.style.display = 'flex';
-            audio.play().catch(() => {}); 
-            setTimeout(() => { overlay.style.display = 'none'; }, 2500);
-            return;
+            doJumpscare(); return;
         }
         if (data.to_user !== currentUser) return;
 
@@ -133,16 +112,26 @@
         } catch (e) {}
     }).subscribe();
 
+    function doJumpscare() {
+        const overlay = document.getElementById('jumpscare-overlay');
+        const audio = new Audio('https://www.myinstants.com/media/sounds/fnaf-foxy-jumpscare.mp3');
+        overlay.style.display = 'flex';
+        audio.play().catch(() => {}); 
+        setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    }
+
     async function triggerJumpscare() {
         await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: 'ALL', type: 'jumpscare', message: '{}' }]);
     }
 
     async function initiateGlobalStream() {
-        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        document.getElementById('global-player').srcObject = localStream;
-        document.getElementById('live-indicator').style.display = "block";
-        document.getElementById('status-text').innerText = "Streaming Active";
-        document.getElementById('start-btn').style.display = "none";
+        try {
+            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            document.getElementById('global-player').srcObject = localStream;
+            document.getElementById('live-indicator').style.display = "block";
+            document.getElementById('status-text').innerText = "Streaming Active";
+            document.getElementById('start-btn').style.display = "none";
+        } catch (e) { alert("Permission denied!"); }
     }
 
     async function createPeerConnection(viewerId) {
@@ -198,12 +187,11 @@
 
     function displayMessage(user, content) {
         const box = document.getElementById('chat-messages');
-        const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
         const msg = document.createElement('div');
         msg.className = "chat-msg";
         msg.innerHTML = `<b>${user}:</b> ${content}`;
         box.appendChild(msg);
-        if (isAtBottom) box.scrollTop = box.scrollHeight;
+        box.scrollTop = box.scrollHeight;
     }
 
     _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
