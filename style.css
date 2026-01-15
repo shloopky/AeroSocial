@@ -12,6 +12,52 @@ body {
     overflow: hidden;
 }
 
+/* Sidebar for DMs and Channels */
+.sub-sidebar {
+    width: 240px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.section-label {
+    padding: 20px 15px 5px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 1px;
+}
+
+/* Profiles & Bios */
+.profile-card {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    z-index: 10002;
+    padding: 25px;
+    text-align: center;
+}
+
+.profile-pfp-large {
+    width: 80px; height: 80px;
+    border-radius: 25%;
+    margin-bottom: 15px;
+    object-fit: cover;
+}
+
+.bio-text {
+    font-size: 14px;
+    color: #666;
+    margin: 10px 0;
+    font-style: italic;
+}
 /* SERVER RAIL (LEFT) */
 .server-rail {
     width: 72px;
