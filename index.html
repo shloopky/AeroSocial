@@ -23,6 +23,9 @@
             <div id="admin-tools" style="display: none;">
                 <button id="start-btn" class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
             </div>
+            <div id="viewer-tools" style="display: none; margin-top: 10px;">
+                <button class="aero-btn" style="background: #4a90e2;" onclick="refreshStreamConnection()">Refresh Video 🔄</button>
+            </div>
         </div>
     </div>
 
@@ -55,7 +58,7 @@
     let peerConnections = {}; 
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    // --- WebRTC SIGNALING (FOLLOWING STEP B) ---
+    // --- WebRTC SIGNALING ---
     _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
         const data = payload.new;
         if (data.to_user !== currentUser) return;
@@ -73,17 +76,29 @@
         }
     }).subscribe();
 
+    // --- REFRESH LOGIC ---
+    function refreshStreamConnection() {
+        if (currentUser === "Shloopky") return;
+        document.getElementById('status-text').innerText = "Re-syncing with Shloopky...";
+        sendSignal('Shloopky', 'join-request', '{}');
+    }
+
     // --- ADMIN LOGIC ---
     async function initiateGlobalStream() {
-        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        document.getElementById('global-player').srcObject = localStream;
-        document.getElementById('status-text').innerText = "Streaming Active";
-        document.getElementById('live-indicator').style.display = "block";
+        try {
+            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            document.getElementById('global-player').srcObject = localStream;
+            document.getElementById('status-text').innerText = "Streaming Active";
+            document.getElementById('live-indicator').style.display = "block";
+        } catch (e) {
+            alert("Permission denied or stream failed.");
+        }
     }
 
     async function createPeerConnection(viewerId) {
         const pc = new RTCPeerConnection(rtcConfig);
         peerConnections[viewerId] = pc;
+
         localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
         
         pc.onicecandidate = (e) => {
@@ -97,16 +112,26 @@
 
     // --- CLIENT LOGIC ---
     async function handleOffer(adminId, offer) {
+        // Close old connection if it exists
+        if (peerConnections[adminId]) {
+            peerConnections[adminId].close();
+        }
+
         const pc = new RTCPeerConnection(rtcConfig);
         peerConnections[adminId] = pc;
+
         pc.ontrack = (e) => {
-            document.getElementById('global-player').srcObject = e.streams[0];
+            const videoElement = document.getElementById('global-player');
+            videoElement.srcObject = e.streams[0];
+            videoElement.onloadedmetadata = () => videoElement.play();
             document.getElementById('live-indicator').style.display = "block";
             document.getElementById('status-text').innerText = "Watching Shloopky Live";
         };
+
         pc.onicecandidate = (e) => {
             if (e.candidate) sendSignal(adminId, 'candidate', JSON.stringify(e.candidate));
         };
+
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
@@ -119,15 +144,22 @@
 
     // --- AUTH & CHAT ---
     function handleAuth() {
-        currentUser = document.getElementById('user-in').value || "Guest";
+        const input = document.getElementById('user-in').value.trim();
+        currentUser = input || "Guest_" + Math.floor(Math.random() * 1000);
         document.getElementById('auth-overlay').style.display = "none";
         document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
-        if (currentUser === "Shloopky") document.getElementById('admin-tools').style.display = "block";
-        else sendSignal('Shloopky', 'join-request', '{}');
+        
+        if (currentUser === "Shloopky") {
+            document.getElementById('admin-tools').style.display = "block";
+        } else {
+            document.getElementById('viewer-tools').style.display = "block";
+            sendSignal('Shloopky', 'join-request', '{}');
+        }
     }
 
     async function sendChat() {
         const input = document.getElementById('chat-input');
+        if (!input.value.trim()) return;
         await _supabase.from('messages').insert([{ username: currentUser, content: input.value }]);
         input.value = "";
     }
@@ -137,6 +169,8 @@
         msg.className = "chat-msg";
         msg.innerHTML = `<b>${p.new.username}:</b> ${p.new.content}`;
         document.getElementById('chat-messages').appendChild(msg);
+        const chatBox = document.getElementById('chat-messages');
+        chatBox.scrollTop = chatBox.scrollHeight;
     }).subscribe();
 </script>
 </body>
