@@ -3,28 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroStream - Pro Direct</title>
+    <title>AeroStream - Foxy Edition</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        #chat-messages {
-            height: 400px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 10px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-        }
-
-        #chat-messages::-webkit-scrollbar { width: 6px; }
-        #chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        /* Jumpscare Overlay Styles */
+        /* Jumpscare Styling */
         #jumpscare-overlay {
             display: none;
             position: fixed;
@@ -37,14 +20,41 @@
         #jumpscare-overlay img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+        }
+
+        /* Bottom Code Display */
+        #bottom-code-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-top: 1px solid #333;
+            z-index: 100;
+        }
+
+        /* Chat Scroller */
+        #chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
 
 <div id="jumpscare-overlay">
-    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndzRxd3JndzRxd3JndzRxd3JndzRxd3JndzRxd3JndzRxd3JndzRxd3ImZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/3o7TKv6MgQxc9f89vG/giphy.gif" alt="BOO">
+    <img src="https://media.giphy.com/media/107lYCYebCwWDC/giphy.gif" alt="FOXY">
 </div>
 
 <header>
@@ -59,11 +69,11 @@
         <video id="global-player" autoplay playsinline muted></video>
         <div class="stream-info">
             <div id="status-text">Ready to Sync</div>
-            <div id="admin-tools" style="display: none; flex-direction: column; gap: 10px;">
+            <div id="admin-tools" style="display: none; gap: 10px;">
                 <button id="start-btn" class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
-                <button class="aero-btn" style="background: red; font-weight: bold;" onclick="triggerJumpscare()">TRAP VIEWERS 😱</button>
+                <button class="aero-btn" style="background: darkred; color: white;" onclick="triggerJumpscare()">FOXY ATTACK 🦊</button>
             </div>
-            <div id="viewer-tools" style="display: none; margin-top: 10px;">
+            <div id="viewer-tools" style="display: none;">
                 <button class="aero-btn" style="background: #4a90e2;" onclick="refreshStreamConnection()">Refresh Video 🔄</button>
             </div>
         </div>
@@ -73,10 +83,14 @@
         <div class="chat-header">Global Chat</div>
         <div id="chat-messages"></div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" maxlength="100" placeholder="Type a message (100 chars)..." onkeypress="if(event.key==='Enter') sendChat()">
+            <input type="text" id="chat-input" maxlength="100" placeholder="Max 100 chars..." onkeypress="if(event.key==='Enter') sendChat()">
             <button class="aero-btn" onclick="sendChat()">Send</button>
         </div>
     </div>
+</div>
+
+<div id="bottom-code-bar">
+    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => { displayMessage(p.new.username, p.new.content); }).subscribe();
 </div>
 
 <div id="auth-overlay" class="overlay">
@@ -102,14 +116,19 @@
     _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
         const data = payload.new;
 
-        // GLOBAL JUMPSCARE (everyone sees it if to_user is 'ALL')
+        // Foxy Jumpscare Trigger
         if (data.type === 'jumpscare' && data.to_user === 'ALL' && currentUser !== 'Shloopky') {
-            activateJumpscareEffect();
+            const overlay = document.getElementById('jumpscare-overlay');
+            const audio = new Audio('https://www.myinstants.com/media/sounds/fnaf-foxy-jumpscare.mp3');
+            overlay.style.display = 'flex';
+            audio.play();
+            setTimeout(() => { overlay.style.display = 'none'; }, 2500);
             return;
         }
 
         if (data.to_user !== currentUser) return;
 
+        // WebRTC Handshake Logic
         if (data.type === 'join-request' && currentUser === 'Shloopky') {
             createPeerConnection(data.from_user);
         } else if (data.type === 'offer') {
@@ -123,37 +142,17 @@
         }
     }).subscribe();
 
-    // --- JUMPSCARE LOGIC ---
     async function triggerJumpscare() {
         if (currentUser !== 'Shloopky') return;
-        await sendSignal('ALL', 'jumpscare', '{}');
+        await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: 'ALL', type: 'jumpscare', message: '{}' }]);
     }
 
-    function activateJumpscareEffect() {
-        const overlay = document.getElementById('jumpscare-overlay');
-        const audio = new Audio('https://www.soundjay.com/human/sounds/scream-01.mp3'); // Replace with scary sound
-        
-        overlay.style.display = 'flex';
-        audio.play().catch(e => console.log("Audio block by browser"));
-
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 3000); // Lasts for 3 seconds
-    }
-
-    // --- STREAMING ENGINE ---
-    function refreshStreamConnection() {
-        if (currentUser === "Shloopky") return;
-        sendSignal('Shloopky', 'join-request', '{}');
-    }
-
+    // --- STREAMING FUNCTIONS ---
     async function initiateGlobalStream() {
-        try {
-            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-            document.getElementById('global-player').srcObject = localStream;
-            document.getElementById('status-text').innerText = "Streaming Active";
-            document.getElementById('live-indicator').style.display = "block";
-        } catch (e) { alert("Stream failed."); }
+        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        document.getElementById('global-player').srcObject = localStream;
+        document.getElementById('live-indicator').style.display = "block";
+        document.getElementById('start-btn').style.display = "none";
     }
 
     async function createPeerConnection(viewerId) {
@@ -170,13 +169,7 @@
         if (peerConnections[adminId]) peerConnections[adminId].close();
         const pc = new RTCPeerConnection(rtcConfig);
         peerConnections[adminId] = pc;
-        pc.ontrack = (e) => {
-            const videoElement = document.getElementById('global-player');
-            videoElement.srcObject = e.streams[0];
-            videoElement.onloadedmetadata = () => videoElement.play();
-            document.getElementById('live-indicator').style.display = "block";
-            document.getElementById('status-text').innerText = "Watching Shloopky Live";
-        };
+        pc.ontrack = (e) => { document.getElementById('global-player').srcObject = e.streams[0]; };
         pc.onicecandidate = (e) => { if (e.candidate) sendSignal(adminId, 'candidate', JSON.stringify(e.candidate)); };
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await pc.createAnswer();
@@ -190,14 +183,12 @@
 
     // --- AUTH & CHAT ---
     function handleAuth() {
-        const input = document.getElementById('user-in').value.trim();
-        currentUser = input || "Guest_" + Math.floor(Math.random() * 1000);
+        const u = document.getElementById('user-in').value.trim();
+        currentUser = u || "Guest";
         document.getElementById('auth-overlay').style.display = "none";
         document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
-        
-        if (currentUser === "Shloopky") {
-            document.getElementById('admin-tools').style.display = "flex";
-        } else {
+        if (currentUser === "Shloopky") document.getElementById('admin-tools').style.display = "flex";
+        else {
             document.getElementById('viewer-tools').style.display = "block";
             sendSignal('Shloopky', 'join-request', '{}');
         }
@@ -226,9 +217,5 @@
 </script>
 </body>
 </html>
-    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
-        displayMessage(p.new.username, p.new.content);
-    }).subscribe();
-</script>
 </body>
 </html>
