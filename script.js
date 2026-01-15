@@ -6,7 +6,26 @@ let currentUser = null;
 let isLoginMode = false;
 let selectedFile = null;
 
-// --- PROFILE CUSTOMIZATION LOGIC ---
+// --- VIEW CONTROLLER ---
+function setView(view) {
+    const content = document.getElementById('sidebar-content');
+    const header = document.getElementById('sidebar-header');
+    content.innerHTML = ''; // Clear current list
+    
+    document.querySelectorAll('.server-icon').forEach(el => el.classList.remove('active'));
+
+    if (view === 'dm') {
+        document.getElementById('nav-dm').classList.add('active');
+        header.innerText = "Direct Messages";
+        loadFriendsList(); 
+    } else if (view === 'friends') {
+        document.getElementById('nav-friends').classList.add('active');
+        header.innerText = "Friends Management";
+        renderFriendsUI(); 
+    }
+}
+
+// --- PROFILE LOGIC ---
 function openProfile() {
     document.getElementById('profile-modal').style.display = 'flex';
     document.getElementById('edit-username').value = document.getElementById('my-name').innerText;
@@ -17,21 +36,20 @@ function closeProfile() {
     selectedFile = null;
 }
 
-// Drag and Drop Event Listeners
+// Drag & Drop Setup
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
-
-dropZone.onclick = () => fileInput.click();
-
-dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
-dropZone.ondragleave = () => dropZone.classList.remove('dragover');
-dropZone.ondrop = (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files[0]);
-};
-
-fileInput.onchange = (e) => handleFiles(e.target.files[0]);
+if(dropZone) {
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
+    dropZone.ondragleave = () => dropZone.classList.remove('dragover');
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files[0]);
+    };
+    fileInput.onchange = (e) => handleFiles(e.target.files[0]);
+}
 
 function handleFiles(file) {
     if (!file || !file.type.startsWith('image/')) return;
@@ -49,18 +67,73 @@ async function saveProfile() {
     const newUsername = document.getElementById('edit-username').value;
 
     if (selectedFile) {
-        const fileName = `${currentUser.id}_${Date.now()}.png`;
-        const { data, error } = await _supabase.storage.from('avatars').upload(fileName, selectedFile);
+        const fileName = `${currentUser.id}_avatar.png`;
+        const { error } = await _supabase.storage.from('avatars').upload(fileName, selectedFile, { upsert: true });
         if (error) return alert("Upload failed: " + error.message);
         const { data: publicUrl } = _supabase.storage.from('avatars').getPublicUrl(fileName);
         pfpUrl = publicUrl.publicUrl;
     }
 
     await _supabase.from('profiles').upsert({ id: currentUser.id, username: newUsername, pfp: pfpUrl });
-    location.reload();
+    location.reload(); 
 }
 
-// --- AUTH & MESSAGING (Previous Code) ---
+// --- FRIENDS LOGIC ---
+function renderFriendsUI() {
+    const content = document.getElementById('sidebar-content');
+    content.innerHTML = `
+        <div style="padding: 15px;">
+            <input type="text" id="friend-search" placeholder="Username..." class="input-box" style="margin-bottom:10px; background:white;">
+            <button class="aero-btn" onclick="sendFriendRequest()">Send Request</button>
+        </div>
+        <div class="section-label">Pending Requests</div>
+        <div id="pending-list"></div>
+    `;
+    loadPendingRequests();
+}
+
+async function sendFriendRequest() {
+    const name = document.getElementById('friend-search').value;
+    const { data: target } = await _supabase.from('profiles').eq('username', name).single();
+    if (!target) return alert("User not found");
+    await _supabase.from('friends').insert([{ sender_id: currentUser.id, receiver_id: target.id, status: 'pending' }]);
+    alert("Request sent!");
+}
+
+async function loadPendingRequests() {
+    const { data } = await _supabase.from('friends')
+        .select('id, sender_id, profiles!friends_sender_id_fkey(username)')
+        .eq('receiver_id', currentUser.id).eq('status', 'pending');
+    
+    const list = document.getElementById('pending-list');
+    data?.forEach(req => {
+        const div = document.createElement('div');
+        div.className = 'friend-item';
+        div.innerHTML = `<span>${req.profiles.username}</span> <button onclick="acceptFriend(${req.id})" style="cursor:pointer; background:none; border:none; color:green;">✔</button>`;
+        list.appendChild(div);
+    });
+}
+
+async function acceptFriend(id) {
+    await _supabase.from('friends').update({ status: 'accepted' }).eq('id', id);
+    setView('friends');
+}
+
+async function loadFriendsList() {
+    const { data } = await _supabase.from('friends')
+        .select('*, profiles!friends_receiver_id_fkey(username, pfp)')
+        .eq('status', 'accepted');
+    
+    const content = document.getElementById('sidebar-content');
+    data?.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'friend-item';
+        div.innerHTML = `<img src="${f.profiles.pfp}" class="pfp-img" style="width:24px"> <span>${f.profiles.username}</span>`;
+        content.appendChild(div);
+    });
+}
+
+// --- AUTH & CHAT ---
 async function handleAuth() {
     const email = document.getElementById('email-in').value;
     const password = document.getElementById('pass-in').value;
@@ -121,5 +194,6 @@ window.onload = async () => {
         }
         loadMessages();
         _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, loadMessages).subscribe();
+        setView('dm');
     }
 };
