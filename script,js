@@ -1,61 +1,95 @@
 // --- CONFIGURATION ---
-// Shloopky is the master admin by default
-let authorizedStreamers = JSON.parse(localStorage.getItem('aero_streamers')) || ["Shloopky"];
-let users = JSON.parse(localStorage.getItem('aero_users')) || {};
-let currentUser = null;
+const STREAM_ID = 'shloopky-live-broadcaster'; 
+const peer = new Peer(STREAM_ID);
 
-function login() {
-    const userField = document.getElementById('username-input');
-    const passField = document.getElementById('password-input');
+// Replace these with your actual Supabase keys!
+const SUPABASE_URL = 'https://your-project.id.supabase.co';
+const SUPABASE_KEY = 'your-anon-key';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let localStream = null;
+
+// --- 1. LOGIN & AUTH ---
+function handleAuth() {
+    const userField = document.getElementById('user-in');
+    const passField = document.getElementById('pass-in');
     const username = userField.value.trim();
     const password = passField.value;
 
-    // LOGIN LOGIC
-    // Check if it's the Shloopky master account or a signed-up user
-    if (username === "Shloopky" && password === "your_password_here") {
+    // Admin override for you
+    if (username === "Shloopky" && password === "admin123") {
         currentUser = "Shloopky";
-    } else if (users[username] && users[username] === password) {
-        currentUser = username;
     } else {
-        alert("Invalid login!");
-        return;
+        currentUser = username || "Guest";
     }
 
-    // FIX: Update the Header to show the Username
-    const userDisplay = document.getElementById('user-display');
-    if (userDisplay) {
-        userDisplay.innerHTML = `Welcome, <strong>${currentUser}</strong>! 🫧`;
-    }
+    // Update UI
+    document.getElementById('auth-overlay').style.display = "none";
+    document.getElementById('user-display').innerHTML = `Welcome, <strong>${currentUser}</strong>! 🫧`;
 
-    // Hide login UI and show the app
-    document.getElementById('auth-container').style.display = "none";
-    document.getElementById('stream-controls').style.display = "block";
-
-    // Call permission check
-    checkPermissions();
-    addSystemMessage(`${currentUser} has logged in.`);
-}
-
-function checkPermissions() {
-    const startBtn = document.getElementById('start-btn');
-    const adminPanel = document.getElementById('admin-panel');
-
-    // 1. Hide/Show Stream Button
-    if (currentUser && authorizedStreamers.includes(currentUser)) {
-        startBtn.style.display = "inline-block";
-        startBtn.disabled = false;
-        startBtn.innerText = "Start Recording Screen";
-    } else {
-        startBtn.style.display = "none"; // Hide completely for non-authorized users
-    }
-
-    // 2. Show Admin Panel ONLY for Shloopky
+    // Permissions
     if (currentUser === "Shloopky") {
-        if (adminPanel) adminPanel.style.display = "block";
+        document.getElementById('admin-tools').style.display = "block";
+        document.getElementById('status-text').innerText = "Broadcaster Ready";
+    } else {
+        connectToStream(); // Viewers try to find Shloopky's screen
+    }
+    
+    loadOldMessages(); // Pull chat history from Supabase
+}
+
+// --- 2. GLOBAL STREAMING (PeerJS) ---
+async function initiateGlobalStream() {
+    try {
+        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        document.getElementById('global-player').srcObject = localStream;
+        document.getElementById('live-indicator').style.display = "block";
+        document.getElementById('start-btn').style.display = "none";
+        document.getElementById('stop-btn').style.display = "inline-block";
+        
+        peer.on('call', call => call.answer(localStream)); // Send video to whoever joins
+    } catch(e) {
+        alert("Could not share screen.");
     }
 }
 
-// Ensure the button is hidden by default when the page loads
-window.onload = function() {
-    document.getElementById('start-btn').style.display = "none";
-};
+function connectToStream() {
+    const call = peer.call(STREAM_ID, null); 
+    call.on('stream', remoteStream => {
+        document.getElementById('global-player').srcObject = remoteStream;
+        document.getElementById('live-indicator').style.display = "block";
+    });
+}
+
+// --- 3. REAL-TIME CHAT (Supabase) ---
+async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const val = input.value.trim();
+    if (!val) return;
+
+    await supabase.from('messages').insert([{ username: currentUser, content: val }]);
+    input.value = "";
+}
+
+// Listen for new messages from anyone on the web
+supabase
+    .channel('public:messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        displayMessage(payload.new.username, payload.new.content);
+    })
+    .subscribe();
+
+function displayMessage(user, content) {
+    const msg = document.createElement('div');
+    msg.className = "chat-msg";
+    msg.innerHTML = `<b>${user}:</b> ${content}`;
+    const box = document.getElementById('chat-messages');
+    box.appendChild(msg);
+    box.scrollTop = box.scrollHeight;
+}
+
+async function loadOldMessages() {
+    const { data } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
+    if(data) data.forEach(m => displayMessage(m.username, m.content));
+}
