@@ -1,205 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AeroStream</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body { margin: 0; font-family: Arial, sans-serif; background: #e3f2fd; }
-.glass-panel { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; }
-.overlay { position: fixed; inset: 0; background: rgba(187,222,251,0.7); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.aero-btn { padding: 10px 16px; border-radius: 10px; border: none; background: #0078d7; color: white; cursor: pointer; }
-.main-layout { display: flex; gap: 20px; padding: 20px; }
-.stream-container { flex: 2; }
-.chat-sidebar { flex: 1; }
-video { width: 100%; background: black; border-radius: 12px; }
-#chat-messages { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.chat-msg { background: white; padding: 10px 14px; border-radius: 14px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroStream - Pro Fix</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(187, 222, 251, 0.7); backdrop-filter: blur(20px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        #jumpscare-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 9999; overflow: hidden; justify-content: center; align-items: center; }
+        #matrix-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; opacity: 0.8; }
+        #chat-messages { height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 20px; }
+        .chat-msg { background: white; padding: 12px 16px; border-radius: 18px; border-bottom-left-radius: 4px; max-width: 85%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 14px; color: #333; }
+        .viewer-count { background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-left: 10px; }
+    </style>
 </head>
-
 <body>
 
-<!-- AUTH -->
 <div id="auth-overlay" class="overlay">
-  <div class="glass-panel">
-    <h2>Aero Login</h2>
-    <input id="user-in" placeholder="Username"><br><br>
-    <input id="pass-in" placeholder="Admin Password (Shloopky only)" type="password"><br><br>
-    <button class="aero-btn" onclick="handleAuth()">Join</button>
-  </div>
+    <div class="auth-card glass-panel">
+        <h2 style="color: #0078d7; margin-bottom: 20px;">Aero Login</h2>
+        <input type="text" id="user-in" placeholder="Enter Username" style="width: 85%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 20px;">
+        <button class="aero-btn" onclick="handleAuth()" style="width: 95%;">Join Stream</button>
+    </div>
 </div>
 
-<header style="padding:12px 20px; display:flex; justify-content:space-between;">
-  <div><b>AeroStream</b></div>
-  <div id="user-display"></div>
+<div id="jumpscare-overlay">
+    <canvas id="matrix-canvas"></canvas>
+    <img src="https://media.giphy.com/media/107lYCYebCwWDC/giphy.gif" alt="FOXY">
+</div>
+
+<header>
+    <div class="logo">AeroStream 🫧 <span id="view-count" class="viewer-count">0 Viewers</span></div>
+    <div id="conn-status" style="font-size: 12px; color: #0078d7;">🟢 Online</div>
+    <div id="user-display">Connecting...</div>
 </header>
 
 <div class="main-layout">
-
-<div class="stream-container glass-panel">
-  <div id="live-indicator" style="display:none;color:red;">● LIVE</div>
-  <video id="global-player" autoplay playsinline></video>
-
-  <div id="admin-tools" style="display:none;margin-top:10px;">
-    <button class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
-  </div>
-
-  <div id="viewer-tools" style="display:none;margin-top:10px;">
-    <button class="aero-btn" onclick="forceReconnect()">Reconnect</button>
-  </div>
-
-  <div id="status-text">Waiting for Shloopky…</div>
-</div>
-
-<div class="chat-sidebar glass-panel">
-  <div id="chat-messages"></div>
-  <input id="chat-input" placeholder="Message…" onkeypress="if(event.key==='Enter')sendChat()">
-  <button class="aero-btn" onclick="sendChat()">Send</button>
-</div>
-
+    <div class="stream-container glass-panel">
+        <div id="live-indicator" style="display:none;">● LIVE</div>
+        <video id="global-player" autoplay playsinline muted onclick="this.play(); this.muted=false;"></video>
+        <div class="stream-info">
+            <div id="status-text">Waiting for Shloopky...</div>
+            <div id="admin-tools" style="display: none; gap: 10px; margin-top: 10px;">
+                <button id="start-btn" class="aero-btn" onclick="initiateGlobalStream()">Start Stream</button>
+                <button class="aero-btn" style="background: #00ff41; color: black; font-weight: bold;" onclick="triggerJumpscare()">GLITCH JUMPSCARE 👾</button>
+            </div>
+            <div id="viewer-tools" style="display: none; margin-top: 10px;">
+                <button class="aero-btn" style="background: #4a90e2;" onclick="forceClientReconnect()">Fix My Stream 🔄</button>
+            </div>
+        </div>
+    </div>
+    <div class="chat-sidebar glass-panel">
+        <div class="chat-header">Global Chat</div>
+        <div id="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" maxlength="100" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendChat()">
+            <button class="aero-btn" onclick="sendChat()">Send</button>
+        </div>
+    </div>
 </div>
 
 <script>
-/* ---------------- CONFIG ---------------- */
-const ADMIN_NAME = "Shloopky";
-const ADMIN_PASSWORD = "ADMIN123";
+    const SUPABASE_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SUPABASE_URL = "https://nrpiojdaltgfgswvhrys.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7";
-const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let currentUser = null;
+    let localStream = null;
+    let peerConnections = {}; 
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
-const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
-
-/* ---------------- STATE ---------------- */
-let currentUser = null;
-let localStream = null;
-let peerConnections = {};
-let pendingViewers = new Set();
-
-/* ---------------- AUTH ---------------- */
-function handleAuth() {
-  const user = user-in.value.trim();
-  const pass = pass-in.value;
-
-  if (!user) return alert("Enter a username");
-
-  if (user === ADMIN_NAME && pass !== ADMIN_PASSWORD) {
-    return alert("Wrong admin password");
-  }
-
-  currentUser = user;
-  auth-overlay.style.display = "none";
-  user-display.innerHTML = `User: <b>${user}</b>`;
-
-  if (user === ADMIN_NAME) {
-    admin-tools.style.display = "block";
-    global-player.muted = true;
-  } else {
-    viewer-tools.style.display = "block";
-    sendSignal(ADMIN_NAME, "join-request", "{}");
-  }
-}
-
-/* ---------------- SIGNALING ---------------- */
-supa.channel("signaling")
-.on("postgres_changes",{event:"INSERT",schema:"public",table:"signaling"}, async p=>{
-  const d = p.new;
-  if (d.to_user !== currentUser) return;
-
-  if (d.type === "join-request" && currentUser === ADMIN_NAME) {
-    if (localStream) createPeerConnection(d.from_user);
-    else pendingViewers.add(d.from_user);
-  }
-
-  if (d.type === "offer") handleOffer(d.from_user, JSON.parse(d.message));
-  if (d.type === "answer" && peerConnections[d.from_user])
-    peerConnections[d.from_user].setRemoteDescription(JSON.parse(d.message));
-  if (d.type === "candidate" && peerConnections[d.from_user])
-    peerConnections[d.from_user].addIceCandidate(JSON.parse(d.message));
-}).subscribe();
-
-/* ---------------- WEBRTC ---------------- */
-async function createPeerConnection(viewer) {
-  if (peerConnections[viewer] || !localStream) return;
-
-  const pc = new RTCPeerConnection(rtcConfig);
-  peerConnections[viewer] = pc;
-
-  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-
-  pc.onicecandidate = e=>{
-    if(e.candidate) sendSignal(viewer,"candidate",JSON.stringify(e.candidate));
-  };
-
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  sendSignal(viewer,"offer",JSON.stringify(offer));
-}
-
-async function handleOffer(admin, offer) {
-  const pc = new RTCPeerConnection(rtcConfig);
-  peerConnections[admin] = pc;
-
-  pc.ontrack = e=>{
-    if (!global-player.srcObject) {
-      global-player.srcObject = e.streams[0];
-      global-player.play().catch(()=>{});
-      live-indicator.style.display="block";
-      status-text.innerText="LIVE";
+    // --- VIEW COUNT LOGIC ---
+    function setupPresence() {
+        const channel = _supabase.channel('room1');
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                document.getElementById('view-count').innerText = `${Object.keys(state).length} Viewers`;
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.track({ user: currentUser, joined_at: new Date().toISOString() });
+                }
+            });
     }
-  };
 
-  pc.onicecandidate = e=>{
-    if(e.candidate) sendSignal(admin,"candidate",JSON.stringify(e.candidate));
-  };
+    // --- SIGNALING ---
+    _supabase.channel('signaling').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signaling' }, async (payload) => {
+        const data = payload.new;
+        if (data.type === 'jumpscare' && data.to_user === 'ALL' && currentUser !== 'Shloopky') { runGlitchJumpscare(); return; }
+        if (data.to_user !== currentUser) return;
 
-  await pc.setRemoteDescription(offer);
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  sendSignal(admin,"answer",JSON.stringify(answer));
-}
+        try {
+            if (data.type === 'join-request' && currentUser === 'Shloopky') {
+                if (localStream) createPeerConnection(data.from_user);
+            } else if (data.type === 'offer') {
+                handleOffer(data.from_user, JSON.parse(data.message));
+            } else if (data.type === 'answer') {
+                const pc = peerConnections[data.from_user];
+                if (pc) await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(data.message)));
+            } else if (data.type === 'candidate') {
+                const pc = peerConnections[data.from_user];
+                // Wait until description is set
+                if (pc && pc.remoteDescription) {
+                    await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(data.message)));
+                }
+            }
+        } catch (e) { console.warn("RTC Sync issue:", e); }
+    }).subscribe();
 
-/* ---------------- STREAM ---------------- */
-async function initiateGlobalStream() {
-  localStream = await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
-  global-player.srcObject = localStream;
-  live-indicator.style.display="block";
-  status-text.innerText="Streaming";
+    async function createPeerConnection(viewerId) {
+        const pc = new RTCPeerConnection(rtcConfig);
+        peerConnections[viewerId] = pc;
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+        pc.onicecandidate = (e) => { if (e.candidate) sendSignal(viewerId, 'candidate', JSON.stringify(e.candidate)); };
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        sendSignal(viewerId, 'offer', JSON.stringify(offer));
+    }
 
-  for (const v of pendingViewers) createPeerConnection(v);
-  pendingViewers.clear();
-}
+    async function handleOffer(adminId, offer) {
+        const pc = new RTCPeerConnection(rtcConfig);
+        peerConnections[adminId] = pc;
+        pc.ontrack = (e) => { 
+            const vid = document.getElementById('global-player');
+            vid.srcObject = e.streams[0];
+            document.getElementById('live-indicator').style.display = "block";
+            document.getElementById('status-text').innerText = "Streaming Live (Click video if silent)";
+            vid.play().catch(err => {
+                document.getElementById('status-text').innerText = "Click Video to Start Audio!";
+            });
+        };
+        pc.onicecandidate = (e) => { if (e.candidate) sendSignal(adminId, 'candidate', JSON.stringify(e.candidate)); };
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        sendSignal(adminId, 'answer', JSON.stringify(answer));
+    }
 
-/* ---------------- UTILS ---------------- */
-function forceReconnect() {
-  Object.values(peerConnections).forEach(pc=>pc.close());
-  peerConnections = {};
-  global-player.srcObject = null;
-  sendSignal(ADMIN_NAME,"join-request","{}");
-}
+    async function sendSignal(to, type, message) {
+        await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: to, type: type, message: message }]);
+    }
 
-async function sendSignal(to,type,msg){
-  await supa.from("signaling").insert([{from_user:currentUser,to_user:to,type,message:msg}]);
-}
+    function handleAuth() {
+        const u = document.getElementById('user-in').value.trim();
+        if(!u) return alert("Enter a name!");
+        currentUser = u;
+        document.getElementById('auth-overlay').style.display = "none";
+        document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
+        
+        setupPresence();
 
-/* ---------------- CHAT ---------------- */
-async function sendChat(){
-  if(!chat-input.value.trim())return;
-  await supa.from("messages").insert([{username:currentUser,content:chat-input.value}]);
-  chat-input.value="";
-}
-supa.channel("messages").on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},p=>{
-  const d=document.createElement("div");
-  d.className="chat-msg";
-  d.innerHTML=`<b>${p.new.username}:</b> ${p.new.content}`;
-  chat-messages.appendChild(d);
-  chat-messages.scrollTop=chat-messages.scrollHeight;
-}).subscribe();
+        if (currentUser === "Shloopky") {
+            document.getElementById('admin-tools').style.display = "flex";
+        } else {
+            document.getElementById('viewer-tools').style.display = "block";
+            sendSignal('Shloopky', 'join-request', '{}');
+        }
+    }
+
+    async function initiateGlobalStream() {
+        try {
+            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            document.getElementById('global-player').srcObject = localStream;
+            document.getElementById('live-indicator').style.display = "block";
+            document.getElementById('status-text').innerText = "Streaming Active";
+            document.getElementById('start-btn').style.display = "none";
+        } catch (e) { alert("Enable Screen Recording!"); }
+    }
+
+    function forceClientReconnect() {
+        sendSignal('Shloopky', 'join-request', '{}');
+    }
+
+    async function sendChat() {
+        const input = document.getElementById('chat-input');
+        if (!input.value.trim()) return;
+        await _supabase.from('messages').insert([{ username: currentUser, content: input.value }]);
+        input.value = "";
+    }
+
+    function displayMessage(user, content) {
+        const box = document.getElementById('chat-messages');
+        const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
+        const msg = document.createElement('div');
+        msg.className = "chat-msg";
+        msg.innerHTML = `<b>${user}:</b> ${content}`;
+        box.appendChild(msg);
+        if (isAtBottom) box.scrollTop = box.scrollHeight;
+    }
+
+    _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
+        displayMessage(p.new.username, p.new.content);
+    }).subscribe();
+
+    function runGlitchJumpscare() {
+        const overlay = document.getElementById('jumpscare-overlay');
+        const audio = new Audio('https://www.myinstants.com/media/sounds/fnaf-foxy-jumpscare.mp3');
+        overlay.style.display = 'flex'; startMatrixEffect();
+        audio.play().catch(() => {}); 
+        setTimeout(() => { overlay.style.display = 'none'; clearInterval(matrixInterval); ctx.clearRect(0, 0, canvas.width, canvas.height); }, 3500);
+    }
+    const canvas = document.getElementById('matrix-canvas'); const ctx = canvas.getContext('2d'); let matrixInterval;
+    function startMatrixEffect() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; const columns = canvas.width / 20; const drops = Array(Math.floor(columns)).fill(1);
+    matrixInterval = setInterval(() => { ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#0F0'; ctx.font = '20px monospace';
+    for (let i = 0; i < drops.length; i++) { const text = Math.floor(Math.random() * 2); ctx.fillText(text, i * 20, drops[i] * 20); if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; } }, 33); }
+    async function triggerJumpscare() { await _supabase.from('signaling').insert([{ from_user: currentUser, to_user: 'ALL', type: 'jumpscare', message: '{}' }]); }
 </script>
-
 </body>
 </html>
