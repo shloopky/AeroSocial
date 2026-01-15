@@ -1,84 +1,40 @@
-:root {
-    --accent: #0078d7;
-    --glass: rgba(255, 255, 255, 0.5);
-    --border: rgba(255, 255, 255, 0.3);
-}
+:root { --accent: #0078d7; --glass: rgba(255, 255, 255, 0.5); --border: rgba(255, 255, 255, 0.3); }
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: 0.2s; }
+body, html { margin: 0; padding: 0; height: 100vh; background: linear-gradient(135deg, #e3f2fd, #bbdefb); overflow: hidden; }
 
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: 0.2s ease; }
-
-body, html {
-    margin: 0; padding: 0; height: 100vh;
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    overflow: hidden;
-}
-
-.overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(187, 222, 251, 0.6); backdrop-filter: blur(20px);
-    display: flex; justify-content: center; align-items: center; z-index: 9999;
-}
-
-.glass-panel {
-    background: var(--glass); backdrop-filter: blur(15px);
-    border: 1px solid var(--border); border-radius: 20px;
-    padding: 30px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+.glass-panel { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
 
 .app-container { display: flex; width: 100vw; height: 100vh; }
+.server-rail { width: 72px; background: rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 12px; border-right: 1px solid var(--border); }
+.server-icon { width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; }
+.server-icon.active { border-radius: 15px; background: var(--accent); color: white; }
 
-/* Sidebar Rails */
-.server-rail {
-    width: 72px; background: rgba(255, 255, 255, 0.2);
-    display: flex; flex-direction: column; align-items: center;
-    padding: 12px 0; gap: 12px; border-right: 1px solid var(--border);
-}
+.sub-sidebar { width: 240px; background: rgba(255,255,255,0.3); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+#sidebar-header { padding: 20px; font-weight: bold; color: var(--accent); border-bottom: 1px solid var(--border); }
+#sidebar-content { flex: 1; overflow-y: auto; padding: 10px 0; }
 
-.server-icon {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: white; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 20px;
-}
-
-.server-icon:hover, .server-icon.active {
-    border-radius: 15px; background: var(--accent); color: white;
-}
-
-.sub-sidebar {
-    width: 240px; background: rgba(255, 255, 255, 0.3);
-    display: flex; flex-direction: column; border-right: 1px solid var(--border);
-}
-
-/* Chat Layout */
 .chat-window { flex: 1; display: flex; flex-direction: column; }
-
 #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.message-bubble { display: flex; gap: 10px; padding: 8px; border-radius: 10px; }
 
-.message-bubble {
-    display: flex; gap: 10px; padding: 8px; border-radius: 10px; max-width: 80%;
-}
-.message-bubble:hover { background: rgba(255,255,255,0.4); }
-
-.input-area { padding: 20px; background: rgba(255,255,255,0.1); }
-.input-box {
-    width: 100%; padding: 12px 20px; border-radius: 15px;
-    border: 1px solid var(--border); outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-/* User Profile Bar */
-.user-bar {
-    padding: 12px; background: rgba(255, 255, 255, 0.4);
-    display: flex; align-items: center; gap: 10px; cursor: pointer;
-    border-top: 1px solid var(--border);
-}
-.user-bar:hover { background: rgba(255, 255, 255, 0.6); }
-
+.user-bar { padding: 12px; background: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 10px; cursor: pointer; border-top: 1px solid var(--border); }
 .pfp-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: #eee; }
-.user-info { display: flex; flex-direction: column; line-height: 1.2; }
-#my-name { font-weight: bold; font-size: 14px; }
-#my-status { font-size: 11px; color: #27ae60; }
 
-.aero-btn {
-    background: var(--accent); color: white; border: none;
-    padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%;
+/* Drag and Drop Zone */
+.drop-zone {
+    border: 2px dashed var(--accent);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.2);
+    color: var(--accent);
+    font-weight: bold;
 }
-#auth-toggle { text-align: center; font-size: 12px; margin-top: 15px; cursor: pointer; color: var(--accent); }
+.drop-zone:hover, .drop-zone.dragover {
+    background: rgba(0, 120, 215, 0.1);
+}
+
+.aero-btn { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+.input-box { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); outline: none; background: white; }
+#auth-form input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ccc; }
