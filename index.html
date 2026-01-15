@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-    <script src="script.js"></script>
 <body>
 
 <header>
@@ -51,9 +50,10 @@
 
 <script>
     // --- DATABASE CONFIG ---
-const SUPABASE_URL = 'https://nrpiojdaltgfgswvhrys';
-const SUPABASE_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // FIXED: Added .supabase.co and fixed the initialization typo
+    const SUPABASE_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co'; 
+    const SUPABASE_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- PEERJS CONFIG ---
     const STREAM_ID = 'shloopky-live-broadcaster'; 
@@ -64,8 +64,7 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let localStream = null;
 
     // --- REAL-TIME CHAT SYNC ---
-    // This listens for new messages in the database and shows them to everyone
-    supabase
+    _supabase
         .channel('public:messages')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             displayMessage(payload.new.username, payload.new.content);
@@ -77,22 +76,31 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const p = document.getElementById('pass-in').value;
         if (!u || !p) return;
 
-        // Simplified for your setup:
         currentUser = u;
         document.getElementById('auth-overlay').style.display = "none";
         document.getElementById('user-display').innerHTML = `User: <b>${currentUser}</b>`;
         
         if (currentUser === "Shloopky") {
             document.getElementById('admin-tools').style.display = "block";
+            document.getElementById('status-text').innerText = "Admin Ready";
         } else {
             connectToStream();
         }
         loadOldMessages();
     }
 
+    function toggleAuth() {
+        isSignUp = !isSignUp;
+        document.getElementById('auth-title').innerText = isSignUp ? "Create Account" : "Welcome to Aero";
+        document.getElementById('submit-btn').innerText = isSignUp ? "Sign Up" : "Login";
+    }
+
     async function loadOldMessages() {
-        const { data } = await supabase.from('messages').select('*').order('created_at', { ascending: true }).limit(50);
-        data.forEach(m => displayMessage(m.username, m.content, false));
+        const { data, error } = await _supabase.from('messages').select('*').order('created_at', { ascending: true }).limit(50);
+        if (data) {
+            document.getElementById('chat-messages').innerHTML = ''; // Clear box
+            data.forEach(m => displayMessage(m.username, m.content, false));
+        }
     }
 
     async function sendChat() {
@@ -100,8 +108,7 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const val = input.value.trim();
         if (!val) return;
 
-        // This saves the message to the cloud
-        await supabase.from('messages').insert([{ username: currentUser, content: val }]);
+        await _supabase.from('messages').insert([{ username: currentUser, content: val }]);
         input.value = "";
     }
 
@@ -113,15 +120,12 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         box.appendChild(msg);
         box.scrollTop = box.scrollHeight;
 
-        if(shouldSpeak) {
+        if(shouldSpeak && user !== currentUser) {
             const speech = new SpeechSynthesisUtterance(content);
             window.speechSynthesis.speak(speech);
         }
     }
 
-    function toggleAuth() { /* same as before */ }
-
-    // --- VIDEO BROADCAST LOGIC (Same as previous version) ---
     async function initiateGlobalStream() {
         try {
             localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -129,18 +133,23 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             document.getElementById('live-indicator').style.display = "block";
             document.getElementById('start-btn').style.display = "none";
             document.getElementById('stop-btn').style.display = "inline-block";
-            peer.on('call', call => call.answer(localStream));
+            
+            peer.on('call', call => {
+                call.answer(localStream);
+            });
+            document.getElementById('status-text').innerText = "Broadcasting Live";
         } catch(e) { alert("Error sharing screen."); }
     }
 
     function connectToStream() {
+        document.getElementById('status-text').innerText = "Connecting to stream...";
         const call = peer.call(STREAM_ID, null); 
         call.on('stream', remoteStream => {
             document.getElementById('global-player').srcObject = remoteStream;
             document.getElementById('live-indicator').style.display = "block";
+            document.getElementById('status-text').innerText = "Watching Live";
         });
     }
 </script>
 </body>
 </html>
-
