@@ -84,55 +84,34 @@ async function showProfile(userId) {
         document.getElementById('edit-pfp-url').value = profile.pfp.includes('dicebear') ? '' : profile.pfp;
     }
 
-    document.getElementById('profile-modal').style.display = 'flex';
+    // Show modal with blur & prevent body scroll
+    const modal = document.getElementById('profile-modal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // prevent scrolling main page
 }
 
 function closeProfileModal() {
-    document.getElementById('profile-modal').style.display = 'none';
-    currentProfileUserId = null;
+    const modal = document.getElementById('profile-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; // restore normal scroll
 }
 
-async function saveProfileChanges() {
-    if (currentProfileUserId !== currentUser.id) return;
-
-    const now = Date.now();
-    if (lastProfileUpdate) {
-        const minutesPassed = (now - lastProfileUpdate) / 1000 / 60;
-        if (minutesPassed < PROFILE_COOLDOWN_MINUTES) {
-            const remaining = Math.ceil(PROFILE_COOLDOWN_MINUTES - minutesPassed);
-            alert(`You can only update every ${PROFILE_COOLDOWN_MINUTES} minutes.\nWait ${remaining} more minute${remaining > 1 ? 's' : ''}.`);
-            return;
-        }
+// Close when clicking outside modal content
+document.getElementById('profile-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) { // clicked on the overlay itself
+        closeProfileModal();
     }
+});
 
-    const newName = document.getElementById('edit-username').value.trim();
-    let newPfp = document.getElementById('edit-pfp-url').value.trim();
+// ────────────────────────────────────────────────
+// REST OF YOUR CODE (loadMessages, sendMessage, etc.)
+// ────────────────────────────────────────────────
 
-    if (!newName) return alert("Username cannot be empty");
+// ... your other functions here ...
 
-    if (!newPfp) {
-        newPfp = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(newName)}`;
-    }
-
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ username: newName, pfp: newPfp })
-        .eq('id', currentUser.id);
-
-    if (error) {
-        alert("Error saving profile: " + error.message);
-        return;
-    }
-
-    lastProfileUpdate = now;
-    document.getElementById('my-name').textContent = newName;
-    document.getElementById('my-pfp').src = newPfp;
-    alert("Profile updated!");
-    closeProfileModal();
-
-    if (chatType === 'dm') loadDMList();
-    if (activeChatID) loadMessages(false);
-}
+window.onload = async () => {
+    // your existing onload code
+};
 
 // ────────────────────────────────────────────────
 // CLICKABLE AVATAR HELPER
