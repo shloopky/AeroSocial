@@ -1,139 +1,99 @@
-/**
- * AeroSocial Pro v3.8 - Profile Edition
- */
-
-const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
-const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
-const _supabase = supabase.createClient(SB_URL, SB_KEY);
-
-let currentUser = null;
-let activeChatID = null;
-let currentServerID = null;
-let chatType = 'dm';
-let isLoginMode = true; 
-const GLOBAL_SERVER_ID = '00000000-0000-0000-0000-000000000000';
-
-window.onload = async () => {
-    const { data: { user } } = await _supabase.auth.getUser();
-    if (user) {
-        currentUser = user;
-        document.getElementById('auth-overlay').style.display = 'none';
-        const { data: prof } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (prof) updateLocalUI(prof.username, prof.pfp);
-        setupRealtime();
-        loadServers();
-        setView('dm'); 
-    } else {
-        document.getElementById('auth-overlay').style.display = 'flex';
-    }
-};
-
-function updateLocalUI(name, pfp) {
-    const nameEl = document.getElementById('my-name');
-    const pfpEl = document.getElementById('my-pfp');
-    if(nameEl) nameEl.textContent = name;
-    if(pfpEl) pfpEl.src = pfp || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`;
-}
-
-async function handleAuth() {
-    const email = document.getElementById('email-in').value.trim();
-    const password = document.getElementById('pass-in').value.trim();
-    const username = document.getElementById('username-in').value.trim();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AeroSocial Pro</title>
     
-    if (!email || !password) return alert("Please fill in all fields.");
-
-    if (isLoginMode) {
-        const { error } = await _supabase.auth.signInWithPassword({ email, password });
-        if (error) return alert(error.message);
-        location.reload();
-    } else {
-        if (!username) return alert("Username required for signup.");
-        const { data, error } = await _supabase.auth.signUp({ email, password });
-        if (error) return alert(error.message);
-        if (data.user) {
-            await _supabase.from('profiles').insert([{ 
-                id: data.user.id, 
-                username, 
-                pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}` 
-            }]);
-            location.reload();
-        }
-    }
-}
-
-async function signOut() {
-    await _supabase.auth.signOut();
-    location.reload();
-}
-
-function toggleAuthMode() {
-    isLoginMode = !isLoginMode;
-    document.getElementById('signup-fields').style.display = isLoginMode ? 'none' : 'block';
-    document.getElementById('auth-main-btn').innerText = isLoginMode ? 'Login' : 'Sign Up';
-}
-
-async function createOrJoinServer() {
-    const name = document.getElementById('server-name-in').value.trim();
-    if (!name) return;
-
-    if (name.includes('-')) {
-        await _supabase.from('server_members').insert([{ server_id: name, user_id: currentUser.id }]);
-    } else {
-        const { data: server, error: sError } = await _supabase.from('servers').insert([
-            { name: name, icon: '🌐', owner_id: currentUser.id }
-        ]).select().single();
-
-        if (sError) return alert(sError.message);
-
-        await _supabase.from('server_members').insert([{ server_id: server.id, user_id: currentUser.id }]);
-        await _supabase.from('channels').insert([{ server_id: server.id, name: 'general' }]);
-    }
-    document.getElementById('server-modal').style.display = 'none';
-    location.reload();
-}
-
-async function loadChannels(serverId, autoSelect = false) {
-    const content = document.getElementById('sidebar-content');
-    content.innerHTML = '';
-    const { data } = await _supabase.from('channels').select('*').eq('server_id', serverId).order('created_at', {ascending: true});
-    data?.forEach((ch, i) => {
-        const div = document.createElement('div');
-        div.className = 'friend-item';
-        div.innerText = `# ${ch.name}`;
-        div.onclick = () => {
-            activeChatID = ch.id; chatType = 'server'; loadMessages();
-            document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active-chat'));
-            div.classList.add('active-chat');
-        };
-        content.appendChild(div);
-        if (autoSelect && i === 0) div.click();
-    });
-}
-
-function appendMessageUI(msg) {
-    const container = document.getElementById('chat-messages');
-    const isMe = msg.sender_id === currentUser.id;
-    const div = document.createElement('div');
-    div.className = `message-bubble ${isMe ? 'own' : ''}`;
+    <link rel="stylesheet" href="style.css">
     
-    div.innerHTML = `
-        <div class="pfp-container">
-            <img src="${msg.pfp_static}" class="pfp-img circle">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div id="auth-overlay">
+        <div class="glass-panel auth-box">
+            <h2>AeroSocial</h2>
+            <div id="signup-fields" style="display:none;">
+                <input type="text" id="username-in" placeholder="Username" class="input-box">
+            </div>
+            <input type="email" id="email-in" placeholder="Email" class="input-box">
+            <input type="password" id="pass-in" placeholder="Password" class="input-box">
+            
+            <button id="auth-main-btn" class="aero-btn full-width" onclick="handleAuth()">Login</button>
+            
+            <p onclick="toggleAuthMode()" class="toggle-link" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.7;">
+                Switch Login/Signup
+            </p>
         </div>
-        <div class="msg-body">
-            <span class="msg-meta" style="${isMe ? 'text-align:right' : ''}">
-                ${msg.username_static} ${isMe ? `<span class="del-btn" onclick="deleteMessage('${msg.id}')">×</span>` : ''}
-            </span>
-            <div class="msg-content">${msg.content}</div>
-        </div>
-    `;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
+    </div>
 
-async function loadMessages() {
-    if (!activeChatID) return;
-    const container = document.getElementById('chat-messages');
-    let query = _supabase.from('messages').select('*').order('created_at', { ascending: true });
-    
-    if (chatType === '
+    <div class="app-container">
+        
+        <nav class="server-rail">
+            <div class="server-icon active" onclick="setView('dm')">DM</div>
+            <div class="rail-divider"></div>
+            
+            <div id="server-list"></div>
+            
+            <div class="server-icon add-server" style="color:#23a55a" onclick="document.getElementById('server-modal').style.display='flex'">+</div>
+        </nav>
+
+        <aside class="sidebar-glass">
+            <header id="sidebar-header">Direct Messages</header>
+            
+            <div id="sidebar-content" class="scrollable"></div>
+            
+            <footer class="user-bar" onclick="openProfile()" title="Click to edit profile">
+                <div class="pfp-container">
+                    <img id="my-pfp" src="" class="pfp-img circle">
+                    <div class="status-dot status-online"></div>
+                </div>
+                <div class="user-info" style="flex:1; overflow:hidden;">
+                    <span id="my-name" style="display:block; font-weight:bold; font-size:14px;">Loading...</span>
+                    <span class="signout-btn" onclick="event.stopPropagation(); signOut()">Sign Out</span>
+                </div>
+            </footer>
+        </aside>
+
+        <main class="chat-area">
+            <div id="chat-messages" class="scrollable"></div>
+            
+            <div class="input-wrapper">
+                <input type="text" id="chat-in" placeholder="Type a message..." autocomplete="off" onkeydown="if(event.key==='Enter') sendMessage()">
+                <button class="aero-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </main>
+
+        <aside id="member-list-sidebar" class="sidebar-glass member-sidebar">
+            <header>Members</header>
+            <div id="member-list-container" class="scrollable"></div>
+        </aside>
+    </div>
+
+    <div id="server-modal" class="modal-overlay" style="display: none;" onclick="this.style.display='none'">
+        <div class="glass-panel modal-content" onclick="event.stopPropagation()">
+            <h3>Create or Join</h3>
+            <p style="font-size:12px; opacity:0.7; margin-bottom:10px;">Enter a name to create, or a UUID to join.</p>
+            <input type="text" id="server-name-in" placeholder="Server Name or ID" class="input-box">
+            <button class="aero-btn full-width" onclick="createOrJoinServer()">Confirm</button>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay" style="display: none;" onclick="this.style.display='none'">
+        <div class="glass-panel modal-content" onclick="event.stopPropagation()">
+            <h3>Edit Profile</h3>
+            
+            <label style="display:block; text-align:left; font-size:12px; margin:10px 0 5px;">Username</label>
+            <input type="text" id="edit-username" class="input-box">
+            
+            <label style="display:block; text-align:left; font-size:12px; margin:10px 0 5px;">Profile Picture URL</label>
+            <input type="text" id="edit-pfp" class="input-box" placeholder="https://...">
+            
+            <button class="aero-btn full-width" style="margin-top:10px;" onclick="saveProfile()">Save Changes</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
