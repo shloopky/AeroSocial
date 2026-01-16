@@ -269,3 +269,21 @@ body, html {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 10px;
 }
+
+.pfp-img[title] {
+    transition: transform 0.15s ease;
+}
+.pfp-img[title]:hover {
+    transform: scale(1.15);
+    z-index: 10;
+}
+
+/* Better modal close button */
+.mini-btn[style*="font-size:18px"] {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 8px;
+}
