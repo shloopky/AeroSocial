@@ -1,9 +1,7 @@
-// script.js - AeroSocial (full version with all features)
+// script.js - AeroSocial (complete version)
 
 const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
 const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
-// WARNING: In production, use environment variables (e.g. import.meta.env.VITE_SUPABASE_ANON_KEY)
-
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
 let currentUser = null;
@@ -16,8 +14,8 @@ let messageSubscription = null;
 let currentProfileUserId = null;
 let lastProfileUpdate = null;
 
-const PROFILE_COOLDOWN_MINUTES = 1;
-const MAX_WORD_LENGTH = 30;
+const PROFILE_COOLDOWN_MINUTES = 20;
+const MAX_WORD_LENGTH = 20;
 
 // ────────────────────────────────────────────────
 // VIEW CONTROLLER
@@ -84,34 +82,62 @@ async function showProfile(userId) {
         document.getElementById('edit-pfp-url').value = profile.pfp.includes('dicebear') ? '' : profile.pfp;
     }
 
-    // Show modal with blur & prevent body scroll
     const modal = document.getElementById('profile-modal');
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // prevent scrolling main page
+    document.body.style.overflow = 'hidden';
 }
 
 function closeProfileModal() {
     const modal = document.getElementById('profile-modal');
     modal.style.display = 'none';
-    document.body.style.overflow = ''; // restore normal scroll
+    document.body.style.overflow = '';
 }
 
-// Close when clicking outside modal content
 document.getElementById('profile-modal')?.addEventListener('click', function(e) {
-    if (e.target === this) { // clicked on the overlay itself
-        closeProfileModal();
-    }
+    if (e.target === this) closeProfileModal();
 });
 
-// ────────────────────────────────────────────────
-// REST OF YOUR CODE (loadMessages, sendMessage, etc.)
-// ────────────────────────────────────────────────
+async function saveProfileChanges() {
+    if (currentProfileUserId !== currentUser.id) return;
 
-// ... your other functions here ...
+    const now = Date.now();
+    if (lastProfileUpdate) {
+        const minutesPassed = (now - lastProfileUpdate) / 1000 / 60;
+        if (minutesPassed < PROFILE_COOLDOWN_MINUTES) {
+            const remaining = Math.ceil(PROFILE_COOLDOWN_MINUTES - minutesPassed);
+            alert(`You can only update every ${PROFILE_COOLDOWN_MINUTES} minutes.\nWait ${remaining} more minute${remaining > 1 ? 's' : ''}.`);
+            return;
+        }
+    }
 
-window.onload = async () => {
-    // your existing onload code
-};
+    const newName = document.getElementById('edit-username').value.trim();
+    let newPfp = document.getElementById('edit-pfp-url').value.trim();
+
+    if (!newName) return alert("Username cannot be empty");
+
+    if (!newPfp) {
+        newPfp = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(newName)}`;
+    }
+
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ username: newName, pfp: newPfp })
+        .eq('id', currentUser.id);
+
+    if (error) {
+        alert("Error saving profile: " + error.message);
+        return;
+    }
+
+    lastProfileUpdate = now;
+    document.getElementById('my-name').textContent = newName;
+    document.getElementById('my-pfp').src = newPfp;
+    alert("Profile updated!");
+    closeProfileModal();
+
+    if (chatType === 'dm') loadDMList();
+    if (activeChatID) loadMessages();
+}
 
 // ────────────────────────────────────────────────
 // CLICKABLE AVATAR HELPER
@@ -131,7 +157,7 @@ function createClickableAvatar(pfpUrl, username, userId, size = 32) {
 }
 
 // ────────────────────────────────────────────────
-// MESSAGES – LOAD, APPEND, REAL-TIME + WORD LIMIT
+// MESSAGES – LOAD, APPEND, REAL-TIME
 // ────────────────────────────────────────────────
 
 function validateMessage(text) {
@@ -144,7 +170,7 @@ function validateMessage(text) {
     return null;
 }
 
-async function loadMessages(scrollToBottom = true) {
+async function loadMessages() {
     if (!activeChatID) return;
 
     let query = _supabase.from('messages').select('*').order('created_at', { ascending: true });
@@ -166,7 +192,7 @@ async function loadMessages(scrollToBottom = true) {
         contentDiv.innerHTML = `
             <div class="msg-header">
                 <span class="username">${msg.username_static}</span>
-                <span class="timestamp">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                <span class="timestamp">${new Date(msg.created_at).toLocaleString([], {dateStyle: 'short', timeStyle: 'short'})}</span>
             </div>
             <div class="msg-content">${msg.content}</div>
         `;
@@ -177,7 +203,7 @@ async function loadMessages(scrollToBottom = true) {
     });
 
     displayedMessages = new Set(data.map(m => m.id));
-    if (scrollToBottom) container.scrollTop = container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
 }
 
 function appendMessage(msg) {
@@ -194,7 +220,7 @@ function appendMessage(msg) {
     contentDiv.innerHTML = `
         <div class="msg-header">
             <span class="username">${msg.username_static}</span>
-            <span class="timestamp">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            <span class="timestamp">${new Date(msg.created_at).toLocaleString([], {dateStyle: 'short', timeStyle: 'short'})}</span>
         </div>
         <div class="msg-content">${msg.content}</div>
     `;
@@ -351,6 +377,10 @@ async function sendFriendRequest() {
     msgEl.style.color = error ? "red" : "green";
 }
 
+// ────────────────────────────────────────────────
+// LOAD DM LIST & CHANNELS
+// ────────────────────────────────────────────────
+
 async function loadDMList() {
     const { data } = await _supabase.from('friends')
         .select('*, sender:profiles!friends_sender_id_fkey(id, username, pfp), receiver:profiles!friends_receiver_id_fkey(id, username, pfp)')
@@ -380,30 +410,6 @@ async function loadDMList() {
     });
 }
 
-// ────────────────────────────────────────────────
-// CHANNELS & SERVER FUNCTIONS
-// ────────────────────────────────────────────────
-
-async function addChannel() {
-    if (!currentServerID) return alert("No server selected");
-
-    const name = prompt("Channel name:");
-    if (!name || !name.trim()) return;
-
-    const trimmed = name.trim().slice(0, 50);
-
-    const { error } = await _supabase.from('channels').insert([{
-        server_id: currentServerID,
-        name: trimmed
-    }]);
-
-    if (error) {
-        alert("Failed: " + error.message);
-    } else {
-        loadChannels(currentServerID);
-    }
-}
-
 async function loadChannels(serverId) {
     const { data } = await _supabase.from('channels').select('*').eq('server_id', serverId);
     const content = document.getElementById('sidebar-content');
@@ -430,13 +436,8 @@ async function loadChannels(serverId) {
     });
 }
 
-function inviteToServer(serverId) {
-    navigator.clipboard.writeText(serverId);
-    alert(`Server ID copied: ${serverId}`);
-}
-
 // ────────────────────────────────────────────────
-// AUTH, SERVERS, OTHER CORE FUNCTIONS
+// AUTH, SERVER MANAGEMENT, OTHER CORE FUNCTIONS
 // ────────────────────────────────────────────────
 
 async function handleAuth() {
@@ -486,24 +487,29 @@ function renderFriendsUI() {
     loadPendingRequests();
 }
 
-async function createEmptyServer() {
-    const name = document.getElementById('server-name-in').value.trim();
-    if (!name) return alert("Server name required");
+async function openServerSettings(serverId) {
+    const { data: server } = await _supabase.from('servers').select('*').eq('id', serverId).single();
+    if (!server) return;
 
-    const icon = document.getElementById('server-icon-in').value || '📁';
-
-    const { data: server } = await _supabase.from('servers')
-        .insert([{ name, icon, owner_id: currentUser.id }])
-        .select()
-        .single();
-
-    if (!server) return alert("Failed to create server");
-
-    await _supabase.from('server_members').insert([{ server_id: server.id, user_id: currentUser.id }]);
-    await _supabase.from('channels').insert([{ server_id: server.id, name: 'general' }]);
-
-    document.getElementById('server-modal').style.display = 'none';
-    location.reload();
+    if (server.owner_id === currentUser.id) {
+        const choice = confirm(`Delete server "${server.name}"?`);
+        if (choice) {
+            const confirmName = prompt(`Type "${server.name}" to confirm:`);
+            if (confirmName === server.name) {
+                await _supabase.from('servers').delete().eq('id', serverId);
+                alert("Server deleted");
+                location.reload();
+            }
+        }
+    } else {
+        if (confirm(`Leave server "${server.name}"?`)) {
+            await _supabase.from('server_members').delete()
+                .eq('server_id', serverId)
+                .eq('user_id', currentUser.id);
+            alert("Left server");
+            location.reload();
+        }
+    }
 }
 
 async function loadServers() {
@@ -528,31 +534,6 @@ async function loadServers() {
         div.onclick = () => setView('server', s.id);
         list.appendChild(div);
     });
-}
-
-async function openServerSettings(serverId) {
-    const { data: server } = await _supabase.from('servers').select('*').eq('id', serverId).single();
-    if (!server) return;
-
-    if (server.owner_id === currentUser.id) {
-        const choice = confirm(`Delete server "${server.name}"?`);
-        if (choice) {
-            const confirmName = prompt(`Type "${server.name}" to confirm:`);
-            if (confirmName === server.name) {
-                await _supabase.from('servers').delete().eq('id', serverId);
-                alert("Server deleted");
-                location.reload();
-            }
-        }
-    } else {
-        if (confirm(`Leave server "${server.name}"?`)) {
-            await _supabase.from('server_members').delete()
-                .eq('server_id', serverId)
-                .eq('user_id', currentUser.id);
-            alert("Left server");
-            location.reload();
-        }
-    }
 }
 
 // ────────────────────────────────────────────────
