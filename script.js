@@ -1,4 +1,4 @@
-// script.js - AeroSocial (complete version)
+// script.js - AeroSocial (full version)
 
 const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
 const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
@@ -53,7 +53,7 @@ function setView(view, id = null) {
 }
 
 // ────────────────────────────────────────────────
-// PROFILE MODAL + EDITING + COOLDOWN
+// PROFILE MODAL
 // ────────────────────────────────────────────────
 
 async function showProfile(userId) {
@@ -140,7 +140,7 @@ async function saveProfileChanges() {
 }
 
 // ────────────────────────────────────────────────
-// CLICKABLE AVATAR HELPER
+// CLICKABLE AVATAR
 // ────────────────────────────────────────────────
 
 function createClickableAvatar(pfpUrl, username, userId, size = 32) {
@@ -157,7 +157,7 @@ function createClickableAvatar(pfpUrl, username, userId, size = 32) {
 }
 
 // ────────────────────────────────────────────────
-// MESSAGES – LOAD, APPEND, REAL-TIME
+// MESSAGES
 // ────────────────────────────────────────────────
 
 function validateMessage(text) {
@@ -437,7 +437,7 @@ async function loadChannels(serverId) {
 }
 
 // ────────────────────────────────────────────────
-// AUTH, SERVER MANAGEMENT, OTHER CORE FUNCTIONS
+// AUTH, SERVER MANAGEMENT
 // ────────────────────────────────────────────────
 
 async function handleAuth() {
