@@ -1,7 +1,7 @@
 /**
- * AeroSocial Pro v4.0 - Master Ultimate Edition
- * Features: Auth, Server Management (Settings/Delete), Lounges (User-style Server Chats),
- * Friend System (ID Based), Profile Editing, and Real-time Sync.
+ * AeroSocial Pro v4.0 - Master "Nothing Missing" Edition
+ * Includes: Auth, Server Settings, Lounges (User-style), Friend System, 
+ * Profile Editing, and Real-time Sync.
  */
 
 const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
@@ -70,7 +70,32 @@ async function handleAuth() {
 }
 
 // ────────────────────────────────────────────────
-// 2. SERVER & LOUNGE LOGIC
+// 2. PROFILE MANAGEMENT (FIXED)
+// ────────────────────────────────────────────────
+
+function openProfile() {
+    const name = document.getElementById('my-name').textContent;
+    const pfp = document.getElementById('my-pfp').src;
+    document.getElementById('edit-username').value = name;
+    document.getElementById('edit-pfp').value = pfp;
+    document.getElementById('profile-modal').style.display = 'flex';
+}
+
+async function saveProfile() {
+    const newName = document.getElementById('edit-username').value.trim();
+    const newPfp = document.getElementById('edit-pfp').value.trim();
+    if (!newName) return alert("Name required");
+
+    const { error } = await _supabase.from('profiles').update({ username: newName, pfp: newPfp }).eq('id', currentUser.id);
+    if (error) alert(error.message);
+    else {
+        updateLocalUI(newName, newPfp);
+        document.getElementById('profile-modal').style.display = 'none';
+    }
+}
+
+// ────────────────────────────────────────────────
+// 3. SERVER & LOUNGE LOGIC
 // ────────────────────────────────────────────────
 
 async function createOrJoinServer() {
@@ -91,7 +116,7 @@ async function createOrJoinServer() {
 }
 
 async function createLounge() {
-    const name = prompt("Enter Lounge Name (e.g., Chill Spot):");
+    const name = prompt("Enter Lounge Name:");
     if (!name || !currentServerID) return;
     const { error } = await _supabase.from('channels').insert([{ server_id: currentServerID, name: name, is_lounge: true }]);
     if (error) alert(error.message); else loadChannels(currentServerID);
@@ -125,7 +150,7 @@ async function deleteServer() {
 }
 
 // ────────────────────────────────────────────────
-// 3. NAVIGATION & VIEW
+// 4. NAVIGATION & VIEW
 // ────────────────────────────────────────────────
 
 async function setView(view, id = null) {
@@ -144,7 +169,7 @@ async function setView(view, id = null) {
     } 
     else if (view === 'friends') {
         sidebarRight.style.display = 'none';
-        header.innerHTML = `Friends Management <button onclick="setView('dm')" class="add-btn" style="background:#555">←</button>`;
+        header.innerHTML = `Friends <button onclick="setView('dm')" class="add-btn" style="background:#555">←</button>`;
         renderFriendsUI();
     }
     else {
@@ -167,16 +192,13 @@ async function loadChannels(serverId, autoSelect = false) {
     content.innerHTML = '';
     
     const { data: channels } = await _supabase.from('channels')
-        .select('*')
-        .eq('server_id', serverId)
+        .select('*').eq('server_id', serverId)
         .order('is_lounge', { ascending: true }) 
         .order('created_at', { ascending: true });
 
     channels?.forEach((ch, i) => {
         const div = document.createElement('div');
-        
         if (ch.is_lounge) {
-            // Lounge View: Looks like a Friend/User entry
             div.className = 'friend-item lounge-item';
             div.innerHTML = `
                 <div class="pfp-container" style="background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; margin-right:10px;">
@@ -184,18 +206,14 @@ async function loadChannels(serverId, autoSelect = false) {
                 </div>
                 <div class="lounge-info">
                     <div style="font-weight:bold; font-size:13px;">${ch.name}</div>
-                    <div style="font-size:10px; color:#43b581;">● Active Lounge</div>
-                </div>
-            `;
+                    <div style="font-size:10px; color:#43b581;">● Live Lounge</div>
+                </div>`;
         } else {
-            // Standard Channel View
             div.className = 'friend-item';
             div.innerHTML = `<span style="opacity:0.5; margin-right:8px; font-weight:bold;">#</span>${ch.name}`;
         }
-
         div.onclick = () => {
-            activeChatID = ch.id; 
-            chatType = ch.is_lounge ? 'lounge' : 'server';
+            activeChatID = ch.id; chatType = ch.is_lounge ? 'lounge' : 'server';
             loadMessages();
             document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active-chat'));
             div.classList.add('active-chat');
@@ -206,7 +224,7 @@ async function loadChannels(serverId, autoSelect = false) {
 }
 
 // ────────────────────────────────────────────────
-// 4. FRIEND SYSTEM (ID BASED)
+// 5. FRIEND SYSTEM (ID BASED)
 // ────────────────────────────────────────────────
 
 function renderFriendsUI() {
@@ -219,8 +237,7 @@ function renderFriendsUI() {
             <hr style="margin:20px 0; opacity:0.1;">
             <p style="font-size:11px; opacity:0.6;">Your ID:</p>
             <strong onclick="navigator.clipboard.writeText('${currentUser.id}'); alert('ID Copied!')" style="cursor:pointer; color:#fff; font-family:monospace; display:block; background:rgba(0,0,0,0.2); padding:5px;">${currentUser.id}</strong>
-        </div>
-    `;
+        </div>`;
 }
 
 async function sendFriendRequest() {
@@ -249,17 +266,15 @@ async function loadDMList() {
 }
 
 // ────────────────────────────────────────────────
-// 5. CHAT ENGINE & MESSAGING
+// 6. CHAT ENGINE & UTILS
 // ────────────────────────────────────────────────
 
 async function loadMessages() {
     if (!activeChatID) return;
     const container = document.getElementById('chat-messages');
     let query = _supabase.from('messages').select('*').order('created_at', { ascending: true });
-    
     if (chatType === 'server' || chatType === 'lounge') query = query.eq('channel_id', activeChatID);
     else query = query.eq('chat_id', [currentUser.id, activeChatID].sort().join('_'));
-    
     const { data } = await query;
     container.innerHTML = ''; 
     data?.forEach(msg => appendMessageUI(msg));
@@ -291,8 +306,7 @@ function appendMessageUI(msg) {
         <div class="msg-body">
             <span class="msg-meta">${msg.username_static}${isMe ? `<span class="del-btn" onclick="deleteMessage('${msg.id}')">×</span>` : ''}</span>
             <div class="msg-content">${msg.content}</div>
-        </div>
-    `;
+        </div>`;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
@@ -302,10 +316,6 @@ async function deleteMessage(id) {
     await _supabase.from('messages').delete().eq('id', id).eq('sender_id', currentUser.id);
     loadMessages();
 }
-
-// ────────────────────────────────────────────────
-// 6. SYSTEM UTILS & REALTIME
-// ────────────────────────────────────────────────
 
 async function loadServers() {
     const list = document.getElementById('server-list');
@@ -340,36 +350,12 @@ async function loadServerMembers(serverId) {
     });
 }
 
-async function saveProfile() {
-    const newName = document.getElementById('edit-username').value;
-    const newPfp = document.getElementById('edit-pfp').value;
-    await _supabase.from('profiles').update({ username: newName, pfp: newPfp }).eq('id', currentUser.id);
-    updateLocalUI(newName, newPfp);
-    document.getElementById('profile-modal').style.display = 'none';
-}
-
 async function ensureGlobalGeneralChannel() { 
     const { data: existing } = await _supabase.from('channels').select('id').eq('server_id', GLOBAL_SERVER_ID).eq('name', 'general').maybeSingle(); 
     if (!existing) await _supabase.from('channels').insert({ server_id: GLOBAL_SERVER_ID, name: 'general', is_lounge: false }); 
 }
 
 function setupRealtime() {
-    // 1. Listen for new messages
-    _supabase.channel('messages_sync')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
-            console.log("Message change detected:", payload);
-            loadMessages();
-        })
-        .subscribe();
-
-    // 2. Listen for new channels/lounges
-    _supabase.channel('channels_sync')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'channels' }, (payload) => {
-            console.log("Channel change detected:", payload);
-            // Only reload if we are looking at the server where the channel was created
-            if (currentServerID && payload.new.server_id === currentServerID) {
-                loadChannels(currentServerID);
-            }
-        })
-        .subscribe();
+    _supabase.channel('main').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => loadMessages()).subscribe();
+    _supabase.channel('channels').on('postgres_changes', { event: '*', schema: 'public', table: 'channels' }, () => { if(currentServerID) loadChannels(currentServerID); }).subscribe();
 }
