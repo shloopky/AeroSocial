@@ -1,16 +1,17 @@
 /**
- * AeroSocial Pro v3.7 - Final Unified Script
- * Fixes: Auto-Channel Creation, Image Scaling, Circle PFP logic, Real-time Sync
+ * AeroSocial Pro v4.0 - Ultimate Edition
+ * Features: Auth, Real-time Chat, Server Logic, Auto-General, Message Deletion, Profile Editing
  */
 
 const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
 const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
+// --- GLOBAL STATE ---
 let currentUser = null;
 let activeChatID = null;
 let currentServerID = null;
-let chatType = 'dm';
+let chatType = 'dm'; // 'dm' or 'server'
 let isLoginMode = true; 
 const GLOBAL_SERVER_ID = '00000000-0000-0000-0000-000000000000';
 
@@ -23,8 +24,11 @@ window.onload = async () => {
     if (user) {
         currentUser = user;
         document.getElementById('auth-overlay').style.display = 'none';
+        
+        // Fetch Profile Data
         const { data: prof } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
         if (prof) updateLocalUI(prof.username, prof.pfp);
+        
         setupRealtime();
         loadServers();
         setView('dm'); 
@@ -34,6 +38,7 @@ window.onload = async () => {
 };
 
 function updateLocalUI(name, pfp) {
+    // Updates the bottom-left user bar
     const nameEl = document.getElementById('my-name');
     const pfpEl = document.getElementById('my-pfp');
     if(nameEl) nameEl.textContent = name;
@@ -48,19 +53,24 @@ async function handleAuth() {
     if (!email || !password) return alert("Please fill in all fields.");
 
     if (isLoginMode) {
+        // LOGIN
         const { error } = await _supabase.auth.signInWithPassword({ email, password });
         if (error) return alert(error.message);
         location.reload();
     } else {
+        // SIGNUP
         if (!username) return alert("Username required for signup.");
         const { data, error } = await _supabase.auth.signUp({ email, password });
         if (error) return alert(error.message);
+        
         if (data.user) {
+            // Create Profile Record
             await _supabase.from('profiles').insert([{ 
                 id: data.user.id, 
                 username, 
                 pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}` 
             }]);
+            alert("Account created! Logging in...");
             location.reload();
         }
     }
@@ -78,30 +88,70 @@ function toggleAuthMode() {
 }
 
 // ────────────────────────────────────────────────
-// 2. SERVER & CHANNEL MANAGEMENT
+// 2. PROFILE MANAGEMENT (NEW)
+// ────────────────────────────────────────────────
+
+function openProfile() {
+    const name = document.getElementById('my-name').textContent;
+    const pfp = document.getElementById('my-pfp').src;
+    
+    document.getElementById('edit-username').value = name;
+    document.getElementById('edit-pfp').value = pfp;
+    document.getElementById('profile-modal').style.display = 'flex';
+}
+
+async function saveProfile() {
+    const newName = document.getElementById('edit-username').value.trim();
+    const newPfp = document.getElementById('edit-pfp').value.trim();
+    
+    if(!newName) return alert("Username cannot be empty");
+
+    // Update Supabase
+    const { error } = await _supabase.from('profiles').update({ 
+        username: newName, 
+        pfp: newPfp 
+    }).eq('id', currentUser.id);
+
+    if(error) return alert("Error updating profile: " + error.message);
+
+    // Update Local UI immediately
+    updateLocalUI(newName, newPfp);
+    document.getElementById('profile-modal').style.display = 'none';
+}
+
+// ────────────────────────────────────────────────
+// 3. SERVER & CHANNEL LOGIC
 // ────────────────────────────────────────────────
 
 async function createOrJoinServer() {
     const name = document.getElementById('server-name-in').value.trim();
     if (!name) return;
 
-    if (name.includes('-')) {
-        // Joining via UUID
-        await _supabase.from('server_members').insert([{ server_id: name, user_id: currentUser.id }]);
+    if (name.includes('-') && name.length > 20) {
+        // --- JOINING A SERVER (via UUID) ---
+        const { error } = await _supabase.from('server_members').insert([
+            { server_id: name, user_id: currentUser.id }
+        ]);
+        if (error) alert("Could not join: " + error.message);
     } else {
-        // 1. Create Server
+        // --- CREATING A SERVER ---
         const { data: server, error: sError } = await _supabase.from('servers').insert([
             { name: name, icon: '🌐', owner_id: currentUser.id }
         ]).select().single();
 
         if (sError) return alert(sError.message);
 
-        // 2. Join Owner to Server
-        await _supabase.from('server_members').insert([{ server_id: server.id, user_id: currentUser.id }]);
+        // 1. Join the server
+        await _supabase.from('server_members').insert([
+            { server_id: server.id, user_id: currentUser.id }
+        ]);
 
-        // 3. Create Default #general Channel
-        await _supabase.from('channels').insert([{ server_id: server.id, name: 'general' }]);
+        // 2. Auto-create #general
+        await _supabase.from('channels').insert([
+            { server_id: server.id, name: 'general' }
+        ]);
     }
+    
     document.getElementById('server-modal').style.display = 'none';
     location.reload();
 }
@@ -111,52 +161,41 @@ async function loadChannels(serverId, autoSelect = false) {
     content.innerHTML = '';
 
     const { data } = await _supabase.from('channels').select('*').eq('server_id', serverId).order('created_at', {ascending: true});
+    
     data?.forEach((ch, i) => {
         const div = document.createElement('div');
         div.className = 'friend-item';
         div.innerText = `# ${ch.name}`;
         div.onclick = () => {
-            activeChatID = ch.id; chatType = 'server'; loadMessages();
+            activeChatID = ch.id; 
+            chatType = 'server'; 
+            loadMessages();
             document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active-chat'));
             div.classList.add('active-chat');
         };
         content.appendChild(div);
+        
+        // Auto-select the first channel (usually #general)
         if (autoSelect && i === 0) div.click();
     });
 }
 
 // ────────────────────────────────────────────────
-// 3. CHAT ENGINE
+// 4. CHAT ENGINE
 // ────────────────────────────────────────────────
-
-function appendMessageUI(msg) {
-    const container = document.getElementById('chat-messages');
-    const isMe = msg.sender_id === currentUser.id;
-    const div = document.createElement('div');
-    div.className = `message-bubble ${isMe ? 'own' : ''}`;
-    
-    div.innerHTML = `
-        <div class="pfp-container">
-            <img src="${msg.pfp_static}" class="pfp-img circle">
-        </div>
-        <div class="msg-body">
-            <span class="msg-meta" style="${isMe ? 'text-align:right' : ''}">
-                ${msg.username_static} ${isMe ? `<span class="del-btn" onclick="deleteMessage('${msg.id}')">×</span>` : ''}
-            </span>
-            <div class="msg-content">${msg.content}</div>
-        </div>
-    `;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
 
 async function loadMessages() {
     if (!activeChatID) return;
     const container = document.getElementById('chat-messages');
+    
     let query = _supabase.from('messages').select('*').order('created_at', { ascending: true });
     
-    if (chatType === 'server') query = query.eq('channel_id', activeChatID);
-    else query = query.eq('chat_id', [currentUser.id, activeChatID].sort().join('_'));
+    if (chatType === 'server') {
+        query = query.eq('channel_id', activeChatID);
+    } else {
+        // DM Logic: Chat ID is combined user IDs
+        query = query.eq('chat_id', [currentUser.id, activeChatID].sort().join('_'));
+    }
 
     const { data } = await query;
     container.innerHTML = ''; 
@@ -169,11 +208,15 @@ async function sendMessage() {
     const text = input.value.trim();
     if (!text || !activeChatID) return;
 
+    // Snapshot current profile info so the message has a permanent name/pfp
+    const myName = document.getElementById('my-name').textContent;
+    const myPfp = document.getElementById('my-pfp').src;
+
     const msgObj = {
         sender_id: currentUser.id,
         content: text,
-        username_static: document.getElementById('my-name').innerText,
-        pfp_static: document.getElementById('my-pfp').src,
+        username_static: myName,
+        pfp_static: myPfp,
         channel_id: chatType === 'server' ? activeChatID : null,
         chat_id: chatType === 'dm' ? [currentUser.id, activeChatID].sort().join('_') : null
     };
@@ -182,20 +225,45 @@ async function sendMessage() {
     await _supabase.from('messages').insert([msgObj]);
 }
 
+function appendMessageUI(msg) {
+    const container = document.getElementById('chat-messages');
+    const isMe = msg.sender_id === currentUser.id;
+    
+    const div = document.createElement('div');
+    div.className = `message-bubble ${isMe ? 'own' : ''}`;
+    
+    // HTML structure for Circle PFP + Content
+    div.innerHTML = `
+        <div class="pfp-container">
+            <img src="${msg.pfp_static}" class="pfp-img circle">
+        </div>
+        <div class="msg-body">
+            <span class="msg-meta" style="${isMe ? 'text-align:right' : ''}">
+                ${msg.username_static} 
+                ${isMe ? `<span class="del-btn" onclick="deleteMessage('${msg.id}')">×</span>` : ''}
+            </span>
+            <div class="msg-content">${msg.content}</div>
+        </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
 async function deleteMessage(id) {
+    if(!confirm("Delete this message?")) return;
     await _supabase.from('messages').delete().eq('id', id).eq('sender_id', currentUser.id);
     loadMessages();
 }
 
 // ────────────────────────────────────────────────
-// 4. NAVIGATION & LISTS
+// 5. VIEW & NAVIGATION
 // ────────────────────────────────────────────────
 
 function setView(view, id = null) {
     currentServerID = id;
-    const sidebarContent = document.getElementById('sidebar-content');
     const sidebarRight = document.getElementById('member-list-sidebar');
     const header = document.getElementById('sidebar-header');
+    const sidebarContent = document.getElementById('sidebar-content');
     
     sidebarContent.innerHTML = ''; 
     document.querySelectorAll('.server-icon').forEach(el => el.classList.remove('active'));
@@ -204,9 +272,16 @@ function setView(view, id = null) {
         sidebarRight.style.display = 'none';
         header.innerHTML = `Direct Messages`;
         loadDMList();
+        // Highlight DM icon
+        document.querySelector('.server-icon[onclick="setView(\'dm\')"]')?.classList.add('active');
     } else {
         sidebarRight.style.display = 'flex';
         header.innerHTML = `Channels`;
+        
+        // Highlight active server icon
+        const activeIcon = document.querySelector(`.server-icon[onclick="setView('server', '${id}')"]`);
+        if(activeIcon) activeIcon.classList.add('active');
+
         loadChannels(id, true);
         loadServerMembers(id);
     }
@@ -214,14 +289,16 @@ function setView(view, id = null) {
 
 async function loadServers() {
     const list = document.getElementById('server-list');
+    // Always add the Global Earth Icon first
     list.innerHTML = `<div class="server-icon" onclick="setView('server', '${GLOBAL_SERVER_ID}')">🌎</div>`;
     
     const { data } = await _supabase.from('server_members').select('servers(*)').eq('user_id', currentUser.id);
+    
     data?.forEach(m => {
         if (!m.servers || m.servers.id === GLOBAL_SERVER_ID) return;
         const div = document.createElement('div');
         div.className = 'server-icon';
-        div.textContent = m.servers.icon || '🌐';
+        div.textContent = m.servers.icon || '🌐'; // Default icon if none
         div.onclick = () => setView('server', m.servers.id);
         list.appendChild(div);
     });
@@ -230,11 +307,14 @@ async function loadServers() {
 async function loadServerMembers(serverId) {
     const container = document.getElementById('member-list-container');
     container.innerHTML = '';
+    
+    // If Global Server, just show recent profiles (simulated member list)
     const { data } = (serverId === GLOBAL_SERVER_ID) 
         ? await _supabase.from('profiles').select('*').limit(30)
         : await _supabase.from('server_members').select('profiles(*)').eq('server_id', serverId);
     
     const users = (serverId === GLOBAL_SERVER_ID) ? data : data?.map(m => m.profiles);
+    
     users?.forEach(u => {
         const div = document.createElement('div');
         div.className = 'member-item';
@@ -249,8 +329,11 @@ async function loadServerMembers(serverId) {
 }
 
 async function loadDMList() {
-    const { data } = await _supabase.from('friends').select('*, sender:profiles!friends_sender_id_fkey(*), receiver:profiles!friends_receiver_id_fkey(*)')
-        .eq('status', 'accepted').or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
+    // Finds friends where status is accepted
+    const { data } = await _supabase.from('friends')
+        .select('*, sender:profiles!friends_sender_id_fkey(*), receiver:profiles!friends_receiver_id_fkey(*)')
+        .eq('status', 'accepted')
+        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
     
     data?.forEach(rel => {
         const f = rel.sender_id === currentUser.id ? rel.receiver : rel.sender;
@@ -263,7 +346,9 @@ async function loadDMList() {
             <span>${f.username}</span>
         `;
         div.onclick = () => {
-            activeChatID = f.id; chatType = 'dm'; loadMessages();
+            activeChatID = f.id; 
+            chatType = 'dm'; 
+            loadMessages();
             document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active-chat'));
             div.classList.add('active-chat');
         };
@@ -272,7 +357,9 @@ async function loadDMList() {
 }
 
 function setupRealtime() {
-    _supabase.channel('db-feed').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-        loadMessages();
-    }).subscribe();
+    _supabase.channel('public-chat')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+            loadMessages();
+        })
+        .subscribe();
 }
