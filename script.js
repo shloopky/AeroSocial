@@ -126,27 +126,29 @@ async function sendMessage() {
     if (!text || !activeChatID || !currentUser) return;
 
     const msgObj = {
-        sender_id: currentUser.id, // This matches the new column
+        sender_id: currentUser.id,
         content: text,
         username_static: document.getElementById('my-name').innerText,
         pfp_static: document.getElementById('my-pfp').src
     };
 
+    // Corrected Routing Logic
     if (chatType === 'server') {
         msgObj.channel_id = activeChatID;
+        msgObj.chat_id = null;
     } else {
-if (chatType === 'server') {
-        msgObj.channel_id = activeChatID;
-    } else {
-        msgObj.chat_id = getPairID(activeChatID); // Use the helper here!
-        msgObj.receiver_id = activeChatID; 
-    }
+        msgObj.chat_id = getPairID(activeChatID);
+        msgObj.receiver_id = activeChatID;
+        msgObj.channel_id = null;
     }
 
     input.value = ''; 
 
     const { error } = await _supabase.from('messages').insert([msgObj]);
-    if (error) console.error("Insert Error:", error.message);
+    if (error) {
+        console.error("Insert Error:", error.message);
+        alert("Failed to send: " + error.message);
+    }
 }
 
 function appendMessageUI(msg) {
