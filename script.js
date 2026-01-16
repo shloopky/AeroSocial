@@ -354,5 +354,22 @@ async function ensureGlobalGeneralChannel() {
 }
 
 function setupRealtime() {
-    _supabase.channel('main').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => loadMessages()).subscribe();
+    // 1. Listen for new messages
+    _supabase.channel('messages_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
+            console.log("Message change detected:", payload);
+            loadMessages();
+        })
+        .subscribe();
+
+    // 2. Listen for new channels/lounges
+    _supabase.channel('channels_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'channels' }, (payload) => {
+            console.log("Channel change detected:", payload);
+            // Only reload if we are looking at the server where the channel was created
+            if (currentServerID && payload.new.server_id === currentServerID) {
+                loadChannels(currentServerID);
+            }
+        })
+        .subscribe();
 }
