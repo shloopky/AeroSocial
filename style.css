@@ -45,6 +45,16 @@ body, html {
     border-right: 1px solid var(--glass-border);
 }
 
+.settings-gear {
+    cursor: pointer;
+    float: right;
+    transition: transform 0.3s ease;
+    opacity: 0.6;
+}
+.settings-gear:hover {
+    transform: rotate(90deg);
+    opacity: 1;
+}
 .server-icon {
     width: 48px;
     height: 48px;
