@@ -1,49 +1,47 @@
-/* AeroSocial — Frutiger + Aero + Fruity Glow Edition */
+/* AeroSocial — Original Aero Colors + Frutiger Smooth Hovers & Animations */
+
 :root {
-    --bg-start:        #f0f8ff;           /* alice blue */
-    --bg-end:          #e6f0fa;           /* very soft blue */
-    --glass:           rgba(255, 255, 255, 0.68);
+    --accent:          #0078d7;           /* classic Aero blue */
+    --accent-light:    #4da8ff;
+    --accent-glow:     rgba(0, 120, 215, 0.25);
+    --glass:           rgba(255, 255, 255, 0.55);
     --glass-border:    rgba(255, 255, 255, 0.35);
-    --accent:          #6c5ce7;           /* soft violet */
-    --accent-light:    #a29bfe;
-    --accent-glow:     rgba(108, 92, 231, 0.25);
-    --peach:           #ff9f9f;
-    --mint:            #a2e4b8;
-    --danger:          #ff7675;
-    --success:         #74d49a;
-    --text:            #2d3436;
-    --text-light:      #636e72;
+    --bg-gradient:     linear-gradient(135deg, #e3f2fd, #bbdefb);
+    --danger:          #ff4757;
+    --success:         #2ed573;
+    --text:            #1a1a1a;
+    --text-light:      #555;
     --shadow-sm:       0 4px 20px rgba(0,0,0,0.08);
     --shadow-md:       0 12px 40px rgba(0,0,0,0.12);
-    --radius-lg:       24px;
-    --radius-md:       16px;
-    --radius-sm:       12px;
+    --radius-lg:       20px;
+    --radius-md:       14px;
+    --radius-sm:       10px;
 }
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body, html {
     height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-    background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-gradient);
     color: var(--text);
     overflow: hidden;
 }
 
-/* Glass panels */
+/* Glass panels — original Aero feel */
 .glass-panel,
 .overlay .glass-panel {
     background: var(--glass);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    padding: 28px;
+    padding: 24px;
 }
 
 /* Main layout */
@@ -52,7 +50,7 @@ body, html {
     height: 100vh;
 }
 
-/* Server rail (leftmost) */
+/* Server rail — kept original colors */
 .server-rail {
     width: 78px;
     background: rgba(255,255,255,0.25);
@@ -68,37 +66,37 @@ body, html {
 .server-icon {
     width: 56px;
     height: 56px;
-    border-radius: var(--radius-lg);
+    border-radius: 50%;
     background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 26px;
     cursor: pointer;
-    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* bouncy hover */
     box-shadow: var(--shadow-sm);
 }
 
 .server-icon:hover {
-    transform: scale(1.14) translateY(-2px);
-    border-radius: 20px;
-    background: linear-gradient(145deg, var(--accent-light), var(--accent));
+    transform: scale(1.18) translateY(-4px);
+    border-radius: 18px;
+    background: var(--accent);
     color: white;
-    box-shadow: 0 12px 32px var(--accent-glow);
+    box-shadow: 0 12px 36px var(--accent-glow);
 }
 
 .server-icon.active {
-    border-radius: 20px;
-    background: linear-gradient(145deg, var(--accent), var(--accent-light));
+    border-radius: 18px;
+    background: var(--accent);
     color: white;
-    transform: scale(1.1);
+    transform: scale(1.12);
     box-shadow: 0 12px 40px var(--accent-glow);
 }
 
 /* Sub-sidebar */
 .sub-sidebar {
     width: 260px;
-    background: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.38);
     backdrop-filter: blur(16px);
     border-right: 1px solid var(--glass-border);
     display: flex;
@@ -107,7 +105,7 @@ body, html {
 
 #sidebar-header {
     padding: 20px 24px;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--accent);
     border-bottom: 1px solid var(--glass-border);
@@ -123,8 +121,8 @@ body, html {
 }
 
 .settings-gear:hover {
-    transform: rotate(90deg) scale(1.15);
-    color: var(--peach);
+    transform: rotate(90deg) scale(1.2);
+    color: var(--accent-light);
 }
 
 /* Chat window */
@@ -132,7 +130,7 @@ body, html {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.12);
 }
 
 #chat-messages {
@@ -144,40 +142,38 @@ body, html {
     gap: 16px;
 }
 
-/* Aero-fruity message bubbles */
+/* Original Aero message bubbles + smooth hover */
 .message-bubble {
     display: flex;
     align-items: flex-start;
     gap: 12px;
     max-width: 78%;
     padding: 12px 16px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.38);
     box-shadow: var(--shadow-sm);
     transition: all 0.28s ease;
 }
 
 .message-bubble:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(108,92,231,0.18);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,120,215,0.18);
 }
 
 .message-bubble.own {
     margin-left: auto;
     flex-direction: row-reverse;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    background: var(--accent);
     color: white;
     border: none;
+    box-shadow: 0 8px 32px var(--accent-glow);
 }
 
-.message-bubble.own .username {
-    color: white;
-}
-
-.message-bubble.own .timestamp {
-    color: rgba(255,255,255,0.75);
+.message-bubble.own:hover {
+    box-shadow: 0 16px 48px var(--accent-glow);
+    transform: translateY(-4px);
 }
 
 .pfp-img {
@@ -186,56 +182,56 @@ body, html {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255,255,255,0.9);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease;
 }
 
 .pfp-img:hover {
-    transform: scale(1.15);
+    transform: scale(1.18);
 }
 
-/* Input area */
+/* Input area — original focus glow */
 .input-area {
     padding: 16px 24px;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.28);
     border-top: 1px solid var(--glass-border);
 }
 
 .input-box {
     width: 100%;
     padding: 14px 18px;
-    border-radius: 22px;
+    border-radius: 20px;
     border: 1px solid var(--glass-border);
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.92);
     font-size: 15px;
-    transition: all 0.2s;
+    transition: all 0.22s;
 }
 
 .input-box:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(108,92,231,0.2);
+    box-shadow: 0 0 0 3px rgba(0,120,215,0.2);
 }
 
-/* Buttons */
+/* Buttons — original Aero blue + bouncy hover */
 .aero-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    background: var(--accent);
     color: white;
     border: none;
     padding: 12px 20px;
-    border-radius: 18px;
+    border-radius: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.24s ease;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .aero-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 12px 32px var(--accent-glow);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 36px var(--accent-glow);
 }
 
-/* Friend items / list items */
+/* Friend items & pending buttons */
 .friend-item {
     display: flex;
     align-items: center;
@@ -244,23 +240,46 @@ body, html {
     margin: 4px 12px;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.22s ease;
+    transition: all 0.28s ease;
 }
 
 .friend-item:hover {
-    background: rgba(255,255,255,0.5);
-    transform: translateX(4px);
+    background: rgba(255,255,255,0.48);
+    transform: translateX(5px) scale(1.02);
 }
 
 .active-chat {
-    background: rgba(108,92,231,0.18) !important;
+    background: rgba(0,120,215,0.15) !important;
     border-left: 5px solid var(--accent);
+}
+
+.mini-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mini-btn:hover {
+    transform: scale(1.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.mini-btn.success {
+    background: var(--success);
+    color: white;
+}
+
+.mini-btn.danger {
+    background: var(--danger);
+    color: white;
 }
 
 /* User bar (bottom) */
 .user-bar {
     padding: 16px;
-    background: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.32);
     border-top: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
@@ -279,7 +298,7 @@ body, html {
     font-weight: 500;
 }
 
-/* Scrollbar — fruity touch */
+/* Scrollbar — matches accent */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -289,21 +308,17 @@ body, html {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(108,92,231,0.4);
+    background: var(--accent);
     border-radius: 12px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
+    background: var(--accent-light);
 }
 
 /* Modal / overlay */
 .overlay {
-    background: rgba(0,0,0,0.35);
+    background: rgba(0,0,0,0.3);
     backdrop-filter: blur(12px);
 }
-
-/* ────────────────────────────────────────────────
-   Frutiger-Aero + Fruity Glow Additions
-───────────────────────────────────────────────── */
 
