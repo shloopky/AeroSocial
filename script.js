@@ -416,6 +416,77 @@ async function loadServers() {
     });
 }
 
+// ────────────────────────────────────────────────
+// SERVER SETTINGS LOGIC
+// ────────────────────────────────────────────────
+
+function openServerSettings(serverId) {
+    currentServerID = serverId;
+    document.getElementById('server-settings-modal').style.display = 'flex';
+}
+
+function closeServerSettings() {
+    document.getElementById('server-settings-modal').style.display = 'none';
+}
+
+// 1. ADD NEW CHANNELS
+async function createNewChannel() {
+    const nameInput = document.getElementById('new-channel-name');
+    const name = nameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+
+    if (!name) return;
+
+    const { error } = await _supabase.from('channels').insert([
+        { server_id: currentServerID, name: name }
+    ]);
+
+    if (error) {
+        alert("Error creating channel: " + error.message);
+    } else {
+        nameInput.value = '';
+        closeServerSettings();
+        loadChannels(currentServerID); // Refresh the list
+    }
+}
+
+// 2. UPDATE SERVER IMAGE
+async function updateServerIcon() {
+    const newIcon = document.getElementById('edit-server-icon').value.trim();
+    if (!newIcon) return;
+
+    const { error } = await _supabase.from('servers')
+        .update({ icon: newIcon })
+        .eq('id', currentServerID);
+
+    if (error) {
+        alert("Error updating icon: " + error.message);
+    } else {
+        alert("Server icon updated!");
+        location.reload();
+    }
+}
+
+// 3. DELETE SERVER
+async function deleteServer() {
+    const confirmDelete = confirm("Are you sure? This will delete the server and all messages forever.");
+    if (!confirmDelete) return;
+
+    // Check if user is the owner (Optional but recommended)
+    const { data: server } = await _supabase.from('servers').select('owner_id').eq('id', currentServerID).single();
+    
+    if (server.owner_id !== currentUser.id) {
+        return alert("Only the owner can delete this server.");
+    }
+
+    const { error } = await _supabase.from('servers').delete().eq('id', currentServerID);
+
+    if (error) {
+        alert("Error deleting server: " + error.message);
+    } else {
+        alert("Server deleted.");
+        location.reload();
+    }
+}
 async function loadChannels(serverId) {
     const { data } = await _supabase.from('channels').select('*').eq('server_id', serverId);
     const content = document.getElementById('sidebar-content');
