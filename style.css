@@ -42,6 +42,14 @@ body, html {
     flex-shrink: 0;
 }
 
+/* Add this to your style.css */
+.channel, #general-channel {
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+    pointer-events: auto !important; /* Forces the element to be clickable */
+}
+
 .pfp-img.circle {
     width: 100%;
     height: 100%;
