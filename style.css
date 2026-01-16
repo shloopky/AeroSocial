@@ -184,6 +184,36 @@ header, .user-bar {
     font-weight: 600;
 }
 
+/* Delete button styling */
+.del-btn {
+    margin-left: 8px;
+    cursor: pointer;
+    color: #ff4d4d;
+    font-size: 14px;
+    opacity: 0;
+    transition: 0.2s;
+}
+.message-bubble:hover .del-btn { opacity: 1; }
+
+.msg-meta { font-size: 11px; font-weight: bold; opacity: 0.5; margin-bottom: 4px; display: block; }
+
+/* QOL Sidebar Buttons */
+.add-channel-btn {
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 10px;
+}
+
+.signout-btn {
+    cursor: pointer;
+    font-size: 10px;
+    padding: 4px 8px;
+    background: rgba(255,0,0,0.1);
+    border-radius: 4px;
+    margin-left: auto;
+}
+.signout-btn:hover { background: rgba(255,0,0,0.3); }
+
 /* --- SCROLLBARS --- */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
