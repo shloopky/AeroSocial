@@ -1,6 +1,6 @@
 /**
- * AeroSocial Pro v2.5 - Global Edition
- * Features: Global Hub, Glass UI, DMs, Friend Requests, Profile Cooldowns
+ * AeroSocial Pro v2.6
+ * Features: Global Hub, Auto-Channel Gen, Auto-Select, Friend Logic
  */
 
 const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
@@ -34,9 +34,7 @@ window.onload = async () => {
             .eq('id', user.id)
             .single();
 
-        if (prof) {
-            updateLocalUI(prof.username, prof.pfp);
-        }
+        if (prof) updateLocalUI(prof.username, prof.pfp);
 
         setupRealtime();
         loadServers();
@@ -82,7 +80,8 @@ function setView(view, id = null) {
         const iconEl = document.querySelector(`.server-icon[data-server-id="${id}"]`);
         if (iconEl) iconEl.classList.add('active');
         
-        loadChannels(id);
+        // Auto-select true so the chat opens immediately
+        loadChannels(id, true); 
     }
 }
 
@@ -215,28 +214,54 @@ async function showProfile(userId) {
 }
 
 // ────────────────────────────────────────────────
-// 5. SERVER & CHANNEL LOGIC (GLOBAL HUB ENABLED)
+// 5. SERVER MANAGEMENT (AUTO-CHANNEL GENERATION)
 // ────────────────────────────────────────────────
+
+async function createOrJoinServer() {
+    const input = document.getElementById('server-name-in').value.trim();
+    const icon = document.getElementById('server-icon-in').value.trim() || "🌐";
+    if (!input) return;
+
+    const isId = input.length > 20 && input.includes('-');
+
+    if (isId) {
+        const { error } = await _supabase.from('server_members').insert([{ server_id: input, user_id: currentUser.id }]);
+        if (error) alert("Could not join server."); else location.reload();
+    } else {
+        // CREATE SERVER
+        const { data: server, error: sErr } = await _supabase.from('servers').insert([
+            { name: input, icon: icon, owner_id: currentUser.id }
+        ]).select().single();
+
+        if (sErr) return alert(sErr.message);
+
+        // AUTO-JOIN CREATOR
+        await _supabase.from('server_members').insert([{ server_id: server.id, user_id: currentUser.id }]);
+
+        // AUTO-GENERATE #GENERAL CHANNEL
+        await _supabase.from('channels').insert([{ server_id: server.id, name: 'general' }]);
+
+        alert(`Server Created! Share ID: ${server.id}`);
+        location.reload();
+    }
+}
 
 async function loadServers() {
     const list = document.getElementById('server-list');
     list.innerHTML = '';
 
-    // Always Add Global Hub First
+    // Global Hub
     const globalDiv = document.createElement('div');
     globalDiv.className = 'server-icon';
     globalDiv.dataset.serverId = GLOBAL_SERVER_ID;
     globalDiv.textContent = '🌎';
-    globalDiv.title = "Global Hub";
     globalDiv.onclick = () => setView('server', GLOBAL_SERVER_ID);
     list.appendChild(globalDiv);
 
     const { data: memberships } = await _supabase.from('server_members').select('server_id').eq('user_id', currentUser.id);
-    
-    if (memberships && memberships.length > 0) {
+    if (memberships) {
         const serverIds = memberships.map(m => m.server_id);
         const { data: servers } = await _supabase.from('servers').select('*').in('id', serverIds);
-
         servers?.forEach(s => {
             if (s.id === GLOBAL_SERVER_ID) return;
             const div = document.createElement('div');
@@ -252,46 +277,33 @@ async function loadServers() {
     }
 }
 
-async function loadChannels(serverId) {
+async function loadChannels(serverId, autoSelect = false) {
     const content = document.getElementById('sidebar-content');
     content.innerHTML = ''; 
 
-    const { data } = await _supabase.from('channels').select('*').eq('server_id', serverId);
+    const { data } = await _supabase.from('channels').select('*').eq('server_id', serverId).order('created_at', {ascending: true});
 
-    // Only show "Copy ID" for personal servers, not Global
     if (serverId !== GLOBAL_SERVER_ID) {
         const inviteBtn = document.createElement('div');
         inviteBtn.className = 'friend-item';
-        inviteBtn.style.color = 'var(--accent)';
-        inviteBtn.innerHTML = `<strong>+ Copy Server ID</strong>`;
-        inviteBtn.onclick = () => {
-            navigator.clipboard.writeText(serverId);
-            alert("Server ID copied!");
-        };
+        inviteBtn.innerHTML = `<strong style="color:var(--accent);">+ Copy Server ID</strong>`;
+        inviteBtn.onclick = () => { navigator.clipboard.writeText(serverId); alert("ID Copied!"); };
         content.appendChild(inviteBtn);
     }
 
-    data?.forEach(ch => {
+    data?.forEach((ch, index) => {
         const div = document.createElement('div');
         div.className = 'friend-item';
         div.innerText = `# ${ch.name}`;
-        div.onclick = () => {
-            activeChatID = ch.id;
-            chatType = 'server';
-            loadMessages();
+        const select = () => {
+            activeChatID = ch.id; chatType = 'server'; loadMessages();
             document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('active-chat'));
             div.classList.add('active-chat');
         };
+        div.onclick = select;
         content.appendChild(div);
+        if (autoSelect && index === 0) select();
     });
-}
-
-function openServerSettings(serverId) {
-    if (serverId === GLOBAL_SERVER_ID) {
-        return alert("The Global Hub is managed by the system and cannot be modified.");
-    }
-    currentServerID = serverId;
-    document.getElementById('server-settings-modal').style.display = 'flex';
 }
 
 // ────────────────────────────────────────────────
@@ -302,13 +314,8 @@ function setupRealtime() {
     _supabase.channel('room1')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const msg = payload.new;
-            if (chatType === 'server' && msg.channel_id === activeChatID) {
-                appendMessageUI(msg);
-            } else if (chatType === 'dm') {
-                if (msg.chat_id === getPairID(activeChatID)) {
-                    appendMessageUI(msg);
-                }
-            }
+            if (chatType === 'server' && msg.channel_id === activeChatID) appendMessageUI(msg);
+            else if (chatType === 'dm' && msg.chat_id === getPairID(activeChatID)) appendMessageUI(msg);
         }).subscribe();
 }
 
@@ -323,12 +330,8 @@ async function handleAuth() {
     } else {
         const { data, error } = await _supabase.auth.signUp({ email, password });
         if (error) return alert(error.message);
-        await _supabase.from('profiles').upsert([{
-            id: data.user.id, username: username,
-            pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
-        }]);
-        alert("Account created! Now login.");
-        toggleAuthMode();
+        await _supabase.from('profiles').upsert([{ id: data.user.id, username: username, pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}` }]);
+        alert("Account created!"); toggleAuthMode();
     }
 }
 
@@ -338,18 +341,19 @@ function toggleAuthMode() {
     document.getElementById('auth-main-btn').innerText = isLoginMode ? 'Login' : 'Sign Up';
 }
 
-function closeServerSettings() {
-    document.getElementById('server-settings-modal').style.display = 'none';
+function openServerSettings(serverId) {
+    if (serverId === GLOBAL_SERVER_ID) return alert("Global Hub cannot be modified.");
+    currentServerID = serverId;
+    document.getElementById('server-settings-modal').style.display = 'flex';
 }
+
+function closeServerSettings() { document.getElementById('server-settings-modal').style.display = 'none'; }
 
 async function loadDMList() {
     const { data } = await _supabase.from('friends').select('*, sender:profiles!friends_sender_id_fkey(*), receiver:profiles!friends_receiver_id_fkey(*)')
         .eq('status', 'accepted').or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
     const content = document.getElementById('sidebar-content');
-    if (!data || data.length === 0) {
-        content.innerHTML = '<div style="padding:20px; opacity:0.6;">No friends yet. Add some in the Friends tab!</div>';
-        return;
-    }
+    if (!data || data.length === 0) { content.innerHTML = '<div style="padding:20px; opacity:0.6;">No friends yet.</div>'; return; }
     data.forEach(rel => {
         const friend = rel.sender_id === currentUser.id ? rel.receiver : rel.sender;
         const div = document.createElement('div');
