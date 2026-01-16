@@ -1,6 +1,6 @@
 /**
- * AeroSocial Pro v4.0 - Ultimate Master Edition
- * Features: Auth, Server Management (Settings/Delete), Lounges (Multi-user Server Chat),
+ * AeroSocial Pro v4.0 - Master Ultimate Edition
+ * Features: Auth, Server Management (Settings/Delete), Lounges (User-style Server Chats),
  * Friend System (ID Based), Profile Editing, and Real-time Sync.
  */
 
@@ -13,6 +13,7 @@ let currentUser = null;
 let activeChatID = null;
 let currentServerID = null;
 let chatType = 'dm'; // 'dm', 'server', or 'lounge'
+let isLoginMode = true;
 const GLOBAL_SERVER_ID = '00000000-0000-0000-0000-000000000000';
 
 // ────────────────────────────────────────────────
@@ -90,7 +91,7 @@ async function createOrJoinServer() {
 }
 
 async function createLounge() {
-    const name = prompt("Enter Lounge Name (e.g., Chill Chat):");
+    const name = prompt("Enter Lounge Name (e.g., Chill Spot):");
     if (!name || !currentServerID) return;
     const { error } = await _supabase.from('channels').insert([{ server_id: currentServerID, name: name, is_lounge: true }]);
     if (error) alert(error.message); else loadChannels(currentServerID);
@@ -151,8 +152,8 @@ async function setView(view, id = null) {
         header.innerHTML = `
             <span>Channels</span> 
             <div class="header-tools">
-                <span class="tool-icon" onclick="createLounge()" title="Create Lounge">💬</span>
-                <span id="server-settings-btn" class="tool-icon" style="display:none;" onclick="openServerSettings('${id}')">⚙️</span>
+                <span class="tool-icon" onclick="createLounge()" title="Create Lounge" style="cursor:pointer; margin-right:8px;">💬</span>
+                <span id="server-settings-btn" class="tool-icon" style="display:none; cursor:pointer;" onclick="openServerSettings('${id}')">⚙️</span>
             </div>
         `;
         loadChannels(id, true);
@@ -164,12 +165,34 @@ async function setView(view, id = null) {
 async function loadChannels(serverId, autoSelect = false) {
     const content = document.getElementById('sidebar-content');
     content.innerHTML = '';
-    const { data: channels } = await _supabase.from('channels').select('*').eq('server_id', serverId).order('is_lounge', { ascending: true }).order('created_at', { ascending: true });
+    
+    const { data: channels } = await _supabase.from('channels')
+        .select('*')
+        .eq('server_id', serverId)
+        .order('is_lounge', { ascending: true }) 
+        .order('created_at', { ascending: true });
 
     channels?.forEach((ch, i) => {
         const div = document.createElement('div');
-        div.className = ch.is_lounge ? 'friend-item lounge-item' : 'friend-item';
-        div.innerHTML = `<span style="opacity:0.5; margin-right:8px;">${ch.is_lounge ? '🔊' : '#'}</span>${ch.name}`;
+        
+        if (ch.is_lounge) {
+            // Lounge View: Looks like a Friend/User entry
+            div.className = 'friend-item lounge-item';
+            div.innerHTML = `
+                <div class="pfp-container" style="background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; margin-right:10px;">
+                    <span style="font-size:14px;">🔊</span>
+                </div>
+                <div class="lounge-info">
+                    <div style="font-weight:bold; font-size:13px;">${ch.name}</div>
+                    <div style="font-size:10px; color:#43b581;">● Active Lounge</div>
+                </div>
+            `;
+        } else {
+            // Standard Channel View
+            div.className = 'friend-item';
+            div.innerHTML = `<span style="opacity:0.5; margin-right:8px; font-weight:bold;">#</span>${ch.name}`;
+        }
+
         div.onclick = () => {
             activeChatID = ch.id; 
             chatType = ch.is_lounge ? 'lounge' : 'server';
@@ -215,7 +238,7 @@ async function loadDMList() {
         const f = rel.sender_id === currentUser.id ? rel.receiver : rel.sender;
         const div = document.createElement('div');
         div.className = 'friend-item';
-        div.innerHTML = `<img src="${f.pfp}" class="pfp-img circle" style="width:24px; height:24px; margin-right:10px;"><span>${f.username}</span>`;
+        div.innerHTML = `<img src="${f.pfp}" class="pfp-img circle" style="width:28px; height:28px; margin-right:10px;"><span>${f.username}</span>`;
         div.onclick = () => {
             activeChatID = f.id; chatType = 'dm'; loadMessages();
             document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active-chat'));
@@ -226,15 +249,17 @@ async function loadDMList() {
 }
 
 // ────────────────────────────────────────────────
-// 5. CHAT ENGINE
+// 5. CHAT ENGINE & MESSAGING
 // ────────────────────────────────────────────────
 
 async function loadMessages() {
     if (!activeChatID) return;
     const container = document.getElementById('chat-messages');
     let query = _supabase.from('messages').select('*').order('created_at', { ascending: true });
+    
     if (chatType === 'server' || chatType === 'lounge') query = query.eq('channel_id', activeChatID);
     else query = query.eq('chat_id', [currentUser.id, activeChatID].sort().join('_'));
+    
     const { data } = await query;
     container.innerHTML = ''; 
     data?.forEach(msg => appendMessageUI(msg));
