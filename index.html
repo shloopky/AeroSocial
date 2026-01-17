@@ -1,135 +1,96 @@
-const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
-const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
-const _supabase = supabase.createClient(SB_URL, SB_KEY);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroSocial Pro | v5.1 Fixed</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
 
-let currentUser = null;
-let activeChatID = null;
-let chatType = 'dm';
+    <div class="aero-sky">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+    </div>
 
-window.onload = async () => {
-    const { data: { user } } = await _supabase.auth.getUser();
-    if (user) {
-        currentUser = user;
-        document.getElementById('auth-overlay').style.display = 'none';
-        await loadMyProfile();
-        setupRealtime();
-        setView('dm');
-    }
-};
+    <div id="auth-overlay" class="modal-overlay">
+        <div class="bulky-window auth-box">
+            <div class="window-title"><span>System Authentication</span></div>
+            <div class="window-body">
+                <h1 class="gel-text">AeroSocial</h1>
+                <div class="input-stack">
+                    <input type="email" id="email-in" placeholder="Email Address" class="aero-input">
+                    <input type="password" id="pass-in" placeholder="Password" class="aero-input">
+                    <input type="text" id="username-in" placeholder="Username (Signup only)" class="aero-input">
+                </div>
+                <button onclick="handleAuth()" class="gel-button primary">Login / Create Account</button>
+            </div>
+        </div>
+    </div>
 
-async function handleAuth() {
-    const email = document.getElementById('email-in').value;
-    const password = document.getElementById('pass-in').value;
-    const username = document.getElementById('username-in').value;
+    <div id="app-root">
+        <nav class="side-dock">
+            <div class="dock-icon active" onclick="setView('dm')">
+                <img src="https://img.icons8.com/fluency/48/home.png">
+            </div>
+            <div class="dock-sep"></div>
+            <div id="server-list"></div>
+            <button class="dock-icon add-btn" onclick="openModal('group-modal')">+</button>
+        </nav>
 
-    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-    
-    if (error && username) {
-        // Sign Up + Generate 4-digit ID
-        const { data: su, error: se } = await _supabase.auth.signUp({ email, password });
-        if (se) return alert(se.message);
-        
-        const idTag = Math.floor(1000 + Math.random() * 9000);
-        await _supabase.from('profiles').insert([{ 
-            id: su.user.id, 
-            username, 
-            display_name: username, 
-            id_tag: idTag,
-            pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
-        }]);
-        alert("Verification email sent! Please check your inbox.");
-    } else if (error) {
-        alert(error.message);
-    } else {
-        location.reload();
-    }
-}
+        <aside class="bulky-window sidebar">
+            <div class="window-title">
+                <span id="sidebar-title">Global Hub</span>
+            </div>
+            <div class="window-tabs">
+                <button onclick="setView('dm')" class="tab active">Friends</button>
+                <button onclick="setView('group')" class="tab">Groups</button>
+            </div>
+            <div id="sidebar-content" class="window-scroll"></div>
+            
+            <div class="user-tray" onclick="openModal('profile-modal')">
+                <div class="avatar-shimmer">
+                    <img id="my-pfp" src="" class="gel-pfp">
+                </div>
+                <div class="user-details">
+                    <b id="my-display-name">Guest</b>
+                    <span id="my-full-id">#0000</span>
+                </div>
+                <button class="gear-btn" onclick="openModal('settings-modal'); event.stopPropagation();">⚙️</button>
+            </div>
+        </aside>
 
-async function loadMyProfile() {
-    const { data: prof } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-    if (prof) {
-        document.getElementById('my-display-name').textContent = prof.display_name;
-        document.getElementById('my-full-id').textContent = `#${prof.id_tag}`;
-        document.getElementById('my-pfp').src = prof.pfp;
-        document.getElementById('edit-display-name').value = prof.display_name;
-        document.getElementById('edit-pfp').value = prof.pfp;
-    }
-}
+        <main class="bulky-window chat-engine">
+            <div class="window-title">
+                <span id="active-chat-title">Ready for Transmission</span>
+                <div class="window-controls">
+                    <button class="ctrl-btn" onclick="openModal('friend-req-modal')">Add Friend</button>
+                </div>
+            </div>
+            <div id="chat-messages" class="window-scroll"></div>
+            <div class="chat-footer">
+                <div class="input-wrapper">
+                    <input type="text" id="chat-in" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()" class="send-btn">Send</button>
+                </div>
+            </div>
+        </main>
+    </div>
 
-async function setView(type) {
-    chatType = type;
-    const container = document.getElementById('sidebar-content');
-    container.innerHTML = '';
-    
-    if (type === 'dm') {
-        const { data } = await _supabase.from('friendships').select('*, profiles:receiver_id(*)').eq('status', 'accepted');
-        data?.forEach(f => renderSidebarItem(f.profiles.display_name, f.profiles.pfp, f.id));
-    }
-}
+    <div id="profile-modal" class="modal-overlay" style="display:none;">
+        <div class="bulky-window modal-content">
+            <div class="window-title">Profile Editor <button onclick="closeModal('profile-modal')" class="close-x">X</button></div>
+            <div class="window-body">
+                <label>Display Name</label>
+                <input type="text" id="edit-display-name" class="aero-input">
+                <label>PFP URL</label>
+                <input type="text" id="edit-pfp" class="aero-input">
+                <button onclick="saveProfile()" class="gel-button">Apply Changes</button>
+            </div>
+        </div>
+    </div>
 
-function renderSidebarItem(name, pfp, id) {
-    const div = document.createElement('div');
-    div.className = 'user-card sidebar-item';
-    div.innerHTML = `<img src="${pfp}" class="avatar"> <span>${name}</span>`;
-    div.onclick = () => {
-        activeChatID = id;
-        document.getElementById('active-chat-title').textContent = name;
-        loadMessages();
-    };
-    document.getElementById('sidebar-content').appendChild(div);
-}
-
-async function sendFriendRequest() {
-    const input = document.getElementById('friend-search-in').value; // Expected: Name#1234
-    const [name, tag] = input.split('#');
-    
-    const { data: target } = await _supabase.from('profiles')
-        .select('id')
-        .eq('username', name)
-        .eq('id_tag', parseInt(tag))
-        .single();
-
-    if (!target) return alert("User not found!");
-    
-    await _supabase.from('friendships').insert([{ 
-        sender_id: currentUser.id, 
-        receiver_id: target.id, 
-        status: 'pending' 
-    }]);
-    alert("Request sent!");
-    closeModal('friend-req-modal');
-}
-
-async function sendMessage() {
-    const input = document.getElementById('chat-in');
-    if (!input.value || !activeChatID) return;
-
-    await _supabase.from('messages').insert([{
-        sender_id: currentUser.id,
-        content: input.value,
-        chat_id: activeChatID,
-        chat_type: chatType
-    }]);
-    input.value = '';
-}
-
-async function loadMessages() {
-    const { data } = await _supabase.from('messages').select('*').eq('chat_id', activeChatID).order('created_at', {ascending: true});
-    const container = document.getElementById('chat-messages');
-    container.innerHTML = '';
-    data?.forEach(m => {
-        const div = document.createElement('div');
-        div.className = 'message-bubble';
-        div.textContent = m.content;
-        container.appendChild(div);
-    });
-    container.scrollTop = container.scrollHeight;
-}
-
-function setupRealtime() {
-    _supabase.channel('msgs').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => loadMessages()).subscribe();
-}
-
-// Helpers
-function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    <script src="script.js"></script>
+</body>
+</html>
