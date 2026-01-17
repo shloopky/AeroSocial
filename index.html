@@ -3,111 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroSocial Pro | Restoration</title>
+    <title>AeroSocial Pro | V5.0</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div class="aero-bg">
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
+    <div class="aero-environment">
+        <div class="orb blue"></div>
+        <div class="orb green"></div>
     </div>
 
-    <div id="auth-overlay" class="window-blur">
-        <div class="glass-window auth-box bulky-shadow">
-            <div class="window-header">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title-text">System Access</span>
-            </div>
-            <div class="window-content">
-                <h1 class="gel-text">AeroSocial</h1>
-                <input type="email" id="email-in" placeholder="Email Address" class="aero-input">
-                <input type="password" id="pass-in" placeholder="Password" class="aero-input">
-                <input type="text" id="username-in" placeholder="Desired Username" class="aero-input">
-                <button onclick="handleAuth()" class="gel-button primary">Initialize Session</button>
-                <p class="verification-note">Email verification is required upon signup.</p>
+    <div id="auth-overlay" class="modal-layer">
+        <div class="aero-window auth-window">
+            <div class="window-caption"><span>System Login</span></div>
+            <div class="window-body">
+                <h1 class="logo-text">AeroSocial</h1>
+                <div class="field-group">
+                    <input type="email" id="email-in" placeholder="Email" class="aero-input">
+                    <input type="password" id="pass-in" placeholder="Password" class="aero-input">
+                    <input type="text" id="username-in" placeholder="Username (Signup only)" class="aero-input">
+                </div>
+                <button onclick="handleAuth()" class="gel-button primary">Enter</button>
             </div>
         </div>
     </div>
 
-    <div id="app-shell">
-        <nav class="dock bulky-shadow">
-            <div class="dock-item" onclick="setView('home')" title="Home/DMs">
-                <img src="https://img.icons8.com/fluency/48/home.png">
-            </div>
+    <div id="main-interface">
+        <nav class="dock">
+            <div class="dock-circle active" onclick="setView('dm')"><img src="https://img.icons8.com/fluency/48/home.png"></div>
             <div class="dock-divider"></div>
             <div id="server-list"></div>
-            <button class="dock-item add-btn" onclick="toggleModal('server-modal')">+</button>
+            <button class="dock-circle add" onclick="openModal('group-modal')">+</button>
         </nav>
 
-        <aside class="sidebar glass-panel bulky-shadow">
-            <div class="sidebar-header gloss">
-                <h3 id="sidebar-title">Global Hub</h3>
+        <aside class="sidebar-window aero-window">
+            <div class="window-caption">
+                <span id="sidebar-title">Global Hub</span>
             </div>
+            <div class="tab-bar">
+                <button onclick="setView('dm')" class="tab active">Friends</button>
+                <button onclick="setView('group')" class="tab">Groups</button>
+            </div>
+            <div id="sidebar-content" class="scroll-area"></div>
             
-            <div class="tab-switcher">
-                <button onclick="setView('dm')" class="tab-btn active">Friends</button>
-                <button onclick="setView('groups')" class="tab-btn">Groups</button>
-            </div>
-
-            <div id="sidebar-content" class="custom-scroll"></div>
-
-            <div class="user-card" onclick="toggleModal('profile-modal')">
-                <div class="pfp-container">
-                    <img id="my-pfp" src="" class="gel-avatar">
+            <div class="user-card" onclick="openModal('profile-modal')">
+                <img id="my-pfp" src="" class="avatar">
+                <div class="user-meta">
+                    <span id="my-display-name">Guest</span>
+                    <span id="my-full-id" class="id-badge">#0000</span>
                 </div>
-                <div class="user-info">
-                    <div id="my-display-name" class="display-name">Guest</div>
-                    <div id="my-id-tag" class="id-tag">#0000</div>
-                </div>
-                <button class="settings-gear" onclick="toggleModal('settings-modal'); event.stopPropagation();">⚙️</button>
+                <button class="gear-btn" onclick="openModal('settings-modal'); event.stopPropagation();">⚙️</button>
             </div>
         </aside>
 
-        <main class="workspace glass-panel bulky-shadow">
-            <header class="chat-header gloss">
-                <div class="chat-identity">
-                    <span class="status-indicator online"></span>
-                    <h2 id="active-chat-name">Select a Terminal</h2>
+        <main class="chat-window aero-window">
+            <div class="window-caption">
+                <span id="active-chat-title">Select a Terminal</span>
+                <div class="caption-btns">
+                    <button onclick="openModal('friend-req-modal')" class="caption-action">Add Friend</button>
                 </div>
-                <div class="header-actions">
-                    <button class="icon-btn" onclick="toggleModal('friend-req-modal')">👤+</button>
-                </div>
-            </header>
-
-            <div id="chat-messages" class="custom-scroll"></div>
-
-            <div class="chat-input-bar">
-                <div class="gel-input-wrapper">
-                    <input type="text" id="chat-in" placeholder="Transmit message..." onkeydown="if(event.key==='Enter') sendMessage()">
+            </div>
+            <div id="chat-messages" class="scroll-area"></div>
+            <div class="input-zone">
+                <div class="input-container">
+                    <input type="text" id="chat-in" placeholder="Send a transmission..." onkeydown="if(event.key==='Enter') sendMessage()">
                     <button onclick="sendMessage()" class="send-btn">Send</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="profile-modal" class="modal-blur" style="display:none;">
-        <div class="glass-window bulky-shadow modal-size">
-            <div class="window-header"><span>Profile Editor</span><button onclick="toggleModal('profile-modal')">X</button></div>
-            <div class="window-content">
+    <div id="profile-modal" class="modal-layer" style="display:none;">
+        <div class="aero-window modal-box">
+            <div class="window-caption">Profile Editor <button onclick="closeModal('profile-modal')" class="close-x">X</button></div>
+            <div class="window-body">
                 <label>Display Name</label>
                 <input type="text" id="edit-display-name" class="aero-input">
-                <label>Profile Picture URL</label>
-                <input type="text" id="edit-pfp-url" class="aero-input">
-                <button onclick="saveProfile()" class="gel-button primary">Update Profile</button>
+                <label>PFP URL</label>
+                <input type="text" id="edit-pfp" class="aero-input">
+                <button onclick="saveProfile()" class="gel-button">Save Changes</button>
             </div>
         </div>
     </div>
 
-    <div id="settings-modal" class="modal-blur" style="display:none;">
-        <div class="glass-window bulky-shadow modal-size">
-            <div class="window-header"><span>System Settings</span><button onclick="toggleModal('settings-modal')">X</button></div>
-            <div class="window-content">
-                <h3>Theme Density</h3>
-                <p>Status: Aero High-Gloss (Enabled)</p>
-                <button onclick="logout()" class="gel-button danger">Sign Out</button>
+    <div id="friend-req-modal" class="modal-layer" style="display:none;">
+        <div class="aero-window modal-box">
+            <div class="window-caption">Add Friend <button onclick="closeModal('friend-req-modal')" class="close-x">X</button></div>
+            <div class="window-body">
+                <p>Search by Username#ID (e.g., Aero#1234)</p>
+                <input type="text" id="friend-search-in" placeholder="Name#0000" class="aero-input">
+                <button onclick="sendFriendRequest()" class="gel-button primary">Send Request</button>
             </div>
         </div>
     </div>
