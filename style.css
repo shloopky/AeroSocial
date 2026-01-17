@@ -1,116 +1,125 @@
-:root {
-    --aero-blue: #2196f3;
-    --glass-border: rgba(255, 255, 255, 0.6);
-    --window-bg: rgba(255, 255, 255, 0.55);
+/* --- Core Reset --- */
+* { box-sizing: border-box; }
+body, html {
+    margin: 0; padding: 0;
+    height: 100vh; width: 100vw;
+    font-family: 'Segoe UI', sans-serif;
+    background: #a1c4fd;
+    overflow: hidden; /* Stops scrolling of the whole page */
 }
 
-body, html { margin: 0; padding: 0; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+/* --- Layout Engine --- */
+#app-root {
+    display: none; /* Controlled by JS */
+    grid-template-columns: 280px 1fr;
+    height: 100vh;
+    padding: 10px;
+    gap: 10px;
+}
 
-/* Dynamic Background */
-.aero-sky { position: fixed; inset: 0; z-index: -1; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
-.cloud { position: absolute; background: white; width: 600px; height: 600px; border-radius: 50%; filter: blur(90px); opacity: 0.4; animation: float 30s infinite alternate; }
+.bulky-window {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
 
-/* --- THE NEW CENTERED LOGIN SCREEN --- */
+/* --- GEL BUTTONS (Glossy Blue) --- */
+button, .gel-button {
+    background: linear-gradient(to bottom, #7abcff 0%, #60abf8 44%, #4096ee 100%);
+    border: 1px solid #1e5799;
+    border-radius: 20px;
+    color: white;
+    padding: 8px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+button:hover { filter: brightness(1.1); }
+button:active { transform: translateY(1px); }
+
+/* --- Inputs --- */
+.aero-input {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 20px;
+    padding: 10px 15px;
+    outline: none;
+    transition: 0.2s;
+}
+.aero-input:focus { border-color: #4096ee; box-shadow: 0 0 5px rgba(64,150,238,0.5); }
+
+/* --- Chat Mechanics (The "Too Low" Fix) --- */
+.chat-area { position: relative; }
+
+.chat-header {
+    padding: 15px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+#chat-messages {
+    flex: 1; /* Fills remaining space */
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-input-container {
+    padding: 15px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+#chat-in { flex: 1; }
+
+/* --- Sidebar Footer --- */
+.user-tray-footer {
+    padding: 15px;
+    background: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#my-pfp { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
+.user-info { flex: 1; font-size: 0.9em; }
+
+/* --- Auth Overlay --- */
 .gatekeeper-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
     z-index: 9999;
 }
+.auth-window { width: 350px; padding: 30px; }
+.auth-form { display: flex; flex-direction: column; gap: 15px; }
+.toggle-link { font-size: 0.8em; color: #0056b3; cursor: pointer; text-decoration: underline; }
 
-.auth-window {
-    width: 400px;
-    padding-bottom: 20px; /* Space for the bottom buttons */
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+/* Message Bubbles */
+.msg-bubble {
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 70%;
+    background: white;
 }
-
-.center-body { text-align: center; padding: 35px 25px; }
-
-.aero-logo-text {
-    font-size: 2.5rem; color: #0d47a1; margin: 0 0 10px 0;
-    text-shadow: 0 0 15px rgba(33, 150, 243, 0.5), 2px 2px 0px rgba(255,255,255,0.8);
-    font-family: 'Trebuchet MS', sans-serif;
-    letter-spacing: -1px;
-}
-
-.status-text { color: #555; font-size: 0.9rem; margin-bottom: 25px; }
-
-.auth-toggle { margin-top: 15px; font-size: 0.85rem; color: #0277bd; cursor: pointer; text-decoration: underline; }
-.auth-toggle:hover { color: #01579b; }
-
-/* --- APP LAYOUT --- */
-#app-root { display: grid; grid-template-columns: 70px 280px 1fr; height: 100vh; padding: 15px; gap: 15px; }
-
-/* WINDOWS */
-.bulky-window {
-    background: var(--window-bg);
-    backdrop-filter: blur(30px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    display: flex; flex-direction: column;
-    overflow: hidden; /* Fixes corner bugs */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-
-.window-title {
-    background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
-    padding: 12px 15px; font-weight: bold; color: #1565c0;
-    border-bottom: 1px solid rgba(255,255,255,0.5);
-    display: flex; justify-content: space-between; align-items: center;
-}
-
-/* INPUTS & BUTTONS */
-.aero-input {
-    width: 100%; padding: 12px; margin-bottom: 10px;
-    border-radius: 12px; border: 1px solid rgba(0,0,0,0.1);
-    background: rgba(255,255,255,0.8); outline: none;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-    box-sizing: border-box; /* Fixes padding width issues */
-}
-.aero-input:focus { border-color: #2196f3; background: white; }
-
-.gel-button {
-    background: linear-gradient(to bottom, #52b6ec 0%, #2989d8 50%, #1e70b1 100%);
-    border: 1px solid #1e5799;
+.msg-bubble.own {
+    align-self: flex-end;
+    background: #0078d7;
     color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
 }
-.gel-button:active { transform: translateY(2px); }
-
-.gel-button:hover {
-    filter: brightness(1.1);
-}
-
-/* TABS */
-.window-tabs { padding: 10px; display: flex; gap: 8px; background: rgba(0,0,0,0.02); }
-.tab {
-    flex: 1; padding: 8px; border-radius: 15px; border: 1px solid transparent;
-    background: transparent; cursor: pointer; color: #666; font-weight: 600;
-}
-.tab.active {
-    background: white; color: #0277bd;
-    border-color: rgba(255,255,255,0.8);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* CHAT */
-.window-scroll { flex: 1; overflow-y: auto; padding: 15px; }
-.msg-bubble { background: white; padding: 10px 15px; border-radius: 18px; margin-bottom: 8px; max-width: 80%; width: fit-content; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-.msg-bubble.own { background: #e3f2fd; align-self: flex-end; margin-left: auto; }
-
-/* MODALS */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 20000; }
-.modal-content { width: 350px; }
-.close-x { background: none; border: none; font-weight: bold; cursor: pointer; color: #d32f2f; }
