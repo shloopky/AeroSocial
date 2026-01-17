@@ -1,159 +1,117 @@
-:root {
-    --pastel-blue: #e3f2fd;
-    --aero-sky: #4fc3f7;
-    --gloss-top: rgba(255, 255, 255, 0.7);
-    --glass-bg: rgba(255, 255, 255, 0.4);
-    --text-main: #2c3e50;
-    --shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroSocial Pro | Restoration</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
 
-* { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    <div class="aero-bg">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
 
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    height: 100vh;
-    display: flex;
-    overflow: hidden;
-    color: var(--text-main);
-}
+    <div id="auth-overlay" class="window-blur">
+        <div class="glass-window auth-box bulky-shadow">
+            <div class="window-header">
+                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                <span class="window-title-text">System Access</span>
+            </div>
+            <div class="window-content">
+                <h1 class="gel-text">AeroSocial</h1>
+                <input type="email" id="email-in" placeholder="Email Address" class="aero-input">
+                <input type="password" id="pass-in" placeholder="Password" class="aero-input">
+                <input type="text" id="username-in" placeholder="Desired Username" class="aero-input">
+                <button onclick="handleAuth()" class="gel-button primary">Initialize Session</button>
+                <p class="verification-note">Email verification is required upon signup.</p>
+            </div>
+        </div>
+    </div>
 
-/* Moving Background Blobs */
-.bg-blobs {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    filter: blur(80px);
-}
-.blob {
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: var(--aero-sky);
-    border-radius: 50%;
-    opacity: 0.3;
-    animation: move 20s infinite alternate;
-}
-@keyframes move { 
-    from { transform: translate(-10%, -10%); } 
-    to { transform: translate(20%, 20%); } 
-}
+    <div id="app-shell">
+        <nav class="dock bulky-shadow">
+            <div class="dock-item" onclick="setView('home')" title="Home/DMs">
+                <img src="https://img.icons8.com/fluency/48/home.png">
+            </div>
+            <div class="dock-divider"></div>
+            <div id="server-list"></div>
+            <button class="dock-item add-btn" onclick="toggleModal('server-modal')">+</button>
+        </nav>
 
-#app-container {
-    display: flex;
-    width: 98vw;
-    height: 95vh;
-    margin: auto;
-    gap: 15px;
-}
+        <aside class="sidebar glass-panel bulky-shadow">
+            <div class="sidebar-header gloss">
+                <h3 id="sidebar-title">Global Hub</h3>
+            </div>
+            
+            <div class="tab-switcher">
+                <button onclick="setView('dm')" class="tab-btn active">Friends</button>
+                <button onclick="setView('groups')" class="tab-btn">Groups</button>
+            </div>
 
-/* Glass Panels */
-.glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 24px;
-    box-shadow: var(--shadow);
-}
+            <div id="sidebar-content" class="custom-scroll"></div>
 
-/* Glossy Buttons */
-.glossy-btn {
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.6);
-    padding: 10px 20px;
-    cursor: pointer;
-    font-weight: 600;
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(to bottom, #fff 0%, #e0e0e0 100%);
-}
+            <div class="user-card" onclick="toggleModal('profile-modal')">
+                <div class="pfp-container">
+                    <img id="my-pfp" src="" class="gel-avatar">
+                </div>
+                <div class="user-info">
+                    <div id="my-display-name" class="display-name">Guest</div>
+                    <div id="my-id-tag" class="id-tag">#0000</div>
+                </div>
+                <button class="settings-gear" onclick="toggleModal('settings-modal'); event.stopPropagation();">⚙️</button>
+            </div>
+        </aside>
 
-.glossy-btn.primary {
-    background: linear-gradient(to bottom, #81d4fa 0%, #29b6f6 50%, #039be5 100%);
-    color: white;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
+        <main class="workspace glass-panel bulky-shadow">
+            <header class="chat-header gloss">
+                <div class="chat-identity">
+                    <span class="status-indicator online"></span>
+                    <h2 id="active-chat-name">Select a Terminal</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="toggleModal('friend-req-modal')">👤+</button>
+                </div>
+            </header>
 
-.glossy-btn::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 50%;
-    background: linear-gradient(rgba(255,255,255,0.4), transparent);
-}
+            <div id="chat-messages" class="custom-scroll"></div>
 
-/* Message Appearance Animation */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
+            <div class="chat-input-bar">
+                <div class="gel-input-wrapper">
+                    <input type="text" id="chat-in" placeholder="Transmit message..." onkeydown="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()" class="send-btn">Send</button>
+                </div>
+            </div>
+        </main>
+    </div>
 
-.message-bubble {
-    animation: slideIn 0.3s ease forwards;
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 10px;
-    border-radius: 15px;
-}
+    <div id="profile-modal" class="modal-blur" style="display:none;">
+        <div class="glass-window bulky-shadow modal-size">
+            <div class="window-header"><span>Profile Editor</span><button onclick="toggleModal('profile-modal')">X</button></div>
+            <div class="window-content">
+                <label>Display Name</label>
+                <input type="text" id="edit-display-name" class="aero-input">
+                <label>Profile Picture URL</label>
+                <input type="text" id="edit-pfp-url" class="aero-input">
+                <button onclick="saveProfile()" class="gel-button primary">Update Profile</button>
+            </div>
+        </div>
+    </div>
 
-.message-bubble:hover {
-    background: rgba(255,255,255,0.2);
-}
+    <div id="settings-modal" class="modal-blur" style="display:none;">
+        <div class="glass-window bulky-shadow modal-size">
+            <div class="window-header"><span>System Settings</span><button onclick="toggleModal('settings-modal')">X</button></div>
+            <div class="window-content">
+                <h3>Theme Density</h3>
+                <p>Status: Aero High-Gloss (Enabled)</p>
+                <button onclick="logout()" class="gel-button danger">Sign Out</button>
+            </div>
+        </div>
+    </div>
 
-/* Custom Scrollbar */
-.custom-scroll::-webkit-scrollbar { width: 6px; }
-.custom-scroll::-webkit-scrollbar-track { background: transparent; }
-.custom-scroll::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.1);
-    border-radius: 10px;
-}
-
-/* Navigation Sidebars */
-.server-rail {
-    width: 70px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    gap: 15px;
-}
-
-.sidebar { width: 260px; display: flex; flex-direction: column; }
-.chat-main { flex: 1; display: flex; flex-direction: column; }
-
-.user-footer {
-    padding: 15px;
-    border-top: 1px solid rgba(255,255,255,0.3);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.avatar-wrapper { position: relative; }
-.pfp { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; }
-.status-dot { 
-    position: absolute; bottom: 0; right: 0; 
-    width: 12px; height: 12px; 
-    background: #4caf50; border-radius: 50%; border: 2px solid #fff;
-}
-
-/* Inputs */
-.input-wrapper {
-    background: #fff;
-    border-radius: 15px;
-    display: flex;
-    padding: 5px 15px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-#chat-in {
-    border: none;
-    padding: 12px;
-    flex: 1;
-    outline: none;
-    background: transparent;
-}
+    <script src="script.js"></script>
+</body>
+</html>
