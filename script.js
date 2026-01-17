@@ -3,7 +3,7 @@ const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
 let currentUser = null;
-let activeChatID = 'global'; // Default to global chat
+let activeChatID = 'global'; 
 let isSignupMode = false;
 let messageSubscription = null;
 
@@ -45,83 +45,98 @@ function showAuth() {
 
 function enterApp() {
     playSound('login');
-    document.getElementById('gatekeeper').style.display = 'none';
-    document.getElementById('app-root').style.display = 'grid';
-    setupRealtime();
-    loadFriends(); // Load the sidebar friends list
+    const gate = document.getElementById('gatekeeper');
+    gate.style.opacity = '0';
+    setTimeout(() => {
+        gate.style.display = 'none';
+        document.getElementById('app-root').style.display = 'flex';
+        setView('dm'); // Start by loading Friends
+        setupRealtime();
+    }, 500);
 }
 
-// --- Messaging Logic ---
+// --- Messaging & Realtime ---
 function setupRealtime() {
     if (messageSubscription) _supabase.removeChannel(messageSubscription);
     messageSubscription = _supabase.channel('messages')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, 
         payload => { 
-            // Only show message if it's in the chat we are currently looking at
             if (payload.new.chat_id === activeChatID) appendMsgUI(payload.new); 
         }).subscribe();
 }
 
-function appendMsgUI(msg) {
+async function loadMessages() {
+    const { data } = await _supabase.from('messages').select('*').eq('chat_id', activeChatID).order('created_at', {ascending: true});
     const container = document.getElementById('chat-messages');
-    if (!container) return;
-    const div = document.createElement('div');
-    div.className = msg.sender_id === currentUser.id ? 'msg-bubble own' : 'msg-bubble';
-    div.innerHTML = `<b>${msg.username_static || 'User'}:</b><br>${msg.content}`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
+    container.innerHTML = '';
+    data?.forEach(m => appendMsgUI(m));
 }
 
 async function sendMessage() {
     const input = document.getElementById('chat-in');
-    const val = input.value.trim();
-    if (!val) return;
-    
-    await _supabase.from('messages').insert([{ 
-        sender_id: currentUser.id, 
-        content: val, 
+    const txt = input.value.trim();
+    if (!txt) return;
+
+    await _supabase.from('messages').insert([{
+        sender_id: currentUser.id,
+        content: txt,
         chat_id: activeChatID,
         username_static: document.getElementById('my-display-name').textContent
     }]);
     input.value = '';
 }
 
-// --- Profile & Friends Logic ---
-async function loadMyProfile() {
-    const { data } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-    if (data) {
-        document.getElementById('my-display-name').textContent = data.username;
-        document.getElementById('my-full-id').textContent = `#${data.id_tag}`;
-        document.getElementById('my-pfp').src = data.pfp || `https://api.dicebear.com/7.x/bottts/svg?seed=${data.username}`;
-    }
+function appendMsgUI(msg) {
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = (msg.sender_id === currentUser.id) ? 'msg-bubble own' : 'msg-bubble';
+    div.innerHTML = `<small>${msg.username_static || 'User'}</small><div>${msg.content}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+// --- Sidebar Systems (Friends & Groups) ---
+function setView(type) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    if (type === 'dm') loadFriends();
+    // if (type === 'group') loadGroups(); // Future Group implementation
 }
 
 async function loadFriends() {
     const { data } = await _supabase.from('friendships').select('*, profiles:receiver_id(*)').eq('status', 'accepted');
     const container = document.getElementById('sidebar-content');
-    if (container) {
-        container.innerHTML = '<div style="padding:10px; opacity:0.5;">DIRECT MESSAGES</div>';
-        data?.forEach(f => {
-            const div = document.createElement('div');
-            div.className = 'user-tray'; 
-            div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.1);';
-            div.innerHTML = `<img src="${f.profiles.pfp}" style="width:30px;height:30px;border-radius:50%;"> <span>${f.profiles.display_name}</span>`;
-            div.onclick = () => {
-                activeChatID = f.id; // Switch chat to this specific friend ID
-                document.getElementById('chat-messages').innerHTML = ''; // Clear chat
-                loadMessages(); // Load old messages for this chat
-            };
-            container.appendChild(div);
-        });
+    container.innerHTML = '<div style="padding:10px; font-size:12px; opacity:0.6;">TRANSMISSIONS</div>';
+    
+    // Add "Global Hub" as first option
+    const globalDiv = document.createElement('div');
+    globalDiv.className = 'user-tray';
+    globalDiv.innerHTML = `<span>🌐 Global Hub</span>`;
+    globalDiv.onclick = () => { activeChatID = 'global'; loadMessages(); setupRealtime(); };
+    container.appendChild(globalDiv);
+
+    data?.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'user-tray';
+        div.innerHTML = `<img src="${f.profiles.pfp}" style="width:30px;height:30px;border-radius:50%;"> <span>${f.profiles.display_name}</span>`;
+        div.onclick = () => {
+            activeChatID = f.id;
+            loadMessages();
+            setupRealtime();
+        };
+        container.appendChild(div);
+    });
+}
+
+// --- Profile & Auth UI ---
+async function loadMyProfile() {
+    const { data } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    if (data) {
+        document.getElementById('my-display-name').textContent = data.display_name;
+        document.getElementById('my-full-id').textContent = `#${data.id_tag}`;
+        document.getElementById('my-pfp').src = data.pfp;
     }
 }
 
-async function loadMessages() {
-    const { data } = await _supabase.from('messages').select('*').eq('chat_id', activeChatID).order('created_at', {ascending: true});
-    data?.forEach(m => appendMsgUI(m));
-}
-
-// --- Auth UI Logic ---
 function toggleAuthMode() {
     isSignupMode = !isSignupMode;
     document.getElementById('auth-title').textContent = isSignupMode ? "New Registration" : "System Access";
@@ -134,18 +149,14 @@ async function handleAuth() {
     const pass = document.getElementById('pass-in').value;
     if (isSignupMode) {
         const user = document.getElementById('username-in').value;
-        const { data, error } = await _supabase.auth.signUp({ email, password: pass });
-        if (error) return alert(error.message);
+        const { data } = await _supabase.auth.signUp({ email, password: pass });
         if (data.user) {
             await _supabase.from('profiles').insert([{ 
-                id: data.user.id, 
-                username: user, 
-                display_name: user,
+                id: data.user.id, username: user, display_name: user, 
                 id_tag: Math.floor(1000 + Math.random() * 9000),
-                pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${user}`
+                pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${user}` 
             }]);
-            alert("Success! Check your email.");
-            toggleAuthMode();
+            alert("Success! Verify email and log in.");
         }
     } else {
         const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
@@ -153,17 +164,5 @@ async function handleAuth() {
     }
 }
 
-function openPfpManager() { document.getElementById('pfp-upload-input').click(); }
-
-async function uploadNewPfp(input) {
-    if (!input.files || !input.files[0]) return;
-    const file = input.files[0];
-    const fileName = `pfps/${currentUser.id}-${Date.now()}`;
-    const { error: upErr } = await _supabase.storage.from('avatars').upload(fileName, file);
-    if (upErr) return alert("Upload failed");
-    const { data } = _supabase.storage.from('avatars').getPublicUrl(fileName);
-    await _supabase.from('profiles').update({ pfp: data.publicUrl }).eq('id', currentUser.id);
-    document.getElementById('my-pfp').src = data.publicUrl;
-}
-
 function logout() { _supabase.auth.signOut(); location.reload(); }
+function openPfpManager() { document.getElementById('pfp-upload-input').click(); }
