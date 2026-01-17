@@ -7,30 +7,33 @@ let activeChatID = null;
 let isSignupMode = false;
 let messageSubscription = null;
 
-// --- Sound Engine (Synthesized Aero Pops) ---
+// --- Sound Engine ---
 function playSound(type) {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    if (type === 'pop') {
-        osc.frequency.setValueAtTime(600, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
-    } else {
-        // "Chime" sound for login
-        osc.frequency.setValueAtTime(440, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        if (type === 'pop') {
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+        } else {
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
+        }
+        
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+        console.log("Audio context blocked by browser until first interaction.");
     }
-    
-    gain.gain.setValueAtTime(0.05, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.2);
 }
 
-// --- App Startup ---
+// --- Initialization ---
 window.onload = async () => {
     const { data: { session } } = await _supabase.auth.getSession();
     if (session) {
@@ -43,38 +46,43 @@ window.onload = async () => {
 function enterApp() {
     playSound('login');
     const gate = document.getElementById('gatekeeper');
-    gate.style.opacity = '0';
-    setTimeout(() => {
-        gate.style.display = 'none';
-        document.getElementById('app-root').style.display = 'grid';
-        setupRealtime(); 
-        setView('dm');
-    }, 500);
+    if (gate) {
+        gate.style.opacity = '0';
+        setTimeout(() => {
+            gate.style.display = 'none';
+            document.getElementById('app-root').style.display = 'grid';
+            setupRealtime(); 
+            setView('dm');
+        }, 500);
+    }
 }
 
-// --- Authentication Logic (Login/Signup Switch) ---
+// --- FIX: The Toggle Function ---
 function toggleAuthMode() {
     playSound('pop');
-    isSignupMode = !isSignupMode;
+    isSignupMode = !isSignupMode; // Switches between true and false
     
+    // Get all the elements we need to change
     const authTitle = document.getElementById('auth-title');
     const mainBtn = document.getElementById('main-auth-btn');
-    const toggleText = document.getElementById('toggle-text');
-    const signupFields = document.getElementById('signup-fields');
+    const toggleLink = document.getElementById('toggle-text');
+    const signupSection = document.getElementById('signup-fields'); // The div containing the username input
     const authStatus = document.getElementById('auth-status');
 
     if (isSignupMode) {
-        authTitle.textContent = "New Registration";
-        authStatus.textContent = "Create your digital identity.";
-        mainBtn.textContent = "Initialize Account";
-        toggleText.textContent = "Already have an account? Log In";
-        signupFields.style.display = "block";
+        // Change UI to Signup Mode
+        if (authTitle) authTitle.textContent = "New Registration";
+        if (authStatus) authStatus.textContent = "Create your digital identity.";
+        if (mainBtn) mainBtn.textContent = "Initialize Account";
+        if (toggleLink) toggleLink.textContent = "Already have an account? Log In";
+        if (signupSection) signupSection.style.display = "block";
     } else {
-        authTitle.textContent = "System Access";
-        authStatus.textContent = "Identify yourself to connect.";
-        mainBtn.textContent = "Log In";
-        toggleText.textContent = "New user? Create Account";
-        signupFields.style.display = "none";
+        // Change UI back to Login Mode
+        if (authTitle) authTitle.textContent = "System Access";
+        if (authStatus) authStatus.textContent = "Identify yourself to connect.";
+        if (mainBtn) mainBtn.textContent = "Log In";
+        if (toggleLink) toggleLink.textContent = "New user? Create Account";
+        if (signupSection) signupSection.style.display = "none";
     }
 }
 
@@ -86,7 +94,6 @@ async function handleAuth() {
     if (!email || !password) return alert("Credentials required.");
 
     if (isSignupMode) {
-        // --- SIGNUP PROCESS ---
         const username = document.getElementById('username-in').value;
         if (!username) return alert("Please choose a username.");
         
@@ -94,7 +101,6 @@ async function handleAuth() {
         if (error) return alert(error.message);
         
         if (data.user) {
-            // Create Profile in Database immediately
             await _supabase.from('profiles').insert([{
                 id: data.user.id,
                 username: username,
@@ -103,10 +109,9 @@ async function handleAuth() {
                 pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
             }]);
             alert("Registration successful! Check your email for a link, then Log In.");
-            toggleAuthMode(); // Switch back to login view
+            toggleAuthMode(); 
         }
     } else {
-        // --- LOGIN PROCESS ---
         const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
         if (error) return alert("Access Denied: " + error.message);
         
@@ -116,20 +121,13 @@ async function handleAuth() {
     }
 }
 
-// --- Realtime Messaging ---
+// --- Realtime & UI ---
 function setupRealtime() {
     if (messageSubscription) _supabase.removeChannel(messageSubscription);
-
     messageSubscription = _supabase
         .channel('public:messages')
-        .on('postgres_changes', { 
-            event: 'INSERT', 
-            schema: 'public', 
-            table: 'messages' 
-        }, (payload) => {
-            if (payload.new.chat_id === activeChatID) {
-                appendMsgUI(payload.new);
-            }
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+            if (payload.new.chat_id === activeChatID) appendMsgUI(payload.new);
         })
         .subscribe();
 }
@@ -143,7 +141,6 @@ function appendMsgUI(msg) {
     container.scrollTop = container.scrollHeight;
 }
 
-// --- Data & Sidebar ---
 async function loadMyProfile() {
     const { data } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).single();
     if (data) {
@@ -179,28 +176,29 @@ async function loadMessages() {
 function setView(type) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     const activeBtn = type === 'dm' ? 'tab-friends' : 'tab-groups';
-    document.getElementById(activeBtn).classList.add('active');
-    
+    const btnEl = document.getElementById(activeBtn);
+    if (btnEl) btnEl.classList.add('active');
     if (type === 'dm') loadFriends();
 }
 
 async function loadFriends() {
     const { data } = await _supabase.from('friendships').select('*, profiles:receiver_id(*)').eq('status', 'accepted');
     const container = document.getElementById('sidebar-content');
-    container.innerHTML = '';
-    
-    data?.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'user-tray'; 
-        div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.2);';
-        div.innerHTML = `<img src="${f.profiles.pfp}" style="width:35px;height:35px;border-radius:50%;"> <b>${f.profiles.display_name}</b>`;
-        div.onclick = () => {
-            activeChatID = f.id;
-            document.getElementById('active-chat-title').textContent = f.profiles.display_name;
-            loadMessages();
-        };
-        container.appendChild(div);
-    });
+    if (container) {
+        container.innerHTML = '';
+        data?.forEach(f => {
+            const div = document.createElement('div');
+            div.className = 'user-tray'; 
+            div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.2);';
+            div.innerHTML = `<img src="${f.profiles.pfp}" style="width:35px;height:35px;border-radius:50%;"> <b>${f.profiles.display_name}</b>`;
+            div.onclick = () => {
+                activeChatID = f.id;
+                document.getElementById('active-chat-title').textContent = f.profiles.display_name;
+                loadMessages();
+            };
+            container.appendChild(div);
+        });
+    }
 }
 
 function logout() {
