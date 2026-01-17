@@ -46,15 +46,22 @@
             </div>
             <div id="sidebar-content" class="scroll-area"></div>
             
-            <div class="user-tray-footer">
-                <img id="my-pfp" src="" alt="pfp">
-                <div class="user-info">
-                    <b id="my-display-name">Guest</b>
-                    <span id="my-full-id">#0000</span>
-                </div>
-                <button onclick="logout()" class="mini-btn">Disconnect</button>
-            </div>
-        </div>
+          <div class="user-tray-footer" onclick="openPfpManager()">
+    <div class="pfp-container">
+        <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=Guest" alt="pfp">
+        <div class="pfp-overlay">Edit</div>
+    </div>
+              
+    <div class="user-info">
+        <b id="my-display-name">Loading...</b>
+        <span id="my-full-id">#0000</span>
+    </div>
+    <button onclick="logout(); event.stopPropagation();" class="mini-logout-btn">
+        <img src="https://img.icons8.com/ios-glyphs/30/ffffff/logout-rounded--v1.png" width="15"/>
+    </button>
+</div>
+
+<input type="file" id="pfp-upload-input" style="display:none" accept="image/*" onchange="uploadNewPfp(this)">
 
         <div class="chat-area bulky-window">
             <div class="chat-header">
