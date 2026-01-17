@@ -6,45 +6,40 @@ let currentUser = null;
 let activeChatID = null;
 let isSignupMode = false;
 
-// Sounds
-const sfxClick = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU");
-const sfxLogin = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"); // Placeholder pop
-
-function playSound() {
-    // Basic beep simulation for feedback
+// --- Sound Engine ---
+function playSound(type) {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.frequency.setValueAtTime(600, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+    
+    if (type === 'pop') {
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+    } else {
+        osc.frequency.setValueAtTime(400, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.2);
+    }
+    
     gain.gain.setValueAtTime(0.05, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.1);
+    osc.stop(ctx.currentTime + 0.2);
 }
 
-// 1. INITIALIZATION
+// --- Initialization ---
 window.onload = async () => {
     const { data: { session } } = await _supabase.auth.getSession();
-    
     if (session) {
         currentUser = session.user;
-        const prof = await loadMyProfile();
-        // If profile is incomplete (ID 0000), keep gatekeeper open but hide login inputs
-        if (!prof || prof.id_tag === 0 || prof.id_tag === "0000") {
-             document.getElementById('auth-status').textContent = "Profile Setup Required.";
-             // We could show a profile setup UI here, but for now let's just let them in to edit
-             enterApp(); 
-        } else {
-             enterApp();
-        }
+        await loadMyProfile();
+        enterApp();
     }
 };
 
 function enterApp() {
-    playSound();
+    playSound('login');
     const gate = document.getElementById('gatekeeper');
     gate.style.opacity = '0';
     setTimeout(() => {
@@ -54,53 +49,55 @@ function enterApp() {
     }, 500);
 }
 
-// 2. AUTHENTICATION LOGIC
+// --- Working Create Account & Login Logic ---
 function toggleMode() {
     isSignupMode = !isSignupMode;
     const btn = document.getElementById('main-auth-btn');
     const toggle = document.getElementById('toggle-text');
-    const userField = document.getElementById('signup-section');
+    const signupSection = document.getElementById('signup-section');
     
     if (isSignupMode) {
         btn.textContent = "Create Account";
         toggle.textContent = "Already have an account? Log In";
-        userField.style.display = 'block';
+        signupSection.style.display = 'block';
     } else {
         btn.textContent = "Log In";
         toggle.textContent = "New user? Create Account";
-        userField.style.display = 'none';
+        signupSection.style.display = 'none';
     }
 }
 
 async function handleAuth() {
-    playSound();
+    playSound('pop');
     const email = document.getElementById('email-in').value;
     const password = document.getElementById('pass-in').value;
     
-    if (!email || !password) return alert("Please fill in all fields.");
+    if (!email || !password) return alert("Please enter email and password.");
 
     if (isSignupMode) {
-        // --- SIGN UP FLOW ---
         const username = document.getElementById('username-in').value;
         if (!username) return alert("Username is required for new accounts.");
         
+        // 1. Create the Auth User
         const { data, error } = await _supabase.auth.signUp({ email, password });
         if (error) return alert(error.message);
         
-        // create profile row
         if (data.user) {
-            await _supabase.from('profiles').insert([{
+            // 2. Create the Database Profile
+            const { error: profError } = await _supabase.from('profiles').insert([{
                 id: data.user.id,
                 username: username,
                 display_name: username,
-                id_tag: Math.floor(1000 + Math.random() * 9000), // Give them a real ID immediately
+                id_tag: Math.floor(1000 + Math.random() * 9000), // Unique tag
                 pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
             }]);
-            alert("Account created! Please check your email to verify, then log in.");
-            toggleMode(); // Switch back to login mode
+            
+            if (profError) console.error("Profile Error:", profError);
+            alert("Account created! Please check your email to verify, then Log In.");
+            toggleMode();
         }
     } else {
-        // --- LOG IN FLOW ---
+        // --- Log In ---
         const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
         if (error) return alert("Login Failed: " + error.message);
         
@@ -110,12 +107,7 @@ async function handleAuth() {
     }
 }
 
-async function logout() {
-    await _supabase.auth.signOut();
-    location.reload();
-}
-
-// 3. APP DATA LOGIC
+// --- App Data ---
 async function loadMyProfile() {
     const { data } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).single();
     if (data) {
@@ -128,13 +120,14 @@ async function loadMyProfile() {
 
 function setView(type) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(type === 'dm' ? 'tab-friends' : 'tab-groups').classList.add('active');
+    const activeTab = type === 'dm' ? 'tab-friends' : 'tab-groups';
+    document.getElementById(activeTab).classList.add('active');
     
     const container = document.getElementById('sidebar-content');
     if (type === 'dm') {
         loadFriends();
     } else {
-        container.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.6;">Groups feature connecting...</div>';
+        container.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.6;">Groups coming soon...</div>';
     }
 }
 
@@ -144,7 +137,7 @@ async function loadFriends() {
     container.innerHTML = '';
     
     if (!data || data.length === 0) {
-        container.innerHTML = '<div style="padding:20px; opacity:0.5; text-align:center;">No friends yet.<br>Click "+" to add.</div>';
+        container.innerHTML = '<div style="padding:20px; opacity:0.5; text-align:center;">No connections found.</div>';
         return;
     }
 
@@ -154,7 +147,7 @@ async function loadFriends() {
         div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(0,0,0,0.05);';
         div.innerHTML = `<img src="${f.profiles.pfp}" style="width:35px;height:35px;border-radius:50%;"> <b>${f.profiles.display_name}</b>`;
         div.onclick = () => {
-            activeChatID = f.id; // Using friendship ID as chat room
+            activeChatID = f.id;
             document.getElementById('active-chat-title').textContent = f.profiles.display_name;
             loadMessages();
         };
@@ -167,14 +160,6 @@ async function sendMessage() {
     const txt = input.value.trim();
     if (!txt || !activeChatID) return;
 
-    // Optimistic UI update (shows message before server confirms)
-    const container = document.getElementById('chat-messages');
-    const tempDiv = document.createElement('div');
-    tempDiv.className = 'msg-bubble own';
-    tempDiv.textContent = txt;
-    container.appendChild(tempDiv);
-    container.scrollTop = container.scrollHeight;
-
     await _supabase.from('messages').insert([{
         sender_id: currentUser.id,
         content: txt,
@@ -182,6 +167,7 @@ async function sendMessage() {
         username_static: document.getElementById('my-display-name').textContent
     }]);
     input.value = '';
+    loadMessages();
 }
 
 async function loadMessages() {
@@ -197,13 +183,10 @@ async function loadMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
-// Helpers
+function logout() {
+    _supabase.auth.signOut();
+    location.reload();
+}
+
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-async function saveProfile() {
-    const name = document.getElementById('edit-display-name').value;
-    const pfp = document.getElementById('edit-pfp').value;
-    if(name) await _supabase.from('profiles').update({ display_name: name, pfp: pfp }).eq('id', currentUser.id);
-    closeModal('profile-modal');
-    loadMyProfile();
-}
