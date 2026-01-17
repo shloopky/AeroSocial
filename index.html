@@ -3,67 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroChat - Social Restoration</title>
+    <title>AeroSocial - Pastel Edition</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div id="auth-overlay" class="glass-panel">
-        <div class="auth-box">
-            <h1 class="glossy-text">AeroChat</h1>
-            <p>Welcome to the future of the past.</p>
-            <input type="email" id="email-in" placeholder="Email" class="aero-input">
-            <input type="password" id="pass-in" placeholder="Password" class="aero-input">
-            <input type="text" id="username-in" placeholder="Username (Signup only)" class="aero-input">
-            <div class="auth-buttons">
-                <button onclick="handleAuth()" class="aero-btn primary">Login / Sign Up</button>
+    <div class="bg-blobs">
+        <div class="blob"></div>
+        <div class="blob"></div>
+    </div>
+
+    <div id="auth-overlay" class="modal-blur">
+        <div class="glass-card auth-card">
+            <h1 class="aero-title">AeroSocial</h1>
+            <div class="input-group">
+                <input type="email" id="email-in" placeholder="Email" class="aero-input">
+                <input type="password" id="pass-in" placeholder="Password" class="aero-input">
+                <input type="text" id="username-in" placeholder="Username (New users)" class="aero-input">
             </div>
+            <button onclick="handleAuth()" class="glossy-btn primary">Enter System</button>
         </div>
     </div>
 
-    <div id="app-wrapper">
-        <nav class="server-sidebar">
-            <div class="server-icon global" onclick="setView('server', '00000000-0000-0000-0000-000000000000')">🌐</div>
+    <div id="app-container">
+        <nav class="server-rail">
+            <div class="server-item active-server" onclick="setView('dm')">
+                <img src="https://img.icons8.com/fluency/48/home.png" alt="Home">
+            </div>
+            <div class="divider"></div>
             <div id="server-list"></div>
-            <button class="add-server-btn" onclick="document.getElementById('server-modal').style.display='flex'">+</button>
+            <button class="add-btn" onclick="openModal('server-modal')">+</button>
         </nav>
 
-        <aside class="channel-sidebar glass">
-            <div class="sidebar-header" id="sidebar-header">
-                <h3>Channels</h3>
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h3 id="sidebar-title">Messages</h3>
             </div>
-            <div id="sidebar-content" class="scrollable"></div>
-            <div class="user-profile-bar" onclick="openProfile()">
-                <img id="my-pfp" src="" class="avatar-circle">
-                <span id="my-name">Loading...</span>
+            <div id="sidebar-content" class="custom-scroll"></div>
+            
+            <div class="user-footer" onclick="openProfile()">
+                <div class="avatar-wrapper">
+                    <img id="my-pfp" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aero" class="pfp">
+                    <div class="status-dot"></div>
+                </div>
+                <span id="my-name">Guest</span>
             </div>
         </aside>
 
-        <main class="chat-area">
-            <div class="chat-header glass">
-                <h2 id="active-chat-name">Select a Channel</h2>
-            </div>
-            <div id="chat-messages" class="scrollable"></div>
-            <div class="input-container">
-                <input type="text" id="chat-in" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()" class="send-btn">Send</button>
+        <main class="chat-main glass-panel">
+            <header class="chat-header">
+                <div class="header-info">
+                    <span class="hash">#</span>
+                    <h2 id="active-chat-name">Select a conversation</h2>
+                </div>
+            </header>
+
+            <div id="chat-messages" class="custom-scroll">
+                </div>
+
+            <div class="chat-input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="chat-in" placeholder="Message..." onkeydown="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()" class="send-icon-btn">
+                        <img src="https://img.icons8.com/fluency/48/sent.png" alt="Send">
+                    </button>
+                </div>
             </div>
         </main>
-
-        <aside class="member-sidebar glass" id="member-list-sidebar">
-            <div class="sidebar-header">Members</div>
-            <div id="member-list-container" class="scrollable"></div>
-        </aside>
     </div>
 
-    <div id="server-modal" class="modal-overlay" style="display:none;">
-        <div class="glass-panel modal-content">
-            <h3>Create/Join Server</h3>
-            <input type="text" id="server-name-in" placeholder="Server Name or Invite ID" class="aero-input">
-            <input type="text" id="server-icon-in" placeholder="Emoji Icon" class="aero-input">
-            <button onclick="createOrJoinServer()" class="aero-btn">Confirm</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" class="aero-btn cancel">Close</button>
+    <div id="server-modal" class="modal-blur" style="display:none;">
+        <div class="glass-card modal-content">
+            <h3>New Server</h3>
+            <input type="text" id="server-name-in" placeholder="Server Name / ID" class="aero-input">
+            <div class="modal-actions">
+                <button onclick="createOrJoinServer()" class="glossy-btn primary">Create</button>
+                <button onclick="closeModal('server-modal')" class="glossy-btn">Cancel</button>
+            </div>
         </div>
     </div>
 
