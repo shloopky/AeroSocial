@@ -5,6 +5,7 @@ const _supabase = supabase.createClient(SB_URL, SB_KEY);
 let currentUser = null;
 let activeChatID = null;
 let isSignupMode = false;
+let messageSubscription = null; // Holds the realtime listener
 
 // --- Sound Engine ---
 function playSound(type) {
@@ -45,11 +46,41 @@ function enterApp() {
     setTimeout(() => {
         gate.style.display = 'none';
         document.getElementById('app-root').style.display = 'grid';
+        setupRealtime(); // Start listening for messages immediately
         setView('dm');
     }, 500);
 }
 
-// --- Working Create Account & Login Logic ---
+// --- Realtime Logic ---
+function setupRealtime() {
+    // If a subscription already exists, kill it first to avoid duplicates
+    if (messageSubscription) _supabase.removeChannel(messageSubscription);
+
+    messageSubscription = _supabase
+        .channel('public:messages')
+        .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'messages' 
+        }, (payload) => {
+            // Only update the UI if the new message belongs to the current open chat
+            if (payload.new.chat_id === activeChatID) {
+                appendSingleMessage(payload.new);
+            }
+        })
+        .subscribe();
+}
+
+function appendSingleMessage(msg) {
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = (msg.sender_id === currentUser.id) ? 'msg-bubble own' : 'msg-bubble';
+    div.textContent = msg.content;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+// --- Auth Logic ---
 function toggleMode() {
     isSignupMode = !isSignupMode;
     const btn = document.getElementById('main-auth-btn');
@@ -76,28 +107,23 @@ async function handleAuth() {
 
     if (isSignupMode) {
         const username = document.getElementById('username-in').value;
-        if (!username) return alert("Username is required for new accounts.");
+        if (!username) return alert("Username is required.");
         
-        // 1. Create the Auth User
         const { data, error } = await _supabase.auth.signUp({ email, password });
         if (error) return alert(error.message);
         
         if (data.user) {
-            // 2. Create the Database Profile
-            const { error: profError } = await _supabase.from('profiles').insert([{
+            await _supabase.from('profiles').insert([{
                 id: data.user.id,
                 username: username,
                 display_name: username,
-                id_tag: Math.floor(1000 + Math.random() * 9000), // Unique tag
+                id_tag: Math.floor(1000 + Math.random() * 9000),
                 pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
             }]);
-            
-            if (profError) console.error("Profile Error:", profError);
-            alert("Account created! Please check your email to verify, then Log In.");
+            alert("Account created! Please verify your email and then Log In.");
             toggleMode();
         }
     } else {
-        // --- Log In ---
         const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
         if (error) return alert("Login Failed: " + error.message);
         
@@ -107,7 +133,7 @@ async function handleAuth() {
     }
 }
 
-// --- App Data ---
+// --- Data & Messaging ---
 async function loadMyProfile() {
     const { data } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).single();
     if (data) {
@@ -116,6 +142,30 @@ async function loadMyProfile() {
         document.getElementById('my-pfp').src = data.pfp;
         return data;
     }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chat-in');
+    const txt = input.value.trim();
+    if (!txt || !activeChatID) return;
+
+    // We don't need to manually add the bubble here anymore! 
+    // Realtime will detect the database insert and call appendSingleMessage for us.
+    await _supabase.from('messages').insert([{
+        sender_id: currentUser.id,
+        content: txt,
+        chat_id: activeChatID,
+        username_static: document.getElementById('my-display-name').textContent
+    }]);
+    input.value = '';
+}
+
+async function loadMessages() {
+    if (!activeChatID) return;
+    const { data } = await _supabase.from('messages').select('*').eq('chat_id', activeChatID).order('created_at', {ascending: true});
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '';
+    data?.forEach(m => appendSingleMessage(m));
 }
 
 function setView(type) {
@@ -136,12 +186,7 @@ async function loadFriends() {
     const container = document.getElementById('sidebar-content');
     container.innerHTML = '';
     
-    if (!data || data.length === 0) {
-        container.innerHTML = '<div style="padding:20px; opacity:0.5; text-align:center;">No connections found.</div>';
-        return;
-    }
-
-    data.forEach(f => {
+    data?.forEach(f => {
         const div = document.createElement('div');
         div.className = 'user-tray'; 
         div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(0,0,0,0.05);';
@@ -153,34 +198,6 @@ async function loadFriends() {
         };
         container.appendChild(div);
     });
-}
-
-async function sendMessage() {
-    const input = document.getElementById('chat-in');
-    const txt = input.value.trim();
-    if (!txt || !activeChatID) return;
-
-    await _supabase.from('messages').insert([{
-        sender_id: currentUser.id,
-        content: txt,
-        chat_id: activeChatID,
-        username_static: document.getElementById('my-display-name').textContent
-    }]);
-    input.value = '';
-    loadMessages();
-}
-
-async function loadMessages() {
-    const { data } = await _supabase.from('messages').select('*').eq('chat_id', activeChatID).order('created_at', {ascending: true});
-    const container = document.getElementById('chat-messages');
-    container.innerHTML = '';
-    data?.forEach(m => {
-        const div = document.createElement('div');
-        div.className = (m.sender_id === currentUser.id) ? 'msg-bubble own' : 'msg-bubble';
-        div.textContent = m.content;
-        container.appendChild(div);
-    });
-    container.scrollTop = container.scrollHeight;
 }
 
 function logout() {
