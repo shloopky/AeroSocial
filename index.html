@@ -9,74 +9,65 @@
 </head>
 <body>
 
-    <div id="gatekeeper" class="gatekeeper-overlay">
-        <div class="bulky-window auth-window">
-            <div class="window-title">
-                <span id="auth-title">System Access</span>
+    <div id="gatekeeper">
+        <div class="auth-box">
+            <h1 id="auth-title" style="margin-bottom: 5px;">AeroSocial</h1>
+            <p id="auth-subtitle" style="margin-bottom: 25px; opacity: 0.7;">Identification Required</p>
+            
+            <div id="signup-fields" style="display: none;">
+                <input type="text" id="username-in" class="aero-input" placeholder="Username">
             </div>
-            <div class="window-body">
-                <h1 class="aero-logo">AeroSocial</h1>
-                <p id="auth-status">Identification Required</p>
-                
-                <div class="auth-form">
-                    <div id="signup-fields" style="display:none;">
-                        <input type="text" id="username-in" placeholder="Choose Username" class="aero-input">
-                    </div>
-                    <input type="email" id="email-in" placeholder="Email Address" class="aero-input">
-                    <input type="password" id="pass-in" placeholder="Password" class="aero-input">
-                    
-                    <button id="main-auth-btn" onclick="handleAuth()" class="gel-button">Log In</button>
-                    
-                    <p class="toggle-link">
-                        <span id="toggle-text" onclick="toggleAuthMode()">New user? Create Account</span>
-                    </p>
-                </div>
+            
+            <input type="email" id="email-in" class="aero-input" placeholder="Email Address">
+            <input type="password" id="pass-in" class="aero-input" placeholder="Password">
+            
+            <div style="margin-top: 20px;">
+                <button id="main-auth-btn" class="gel-button" onclick="handleAuth()">Log In</button>
             </div>
+            
+            <p style="margin-top: 20px; font-size: 13px;">
+                <span id="auth-toggle-text">New user?</span> 
+                <a href="#" onclick="toggleAuthMode()" style="color: #1e5799; font-weight: bold; text-decoration: none;">Create Account</a>
+            </p>
         </div>
     </div>
 
     <div id="app-root">
-        <div class="sidebar bulky-window">
-            <div class="sidebar-header">
-                <h3>Global Hub</h3>
-                <div class="tab-bar">
-                    <button id="tab-friends" class="tab active" onclick="setView('dm')">Friends</button>
-                    <button id="tab-groups" class="tab" onclick="setView('groups')">Groups</button>
-                </div>
-            </div>
-            <div id="sidebar-content" class="scroll-area"></div>
+        
+        <div class="sidebar">
+            <div class="sidebar-header">AeroSocial</div>
             
-          <div class="user-tray-footer" onclick="openPfpManager()">
-    <div class="pfp-container">
-        <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=Guest" alt="pfp">
-        <div class="pfp-overlay">Edit</div>
-    </div>
-              
-    <div class="user-info">
-        <b id="my-display-name">Loading...</b>
-        <span id="my-full-id">#0000</span>
-    </div>
-    <button onclick="logout(); event.stopPropagation();" class="mini-logout-btn">
-        <img src="https://img.icons8.com/ios-glyphs/30/ffffff/logout-rounded--v1.png" width="15"/>
-    </button>
-</div>
-
-<input type="file" id="pfp-upload-input" style="display:none" accept="image/*" onchange="uploadNewPfp(this)">
-
-        <div class="chat-area bulky-window">
-            <div class="chat-header">
-                <span id="active-chat-title">Ready for Transmission</span>
-                <button class="gel-button" onclick="openModal('add-friend-modal')">Add Friend</button>
+            <div class="tab-nav">
+                <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">Friends</button>
+                <button id="tab-groups" class="tab-btn" onclick="setView('group')">Groups</button>
             </div>
             
-            <div id="chat-messages" class="scroll-area">
+            <div id="sidebar-list">
                 </div>
 
-            <div class="chat-input-container">
-                <input type="text" id="chat-in" class="aero-input" placeholder="Type a message...">
+            <div class="profile-tray">
+                <div class="pfp-container">
+                    <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=default" alt="Profile" onclick="openPfpManager()">
+                    <input type="file" id="pfp-upload-input" style="display: none;" accept="image/*">
+                </div>
+                <div style="flex: 1;">
+                    <div id="my-display-name" style="font-weight: bold; font-size: 14px;">Loading...</div>
+                    <div id="my-full-id" style="font-size: 10px; opacity: 0.6;">#0000</div>
+                </div>
+                <button class="mini-logout" title="Logout" onclick="logout()">✕</button>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div id="chat-messages">
+                </div>
+
+            <div class="chat-footer">
+                <input type="text" id="chat-in" class="aero-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
                 <button onclick="sendMessage()" class="gel-button">Send</button>
             </div>
         </div>
+
     </div>
 
     <script src="script.js"></script>
