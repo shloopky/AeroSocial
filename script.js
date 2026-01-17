@@ -29,19 +29,43 @@ function playSound(type) {
         osc.start();
         osc.stop(ctx.currentTime + 0.2);
     } catch (e) {
-        console.log("Audio context blocked by browser until first interaction.");
+        console.log("Audio interaction required for sound.");
     }
 }
 
-// --- Initialization ---
+// --- Startup Logic (Fixes Guest #0000 bug) ---
 window.onload = async () => {
     const { data: { session } } = await _supabase.auth.getSession();
+    
     if (session) {
-        currentUser = session.user;
-        await loadMyProfile();
-        enterApp();
+        const { data: profile } = await _supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+        if (profile) {
+            currentUser = session.user;
+            await loadMyProfile();
+            enterApp();
+        } else {
+            // Force logout if account was deleted from DB but session remains
+            await _supabase.auth.signOut();
+            showAuth(); 
+        }
+    } else {
+        showAuth();
     }
 };
+
+function showAuth() {
+    const gate = document.getElementById('gatekeeper');
+    if (gate) {
+        gate.style.display = 'flex';
+        gate.style.opacity = '1';
+    }
+    document.getElementById('app-root').style.display = 'none';
+}
 
 function enterApp() {
     playSound('login');
@@ -57,27 +81,24 @@ function enterApp() {
     }
 }
 
-// --- FIX: The Toggle Function ---
+// --- Authentication UI Toggle ---
 function toggleAuthMode() {
     playSound('pop');
-    isSignupMode = !isSignupMode; // Switches between true and false
+    isSignupMode = !isSignupMode;
     
-    // Get all the elements we need to change
     const authTitle = document.getElementById('auth-title');
     const mainBtn = document.getElementById('main-auth-btn');
     const toggleLink = document.getElementById('toggle-text');
-    const signupSection = document.getElementById('signup-fields'); // The div containing the username input
+    const signupSection = document.getElementById('signup-fields');
     const authStatus = document.getElementById('auth-status');
 
     if (isSignupMode) {
-        // Change UI to Signup Mode
         if (authTitle) authTitle.textContent = "New Registration";
         if (authStatus) authStatus.textContent = "Create your digital identity.";
         if (mainBtn) mainBtn.textContent = "Initialize Account";
         if (toggleLink) toggleLink.textContent = "Already have an account? Log In";
         if (signupSection) signupSection.style.display = "block";
     } else {
-        // Change UI back to Login Mode
         if (authTitle) authTitle.textContent = "System Access";
         if (authStatus) authStatus.textContent = "Identify yourself to connect.";
         if (mainBtn) mainBtn.textContent = "Log In";
@@ -108,12 +129,12 @@ async function handleAuth() {
                 id_tag: Math.floor(1000 + Math.random() * 9000),
                 pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
             }]);
-            alert("Registration successful! Check your email for a link, then Log In.");
+            alert("Account created! Check email for verification, then Log In.");
             toggleAuthMode(); 
         }
     } else {
         const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-        if (error) return alert("Access Denied: " + error.message);
+        if (error) return alert("Login Failed: " + error.message);
         
         currentUser = data.user;
         await loadMyProfile();
@@ -121,7 +142,7 @@ async function handleAuth() {
     }
 }
 
-// --- Realtime & UI ---
+// --- Messaging & Realtime ---
 function setupRealtime() {
     if (messageSubscription) _supabase.removeChannel(messageSubscription);
     messageSubscription = _supabase
@@ -134,6 +155,7 @@ function setupRealtime() {
 
 function appendMsgUI(msg) {
     const container = document.getElementById('chat-messages');
+    if (!container) return;
     const div = document.createElement('div');
     div.className = (msg.sender_id === currentUser.id) ? 'msg-bubble own' : 'msg-bubble';
     div.textContent = msg.content;
@@ -147,7 +169,6 @@ async function loadMyProfile() {
         document.getElementById('my-display-name').textContent = data.display_name;
         document.getElementById('my-full-id').textContent = `#${data.id_tag}`;
         document.getElementById('my-pfp').src = data.pfp;
-        return data;
     }
 }
 
@@ -169,8 +190,10 @@ async function loadMessages() {
     if (!activeChatID) return;
     const { data } = await _supabase.from('messages').select('*').eq('chat_id', activeChatID).order('created_at', {ascending: true});
     const container = document.getElementById('chat-messages');
-    container.innerHTML = '';
-    data?.forEach(m => appendMsgUI(m));
+    if (container) {
+        container.innerHTML = '';
+        data?.forEach(m => appendMsgUI(m));
+    }
 }
 
 function setView(type) {
@@ -189,8 +212,8 @@ async function loadFriends() {
         data?.forEach(f => {
             const div = document.createElement('div');
             div.className = 'user-tray'; 
-            div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.2);';
-            div.innerHTML = `<img src="${f.profiles.pfp}" style="width:35px;height:35px;border-radius:50%;"> <b>${f.profiles.display_name}</b>`;
+            div.style.cssText = 'padding:10px; cursor:pointer; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.1);';
+            div.innerHTML = `<img src="${f.profiles.pfp}" style="width:30px;height:30px;border-radius:50%;"> <span>${f.profiles.display_name}</span>`;
             div.onclick = () => {
                 activeChatID = f.id;
                 document.getElementById('active-chat-title').textContent = f.profiles.display_name;
