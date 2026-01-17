@@ -1,117 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroSocial Pro | Restoration</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
+:root {
+    --aero-main: #b3e5fc;
+    --aero-gloss: rgba(255, 255, 255, 0.6);
+    --window-bg: rgba(255, 255, 255, 0.45);
+    --text-color: #1a3a5a;
+}
 
-    <div class="aero-bg">
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-    </div>
+* { box-sizing: border-box; transition: 0.2s cubic-bezier(0.1, 0.7, 0.1, 1); }
 
-    <div id="auth-overlay" class="window-blur">
-        <div class="glass-window auth-box bulky-shadow">
-            <div class="window-header">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="window-title-text">System Access</span>
-            </div>
-            <div class="window-content">
-                <h1 class="gel-text">AeroSocial</h1>
-                <input type="email" id="email-in" placeholder="Email Address" class="aero-input">
-                <input type="password" id="pass-in" placeholder="Password" class="aero-input">
-                <input type="text" id="username-in" placeholder="Desired Username" class="aero-input">
-                <button onclick="handleAuth()" class="gel-button primary">Initialize Session</button>
-                <p class="verification-note">Email verification is required upon signup.</p>
-            </div>
-        </div>
-    </div>
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-color);
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    overflow: hidden;
+}
 
-    <div id="app-shell">
-        <nav class="dock bulky-shadow">
-            <div class="dock-item" onclick="setView('home')" title="Home/DMs">
-                <img src="https://img.icons8.com/fluency/48/home.png">
-            </div>
-            <div class="dock-divider"></div>
-            <div id="server-list"></div>
-            <button class="dock-item add-btn" onclick="toggleModal('server-modal')">+</button>
-        </nav>
+/* Environment Orbs */
+.aero-environment { position: fixed; inset: 0; z-index: -1; filter: blur(60px); opacity: 0.6; }
+.orb { position: absolute; border-radius: 50%; width: 500px; height: 500px; animation: float 20s infinite alternate; }
+.blue { background: #0091ff; top: -10%; left: -10%; }
+.green { background: #00ff8c; bottom: -10%; right: -10%; animation-delay: -5s; }
 
-        <aside class="sidebar glass-panel bulky-shadow">
-            <div class="sidebar-header gloss">
-                <h3 id="sidebar-title">Global Hub</h3>
-            </div>
-            
-            <div class="tab-switcher">
-                <button onclick="setView('dm')" class="tab-btn active">Friends</button>
-                <button onclick="setView('groups')" class="tab-btn">Groups</button>
-            </div>
+@keyframes float { from { transform: translate(0,0); } to { transform: translate(100px, 50px); } }
 
-            <div id="sidebar-content" class="custom-scroll"></div>
+#main-interface {
+    display: flex;
+    padding: 20px;
+    height: 100vh;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+}
 
-            <div class="user-card" onclick="toggleModal('profile-modal')">
-                <div class="pfp-container">
-                    <img id="my-pfp" src="" class="gel-avatar">
-                </div>
-                <div class="user-info">
-                    <div id="my-display-name" class="display-name">Guest</div>
-                    <div id="my-id-tag" class="id-tag">#0000</div>
-                </div>
-                <button class="settings-gear" onclick="toggleModal('settings-modal'); event.stopPropagation();">⚙️</button>
-            </div>
-        </aside>
+/* The Bulky Window System */
+.aero-window {
+    background: var(--window-bg);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 25px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1), inset 0 0 15px rgba(255,255,255,0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
 
-        <main class="workspace glass-panel bulky-shadow">
-            <header class="chat-header gloss">
-                <div class="chat-identity">
-                    <span class="status-indicator online"></span>
-                    <h2 id="active-chat-name">Select a Terminal</h2>
-                </div>
-                <div class="header-actions">
-                    <button class="icon-btn" onclick="toggleModal('friend-req-modal')">👤+</button>
-                </div>
-            </header>
+.aero-window::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    pointer-events: none;
+}
 
-            <div id="chat-messages" class="custom-scroll"></div>
+.window-caption {
+    padding: 12px 20px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+}
 
-            <div class="chat-input-bar">
-                <div class="gel-input-wrapper">
-                    <input type="text" id="chat-in" placeholder="Transmit message..." onkeydown="if(event.key==='Enter') sendMessage()">
-                    <button onclick="sendMessage()" class="send-btn">Send</button>
-                </div>
-            </div>
-        </main>
-    </div>
+/* Sidebar & Navigation */
+.dock { width: 85px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+.dock-circle {
+    width: 55px; height: 55px; border-radius: 20px;
+    background: white; border: 2px solid white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.dock-circle:hover { transform: scale(1.1); }
 
-    <div id="profile-modal" class="modal-blur" style="display:none;">
-        <div class="glass-window bulky-shadow modal-size">
-            <div class="window-header"><span>Profile Editor</span><button onclick="toggleModal('profile-modal')">X</button></div>
-            <div class="window-content">
-                <label>Display Name</label>
-                <input type="text" id="edit-display-name" class="aero-input">
-                <label>Profile Picture URL</label>
-                <input type="text" id="edit-pfp-url" class="aero-input">
-                <button onclick="saveProfile()" class="gel-button primary">Update Profile</button>
-            </div>
-        </div>
-    </div>
+.sidebar-window { width: 300px; }
+.chat-window { flex: 1; }
 
-    <div id="settings-modal" class="modal-blur" style="display:none;">
-        <div class="glass-window bulky-shadow modal-size">
-            <div class="window-header"><span>System Settings</span><button onclick="toggleModal('settings-modal')">X</button></div>
-            <div class="window-content">
-                <h3>Theme Density</h3>
-                <p>Status: Aero High-Gloss (Enabled)</p>
-                <button onclick="logout()" class="gel-button danger">Sign Out</button>
-            </div>
-        </div>
-    </div>
+/* Bulky Inputs */
+.aero-input {
+    width: 100%; padding: 12px 18px; border-radius: 15px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.8);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    outline: none; margin-bottom: 10px;
+}
 
-    <script src="script.js"></script>
-</body>
-</html>
+/* Gel Buttons */
+.gel-button {
+    background: linear-gradient(to bottom, #81d4fa 0%, #29b6f6 50%, #0288d1 51%, #03a9f4 100%);
+    border: 1px solid #01579b;
+    border-radius: 20px; padding: 10px 25px;
+    color: white; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    cursor: pointer; box-shadow: 0 4px 10px rgba(3,169,244,0.3);
+}
+
+/* Chat Layout */
+.scroll-area { flex: 1; overflow-y: auto; padding: 20px; }
+.message-bubble {
+    background: white; padding: 12px 18px; border-radius: 20px;
+    margin-bottom: 15px; width: fit-content; max-width: 80%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.8);
+}
+
+.user-card {
+    padding: 15px; margin: 15px; background: rgba(255,255,255,0.4);
+    border-radius: 20px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; border: 1px solid white;
+}
+.avatar { width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; }
+.id-badge { font-size: 0.8rem; opacity: 0.6; background: #e1f5fe; padding: 2px 6px; border-radius: 5px; }
