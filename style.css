@@ -1,92 +1,77 @@
+* { box-sizing: border-box; }
 body, html {
-    margin: 0; height: 100vh;
+    margin: 0; height: 100vh; width: 100vw;
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
     overflow: hidden;
 }
 
 #app-root {
-    display: flex; /* Changed from grid to flex for easier control */
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+    display: none; /* Changed to flex via JS */
+    height: 100vh; width: 100vw;
 }
 
-.bulky-window {
-    background: rgba(255, 255, 255, 0.4);
+/* Sidebar Fixes */
+.sidebar {
+    width: 280px; min-width: 280px;
+    background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
     display: flex; flex-direction: column;
-    overflow: hidden;
 }
 
-/* --- GEL BUTTONS --- */
-button, .gel-button {
-    background: linear-gradient(to bottom, #7abcff 0%, #60abf8 44%, #4096ee 100%);
-    border: 1px solid #1e5799;
-    border-radius: 20px; color: white;
-    padding: 8px 20px; font-weight: bold; cursor: pointer;
+#sidebar-content { flex: 1; overflow-y: auto; padding: 10px; }
+
+.user-tray {
+    padding: 12px; margin-bottom: 5px; border-radius: 10px;
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    transition: 0.2s; background: rgba(255,255,255,0.2);
+}
+.user-tray:hover { background: rgba(255,255,255,0.5); }
+
+/* Chat Area - THE BIG FIX */
+.chat-area {
+    flex: 1; /* This makes it fill the screen */
+    display: flex; flex-direction: column;
+    height: 100%; position: relative;
 }
 
-/* --- CHAT AREA --- */
 #chat-messages {
-    flex: 1; /* This pushes the input to the bottom */
-    padding: 20px;
-    overflow-y: auto;
-    display: flex; flex-direction: column; gap: 10px;
-}
-
-.msg-bubble {
-    background: rgba(255,255,255,0.8);
-    padding: 10px; border-radius: 15px; max-width: 70%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.msg-bubble.own {
-    align-self: flex-end;
-    background: #4096ee; color: white;
+    flex: 1; overflow-y: auto; padding: 30px;
+    display: flex; flex-direction: column; gap: 15px;
 }
 
 .chat-input-container {
-    padding: 15px; background: rgba(255,255,255,0.2);
-    display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.3);
+    padding: 20px; background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px); display: flex; gap: 10px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+/* UI Elements */
+.msg-bubble {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 12px 18px; border-radius: 20px; max-width: 65%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.msg-bubble.own {
+    align-self: flex-end; background: #4096ee; color: white;
+}
+.msg-bubble small { font-size: 11px; font-weight: bold; margin-bottom: 4px; display: block; }
+
+.user-tray-footer {
+    padding: 15px; background: rgba(255, 255, 255, 0.5);
+    display: flex; align-items: center; gap: 12px; border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+#my-pfp { width: 42px; height: 42px; border-radius: 50%; border: 2px solid white; }
+
+/* Buttons */
+.gel-button {
+    background: linear-gradient(to bottom, #7abcff 0%, #4096ee 100%);
+    border: 1px solid #1e5799; border-radius: 20px;
+    color: white; padding: 10px 20px; font-weight: bold; cursor: pointer;
 }
 
 .aero-input {
-    flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ccc;
+    flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(0,0,0,0.1); outline: none;
 }
-
-/* --- SIDEBAR & PROFILE TRAY --- */
-.sidebar {
-    width: 280px; /* Keep sidebar fixed */
-    min-width: 280px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-}
-.sidebar-content, .chat-input-container {
-    display: flex;
-    flex-direction: column; 
-    gap: 10px;
-    padding: 15px;
-}
-
-.chat-area {
-    flex: 1; /* THIS MAKES CHAT FILL THE BLUE SPACE */
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: transparent; /* Let the body gradient show through */
-}
-
-.user-tray-footer {
-    padding: 12px; background: rgba(255, 255, 255, 0.5);
-    display: flex; align-items: center; gap: 12px; cursor: pointer;
-}
-
-#my-pfp { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
-.user-info { flex: 1; }
-#my-display-name { font-size: 14px; font-weight: bold; display: block; }
-#my-full-id { font-size: 11px; color: #555; }
