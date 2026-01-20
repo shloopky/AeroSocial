@@ -31,16 +31,18 @@ function playSound(type) {
 //  STARTUP & AUTH
 // =============================================
 window.onload = async () => {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (session) {
+    // Get the current session
+    const { data: { session }, error } = await _supabase.auth.getSession();
+    
+    if (session && session.user) {
         currentUser = session.user;
         await loadMyProfile();
         enterApp();
     } else {
+        // No session found, stay at the gatekeeper
         showAuth();
     }
 };
-
 function showAuth() {
     document.getElementById('gatekeeper').style.display = 'flex';
     document.getElementById('app-root').style.display = 'none';
@@ -109,12 +111,35 @@ function toggleAuthMode() {
     document.getElementById('auth-toggle-text').textContent = isSignupMode ? 'Already have an account?' : 'New user?';
 }
 
-function logout() {
+async function logout() {
     playSound('pop');
-    _supabase.auth.signOut();
-    location.reload();
-}
+    
+    // 1. Sign out from Supabase (this clears the server-side session)
+    const { error } = await _supabase.auth.signOut();
+    
+    if (error) {
+        console.error("Logout error:", error.message);
+    }
 
+    // 2. Force clear local storage just in case
+    localStorage.clear(); 
+    sessionStorage.clear();
+
+    // 3. Redirect to the gatekeeper (login screen) manually
+    // Instead of reload(), we hide the app and show the login
+    document.getElementById('app-root').style.display = 'none';
+    document.getElementById('gatekeeper').style.display = 'flex';
+    document.getElementById('gatekeeper').style.opacity = '1';
+    
+    // 4. Reset variables
+    currentUser = null;
+    activeChatID = 'global';
+    
+    // Optional: Full reload after a tiny delay to ensure a clean state
+    setTimeout(() => {
+        location.reload();
+    }, 100);
+}
 // =============================================
 //  PROFILE & PFP
 // =============================================
