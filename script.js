@@ -1,4 +1,4 @@
-// script.js - AeroSocial v2.0 (Enhanced with Friend System)
+// script.js - AeroSocial v2.0 (Direct Flow & Clean Visibility)
 const SB_URL = 'https://nrpiojdaltgfgswvhrys.supabase.co';
 const SB_KEY = 'sb_publishable_nu-if7EcpRJkKD9bXM97Rg__X3ELLW7';
 const _supabase = supabase.createClient(SB_URL, SB_KEY);
@@ -28,43 +28,56 @@ function playSound(type) {
 }
 
 // =============================================
-//  STARTUP & AUTH
-// =============================================
-// =============================================
-//  STARTUP & AUTH (FIXED FOR NO AUTO-LOG IN)
+//  STARTUP & AUTH FLOW
 // =============================================
 window.onload = async () => {
-    // 1. Check for session
     const { data: { session } } = await _supabase.auth.getSession();
     
-    // 2. ONLY enter the app if a session exists AND we have a user
     if (session && session.user) {
         currentUser = session.user;
         await loadMyProfile();
         enterApp();
     } else {
-        // Force the login screen to stay visible
-        document.getElementById('gatekeeper').style.display = 'flex';
-        document.getElementById('app-root').style.display = 'none';
+        // Show login, hide app
+        document.getElementById('gatekeeper').classList.remove('hidden');
+        document.getElementById('app-root').classList.add('hidden');
     }
 };
 
-async function logout() {
-    playSound('pop');
-    
-    // 1. Sign out from Supabase
-    await _supabase.auth.signOut();
-    
-    // 2. Wipe ALL local data so the browser "forgets" you
-    localStorage.clear();
-    sessionStorage.clear();
+async function handleAuth() {
+    const btn = document.getElementById('main-auth-btn');
+    const email = document.getElementById('email-in').value.trim();
+    const pass = document.getElementById('pass-in').value;
 
-    // 3. Immediately hide the app and show the login screen
-    document.getElementById('app-root').style.setAttribute('style', 'display: none !important');
-    document.getElementById('gatekeeper').style.setAttribute('style', 'display: flex !important; opacity: 1 !important');
+    if (!email || !pass) return alert("Please fill in all fields.");
 
-    // 4. Refresh the page to a completely clean state
-    window.location.href = window.location.pathname; 
+    if (isSignupMode) {
+        const username = document.getElementById('username-in').value.trim();
+        if (username.length < 3) return alert('Username must be 3+ characters');
+
+        const { data, error } = await _supabase.auth.signUp({ email, password: pass });
+        if (error) return alert("Signup Failed: " + error.message);
+        
+        if (data.user) {
+            await _supabase.from('profiles').insert([{
+                id: data.user.id,
+                username: username,
+                display_name: username,
+                id_tag: Math.floor(1000 + Math.random() * 9000),
+                pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
+            }]);
+            alert('Account created! Please verify your email.');
+        }
+    } else {
+        const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+        if (error) return alert("Login Failed: Invalid credentials.");
+        
+        if (data.user) {
+            currentUser = data.user;
+            await loadMyProfile();
+            enterApp();
+        }
+    }
 }
 
 function enterApp() {
@@ -72,12 +85,10 @@ function enterApp() {
     const gate = document.getElementById('gatekeeper');
     const app = document.getElementById('app-root');
 
-    // Smooth transition
     gate.style.opacity = '0';
     setTimeout(() => {
-        gate.style.display = 'none';
-        app.style.display = 'flex'; // This overrides the CSS !important
-        app.style.setProperty('display', 'flex', 'important');
+        gate.classList.add('hidden');
+        app.classList.remove('hidden');
         
         setView('dm');
         setupRealtime();
@@ -86,62 +97,23 @@ function enterApp() {
     }, 500);
 }
 
-async function handleAuth() {
-    const btn = document.getElementById('main-auth-btn');
-    const loader = btn.querySelector('.btn-loader');
-    const text = btn.querySelector('.btn-text');
+async function logout() {
+    playSound('pop');
+    await _supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Visual Reset
+    document.getElementById('app-root').classList.add('hidden');
+    const gate = document.getElementById('gatekeeper');
+    gate.classList.remove('hidden');
+    gate.style.opacity = '1';
+
+    currentUser = null;
+    activeChatID = 'global';
     
-    // UI Feedback
-    text.style.display = 'none';
-    loader.style.display = 'inline';
-
-    const email = document.getElementById('email-in').value.trim();
-    const pass = document.getElementById('pass-in').value;
-
-    if (isSignupMode) {
-        // --- REGISTRATION LOGIC ---
-        const username = document.getElementById('username-in').value.trim();
-        if (username.length < 3) {
-            alert('Username must be at least 3 characters');
-            resetBtn(); return;
-        }
-
-        const { data, error } = await _supabase.auth.signUp({ email, password: pass });
-        
-        if (error) {
-            alert("Signup Failed: " + error.message);
-        } else if (data.user) {
-            // Create the profile only after successful auth signup
-            await _supabase.from('profiles').insert([{
-                id: data.user.id,
-                username: username,
-                display_name: username,
-                id_tag: Math.floor(1000 + Math.random() * 9000),
-                pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
-            }]);
-            alert('Account created! Please check your email for a verification link.');
-        }
-    } else {
-        // --- LOGIN LOGIC (Existing Accounts Only) ---
-        const { data, error } = await _supabase.auth.signInWithPassword({ 
-            email: email, 
-            password: pass 
-        });
-
-        if (error) {
-            // This triggers if the email doesn't exist or password is wrong
-            alert("Login Failed: Invalid email or password.");
-        } else if (data.user) {
-            // Successful login
-            location.reload(); 
-        }
-    }
-
-    function resetBtn() {
-        text.style.display = 'inline';
-        loader.style.display = 'none';
-    }
-    resetBtn();
+    // Hard refresh to clear memory
+    setTimeout(() => location.reload(), 100);
 }
 
 function toggleAuthMode() {
@@ -152,57 +124,32 @@ function toggleAuthMode() {
     document.getElementById('auth-toggle-text').textContent = isSignupMode ? 'Already have an account?' : 'New user?';
 }
 
-async function logout() {
-    playSound('pop');
-    
-    // 1. Sign out from Supabase (this clears the server-side session)
-    const { error } = await _supabase.auth.signOut();
-    
-    if (error) {
-        console.error("Logout error:", error.message);
-    }
-
-    // 2. Force clear local storage just in case
-    localStorage.clear(); 
-    sessionStorage.clear();
-
-    // 3. Redirect to the gatekeeper (login screen) manually
-    // Instead of reload(), we hide the app and show the login
-    document.getElementById('app-root').style.display = 'none';
-    document.getElementById('gatekeeper').style.display = 'flex';
-    document.getElementById('gatekeeper').style.opacity = '1';
-    
-    // 4. Reset variables
-    currentUser = null;
-    activeChatID = 'global';
-    
-    // Optional: Full reload after a tiny delay to ensure a clean state
-    setTimeout(() => {
-        location.reload();
-    }, 100);
-}
 // =============================================
 //  PROFILE & PFP
 // =============================================
 async function loadMyProfile() {
     const { data, error } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
 
-    if (error) return console.error('Profile fetch error:', error);
-
     if (data) {
-        document.getElementById('my-display-name').textContent = data.display_name || 'User';
-        document.getElementById('my-full-id').textContent = `#${data.id_tag || '0000'}`;
-        document.getElementById('my-pfp').src = data.pfp || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.id}`;
+        document.getElementById('my-display-name').textContent = data.display_name;
+        document.getElementById('my-full-id').textContent = `#${data.id_tag}`;
+        document.getElementById('my-pfp').src = data.pfp;
     } else {
-        const defaultProfile = {
+        // Fallback for new accounts
+        const defaultName = currentUser.email.split('@')[0];
+        const { data: newProf } = await _supabase.from('profiles').insert([{
             id: currentUser.id,
-            username: currentUser.email?.split('@')[0] || 'user' + Math.floor(Math.random() * 1000),
-            display_name: currentUser.email?.split('@')[0] || 'User',
+            username: defaultName,
+            display_name: defaultName,
             id_tag: Math.floor(1000 + Math.random() * 9000),
             pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.id}`
-        };
-        const { error: insErr } = await _supabase.from('profiles').insert([defaultProfile]);
-        if (!insErr) await loadMyProfile();
+        }]).select().single();
+        
+        if (newProf) {
+            document.getElementById('my-display-name').textContent = newProf.display_name;
+            document.getElementById('my-full-id').textContent = `#${newProf.id_tag}`;
+            document.getElementById('my-pfp').src = newProf.pfp;
+        }
     }
 }
 
@@ -210,18 +157,16 @@ async function handlePfpUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     const { data, error } = await _supabase.storage.from('pfps').upload(currentUser.id + '/pfp', file, { upsert: true });
-    if (error) {
-        alert('Upload failed: ' + error.message);
-    } else {
-        const { data: { publicUrl } } = _supabase.storage.from('pfps').getPublicUrl(currentUser.id + '/pfp');
-        await _supabase.from('profiles').update({ pfp: publicUrl }).eq('id', currentUser.id);
-        document.getElementById('my-pfp').src = publicUrl + '?' + Date.now();
-        playSound('pop');
-    }
+    if (error) return alert('Upload failed: ' + error.message);
+
+    const { data: { publicUrl } } = _supabase.storage.from('pfps').getPublicUrl(currentUser.id + '/pfp');
+    await _supabase.from('profiles').update({ pfp: publicUrl }).eq('id', currentUser.id);
+    document.getElementById('my-pfp').src = publicUrl + '?' + Date.now();
+    playSound('pop');
 }
 
 // =============================================
-//  FRIEND SYSTEM LOGIC
+//  FRIEND SYSTEM
 // =============================================
 async function promptAddFriend() {
     const name = prompt("Enter Target Username:");
@@ -229,19 +174,17 @@ async function promptAddFriend() {
     const tag = prompt("Enter 4-Digit Tag (e.g. 1234):");
     if (!tag) return;
 
-    // Find User
-    const { data: targetUser, error } = await _supabase.from('profiles')
+    const { data: targetUser } = await _supabase.from('profiles')
         .select('id').eq('username', name.trim()).eq('id_tag', tag.trim()).maybeSingle();
 
-    if (error || !targetUser) return alert("User not found!");
+    if (!targetUser) return alert("User not found!");
     if (targetUser.id === currentUser.id) return alert("You can't add yourself!");
 
-    // Send Request
-    const { error: reqErr } = await _supabase.from('friendships').insert([
+    const { error } = await _supabase.from('friendships').insert([
         { sender_id: currentUser.id, receiver_id: targetUser.id, status: 'pending' }
     ]);
 
-    if (reqErr) alert("Request already exists or error occurred.");
+    if (error) alert("Already sent or error occurred.");
     else alert("Request Sent!");
 }
 
@@ -271,28 +214,27 @@ async function loadFriends() {
     hub.onclick = () => selectChat('global', 'Global Hub', 'Public community space');
     container.appendChild(hub);
 
-    // Load Accepted Friends
+    // Accepted Friends
     const { data: friends } = await _supabase.from('friendships')
         .select('id, status, sender:sender_id(id, display_name, pfp), receiver:receiver_id(id, display_name, pfp)')
         .eq('status', 'accepted')
         .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
 
     friends?.forEach(f => {
-        const isSender = f.sender.id === currentUser.id;
-        const friendData = isSender ? f.receiver : f.sender;
+        const friendData = f.sender.id === currentUser.id ? f.receiver : f.sender;
         const item = createTrayItem(friendData.display_name, friendData.pfp, f.id);
         item.onclick = () => selectChat(f.id, friendData.display_name, 'Direct Message');
         container.appendChild(item);
     });
 
-    // Load Pending Requests
+    // Pending Requests
     const { data: pending } = await _supabase.from('friendships')
         .select('id, sender:sender_id(display_name)')
         .eq('receiver_id', currentUser.id)
         .eq('status', 'pending');
 
     if (pending?.length > 0) {
-        container.innerHTML += '<div class="list-label">PENDING REQUESTS</div>';
+        container.innerHTML += '<div class="list-label">PENDING</div>';
         pending.forEach(p => {
             const div = document.createElement('div');
             div.className = 'tray-item pending-req';
@@ -303,13 +245,13 @@ async function loadFriends() {
 }
 
 async function loadGroups() {
-    const container = document.getElementById('sidebar-list');
-    container.innerHTML = '<div class="list-label">GROUP FREQUENCIES</div><p style="padding:15px; opacity:0.7; font-size:13px;">No groups joined yet.</p>';
+    document.getElementById('sidebar-list').innerHTML = '<div class="list-label">GROUPS</div><p style="padding:15px; opacity:0.6;">Coming soon...</p>';
 }
 
 function createTrayItem(name, pfpUrl, chatId) {
     const div = document.createElement('div');
     div.className = 'tray-item';
+    if (chatId === activeChatID) div.classList.add('active');
     div.dataset.chatId = chatId;
     div.innerHTML = pfpUrl ? `<img src="${pfpUrl}" class="mini-pfp"><span>${name}</span>` : `<span>${name}</span>`;
     return div;
@@ -331,7 +273,7 @@ async function sendMessage() {
     const input = document.getElementById('chat-in');
     const text = input.value.trim();
     if (!text) return;
-    playSound('pop');
+    
     await _supabase.from('messages').insert([{
         sender_id: currentUser.id,
         content: text,
@@ -339,6 +281,7 @@ async function sendMessage() {
         username_static: document.getElementById('my-display-name').textContent
     }]);
     input.value = '';
+    playSound('pop');
 }
 
 async function loadMessages() {
@@ -379,6 +322,9 @@ function updateChatHeader(title = 'Global Hub', subtitle = 'Public community spa
 }
 
 function handleMessageInput(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+function openPfpManager() { document.getElementById('pfp-upload-input').click(); }}
 
 function openSettings() { playSound('pop'); document.getElementById('settings-modal').style.display = 'flex'; }
 function closeSettings() { playSound('pop'); document.getElementById('settings-modal').style.display = 'none'; }
