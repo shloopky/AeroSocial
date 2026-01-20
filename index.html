@@ -3,151 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroSocial - Next-Gen Communication Platform</title>
+    <title>AeroSocial | Secure Communication</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div id="gatekeeper">
+
+    <div id="gatekeeper" class="hidden">
         <div class="auth-box">
             <div class="logo-container">
                 <h1 id="auth-title">AeroSocial</h1>
                 <div class="logo-accent"></div>
             </div>
-            <p id="auth-subtitle">Secure Identification Required</p>
-            
-            <div id="signup-fields" style="display: none;">
-                <input type="text" id="username-in" class="aero-input" placeholder="Choose Username" maxlength="20">
-                <small class="input-hint">3-20 characters, alphanumeric only</small>
+            <p id="auth-subtitle">Encrypted Frequency Access</p>
+
+            <div class="auth-form">
+                <div id="signup-fields" style="display: none;">
+                    <input type="text" id="username-in" class="aero-input" placeholder="Username">
+                    <small class="input-hint">Used for friend requests</small>
+                </div>
+
+                <input type="email" id="email-in" class="aero-input" placeholder="Email Address">
+                <input type="password" id="pass-in" class="aero-input" placeholder="Password">
+
+                <div class="auth-actions">
+                    <button id="main-auth-btn" class="gel-button" onclick="handleAuth()">
+                        <span class="btn-text">Log In</span>
+                    </button>
+                </div>
             </div>
-            
-            <input type="email" id="email-in" class="aero-input" placeholder="Email Address" autocomplete="email">
-            <input type="password" id="pass-in" class="aero-input" placeholder="Password" autocomplete="current-password">
-            
-            <div class="auth-actions">
-                <button id="main-auth-btn" class="gel-button primary" onclick="handleAuth()">
-                    <span class="btn-text">Log In</span>
-                    <span class="btn-loader" style="display: none;">●●●</span>
-                </button>
-            </div>
-            
+
             <div class="auth-footer">
-                <p>
-                    <span id="auth-toggle-text">New user?</span> 
-                    <a href="#" onclick="toggleAuthMode(); return false;" class="auth-link">Create Account</a>
+                <p><span id="auth-toggle-text">New user?</span> 
+                   <a href="#" class="auth-link" onclick="toggleAuthMode()">Switch Mode</a>
                 </p>
-                <p class="privacy-notice">By continuing, you agree to our Terms of Service</p>
+                <p class="privacy-notice">Secure end-to-end encrypted protocol</p>
             </div>
         </div>
     </div>
-    
-    <div id="app-root" style="display: none;">
-        <div class="sidebar">
+
+    <div id="app-root" class="hidden">
+        <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <span class="brand-icon">⚡</span>
-                    <span class="brand-text">AeroSocial</span>
+                    <span class="brand-icon">💠</span>
+                    <span>Aero</span>
                 </div>
                 <div class="header-actions">
                     <button class="icon-btn-header" onclick="promptAddFriend()" title="Add Friend">➕</button>
-                    <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+                    <button class="settings-btn" onclick="openSettings()">⚙️</button>
                 </div>
             </div>
-            
-            <div class="tab-nav">
+
+            <nav class="tab-nav">
                 <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">
-                    <span class="tab-icon">👥</span>
-                    <span>Friends</span>
+                    <span>Direct</span>
                 </button>
-                <button id="tab-groups" class="tab-btn" onclick="setView('group')">
-                    <span class="tab-icon">🌐</span>
+                <button id="tab-groups" class="tab-btn" onclick="setView('groups')">
                     <span>Groups</span>
                 </button>
-            </div>
-            
+            </nav>
+
             <div class="search-container">
-                <input type="text" id="contact-search" class="search-input" placeholder="Search conversations..." oninput="filterContacts(this.value)">
+                <input type="text" class="search-input" placeholder="Search transmissions...">
             </div>
-            
+
             <div id="sidebar-list">
                 </div>
-            
+
             <div class="profile-tray">
-                <div class="pfp-container">
-                    <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=default" alt="Profile" onclick="openPfpManager()">
+                <div class="pfp-container" onclick="openPfpManager()">
+                    <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=default" alt="Profile">
                     <div class="status-indicator online"></div>
-                    <input type="file" id="pfp-upload-input" style="display: none;" accept="image/*" onchange="handlePfpUpload(event)">
                 </div>
                 <div class="user-info">
                     <div id="my-display-name">Loading...</div>
                     <div id="my-full-id">#0000</div>
                 </div>
-                <button class="mini-logout" title="Logout" onclick="logout()">✕</button>
+                <button class="mini-logout" onclick="logout()" title="Secure Logout">⏻</button>
             </div>
-        </div>
-        
-        <div class="chat-area">
-            <div class="chat-header">
+        </aside>
+
+        <main class="chat-area">
+            <header class="chat-header">
                 <div class="chat-header-info">
                     <h2 id="chat-title">Global Hub</h2>
                     <p id="chat-subtitle">Public community space</p>
                 </div>
-                <div class="chat-header-actions">
-                    <button class="icon-btn" onclick="toggleChatInfo()" title="Chat Info">ℹ</button>
-                    <button class="icon-btn" onclick="toggleSearch()" title="Search Messages">🔍</button>
+            </header>
+
+            <div id="chat-messages">
                 </div>
-            </div>
-            
-            <div id="chat-messages"></div>
-            
-            <div id="typing-indicator" style="display: none;">
-                <span class="typing-dots">Someone is typing...</span>
-            </div>
-            
-            <div class="chat-footer">
-                <button class="attach-btn" onclick="attachFile()" title="Attach File">📎</button>
-                <input type="text" id="chat-in" class="aero-input message-input" placeholder="Type a message..." 
-                       onkeydown="handleMessageInput(event)">
-                <button onclick="sendMessage()" class="gel-button send-btn" title="Send Message">
-                    <span>Send</span>
-                    <span class="send-icon">➤</span>
-                </button>
-            </div>
-        </div>
-        
-        <div id="chat-info-panel" class="info-panel" style="display: none;">
-            <div class="info-header">
-                <h3>Chat Information</h3>
-                <button onclick="toggleChatInfo()">✕</button>
-            </div>
-            <div class="info-content">
-                <p>Secure peer-to-peer transmission active.</p>
-            </div>
-        </div>
+
+            <footer class="chat-footer">
+                <input type="text" id="chat-in" class="aero-input message-input" 
+                       placeholder="Type a message..." onkeydown="handleMessageInput(event)">
+                <button class="gel-button send-btn" onclick="sendMessage()">Send</button>
+            </footer>
+        </main>
     </div>
-    
+
     <div id="settings-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Settings</h2>
-                <button onclick="closeSettings()">✕</button>
+                <h2>System Settings</h2>
+                <button onclick="closeSettings()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="settings-section">
-                    <h3>Appearance</h3>
-                    <label class="switch-label">
-                        <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()"> Dark Mode
-                    </label>
+                    <h3>Profile Identity</h3>
+                    <button class="gel-button" onclick="openPfpManager()">Change Avatar</button>
+                    <input type="file" id="pfp-upload-input" style="display: none;" accept="image/*" onchange="handlePfpUpload(event)">
                 </div>
                 <div class="settings-section">
-                    <h3>Notifications</h3>
-                    <label class="switch-label">
-                        <input type="checkbox" id="sound-toggle" checked onchange="toggleSounds()"> Sound Effects
-                    </label>
+                    <h3>Account Security</h3>
+                    <button class="gel-button" style="background: #ff4d4d;" onclick="logout()">Terminate Session</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
     
     <script src="script.js"></script>
 </body>
