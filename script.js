@@ -30,31 +30,55 @@ function playSound(type) {
 // =============================================
 //  STARTUP & AUTH
 // =============================================
+// =============================================
+//  STARTUP & AUTH (FIXED FOR NO AUTO-LOG IN)
+// =============================================
 window.onload = async () => {
-    // Get the current session
-    const { data: { session }, error } = await _supabase.auth.getSession();
+    // 1. Check for session
+    const { data: { session } } = await _supabase.auth.getSession();
     
+    // 2. ONLY enter the app if a session exists AND we have a user
     if (session && session.user) {
         currentUser = session.user;
         await loadMyProfile();
         enterApp();
     } else {
-        // No session found, stay at the gatekeeper
-        showAuth();
+        // Force the login screen to stay visible
+        document.getElementById('gatekeeper').style.display = 'flex';
+        document.getElementById('app-root').style.display = 'none';
     }
 };
-function showAuth() {
-    document.getElementById('gatekeeper').style.display = 'flex';
-    document.getElementById('app-root').style.display = 'none';
+
+async function logout() {
+    playSound('pop');
+    
+    // 1. Sign out from Supabase
+    await _supabase.auth.signOut();
+    
+    // 2. Wipe ALL local data so the browser "forgets" you
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // 3. Immediately hide the app and show the login screen
+    document.getElementById('app-root').style.setAttribute('style', 'display: none !important');
+    document.getElementById('gatekeeper').style.setAttribute('style', 'display: flex !important; opacity: 1 !important');
+
+    // 4. Refresh the page to a completely clean state
+    window.location.href = window.location.pathname; 
 }
 
 function enterApp() {
     playSound('login');
     const gate = document.getElementById('gatekeeper');
+    const app = document.getElementById('app-root');
+
+    // Smooth transition
     gate.style.opacity = '0';
     setTimeout(() => {
         gate.style.display = 'none';
-        document.getElementById('app-root').style.display = 'flex';
+        app.style.display = 'flex'; // This overrides the CSS !important
+        app.style.setProperty('display', 'flex', 'important');
+        
         setView('dm');
         setupRealtime();
         loadMessages();
