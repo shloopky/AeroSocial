@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Authentication Gateway -->
     <div id="gatekeeper">
         <div class="auth-box">
             <div class="logo-container">
@@ -42,19 +41,19 @@
         </div>
     </div>
     
-    <!-- Main Application Interface -->
-    <div id="app-root">
-        <!-- Left Sidebar: Navigation & Contacts -->
+    <div id="app-root" style="display: none;">
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
                     <span class="brand-icon">⚡</span>
                     <span class="brand-text">AeroSocial</span>
                 </div>
-                <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+                <div class="header-actions">
+                    <button class="icon-btn-header" onclick="promptAddFriend()" title="Add Friend">➕</button>
+                    <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+                </div>
             </div>
             
-            <!-- Tab Navigation -->
             <div class="tab-nav">
                 <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">
                     <span class="tab-icon">👥</span>
@@ -66,15 +65,13 @@
                 </button>
             </div>
             
-            <!-- Search Bar -->
             <div class="search-container">
                 <input type="text" id="contact-search" class="search-input" placeholder="Search conversations..." oninput="filterContacts(this.value)">
             </div>
             
-            <!-- Contact/Group List -->
-            <div id="sidebar-list"></div>
+            <div id="sidebar-list">
+                </div>
             
-            <!-- User Profile Tray -->
             <div class="profile-tray">
                 <div class="pfp-container">
                     <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=default" alt="Profile" onclick="openPfpManager()">
@@ -89,9 +86,7 @@
             </div>
         </div>
         
-        <!-- Main Chat Area -->
         <div class="chat-area">
-            <!-- Chat Header -->
             <div class="chat-header">
                 <div class="chat-header-info">
                     <h2 id="chat-title">Global Hub</h2>
@@ -103,20 +98,16 @@
                 </div>
             </div>
             
-            <!-- Messages Container -->
             <div id="chat-messages"></div>
             
-            <!-- Typing Indicator -->
             <div id="typing-indicator" style="display: none;">
                 <span class="typing-dots">Someone is typing...</span>
             </div>
             
-            <!-- Message Input Footer -->
             <div class="chat-footer">
                 <button class="attach-btn" onclick="attachFile()" title="Attach File">📎</button>
                 <input type="text" id="chat-in" class="aero-input message-input" placeholder="Type a message..." 
-                       onkeydown="handleMessageInput(event)" 
-                       oninput="handleTyping()">
+                       onkeydown="handleMessageInput(event)">
                 <button onclick="sendMessage()" class="gel-button send-btn" title="Send Message">
                     <span>Send</span>
                     <span class="send-icon">➤</span>
@@ -124,19 +115,17 @@
             </div>
         </div>
         
-        <!-- Right Sidebar: Chat Info (Hidden by default) -->
         <div id="chat-info-panel" class="info-panel" style="display: none;">
             <div class="info-header">
                 <h3>Chat Information</h3>
                 <button onclick="toggleChatInfo()">✕</button>
             </div>
             <div class="info-content">
-                <p>Additional chat details will appear here</p>
+                <p>Secure peer-to-peer transmission active.</p>
             </div>
         </div>
     </div>
     
-    <!-- Settings Modal -->
     <div id="settings-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -146,20 +135,14 @@
             <div class="modal-body">
                 <div class="settings-section">
                     <h3>Appearance</h3>
-                    <label>
+                    <label class="switch-label">
                         <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()"> Dark Mode
                     </label>
                 </div>
                 <div class="settings-section">
                     <h3>Notifications</h3>
-                    <label>
+                    <label class="switch-label">
                         <input type="checkbox" id="sound-toggle" checked onchange="toggleSounds()"> Sound Effects
-                    </label>
-                </div>
-                <div class="settings-section">
-                    <h3>Privacy</h3>
-                    <label>
-                        <input type="checkbox" id="read-receipts" checked> Read Receipts
                     </label>
                 </div>
             </div>
