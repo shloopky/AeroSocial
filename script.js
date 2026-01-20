@@ -66,6 +66,8 @@ async function handleAuth() {
     const btn = document.getElementById('main-auth-btn');
     const loader = btn.querySelector('.btn-loader');
     const text = btn.querySelector('.btn-text');
+    
+    // UI Feedback
     text.style.display = 'none';
     loader.style.display = 'inline';
 
@@ -73,15 +75,19 @@ async function handleAuth() {
     const pass = document.getElementById('pass-in').value;
 
     if (isSignupMode) {
+        // --- REGISTRATION LOGIC ---
         const username = document.getElementById('username-in').value.trim();
         if (username.length < 3) {
             alert('Username must be at least 3 characters');
             resetBtn(); return;
         }
+
         const { data, error } = await _supabase.auth.signUp({ email, password: pass });
+        
         if (error) {
-            alert(error.message);
-        } else {
+            alert("Signup Failed: " + error.message);
+        } else if (data.user) {
+            // Create the profile only after successful auth signup
             await _supabase.from('profiles').insert([{
                 id: data.user.id,
                 username: username,
@@ -89,13 +95,24 @@ async function handleAuth() {
                 id_tag: Math.floor(1000 + Math.random() * 9000),
                 pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`
             }]);
-            alert('Account created! Check your email to verify.');
+            alert('Account created! Please check your email for a verification link.');
         }
     } else {
-        const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-        if (error) alert(error.message);
-        else location.reload();
+        // --- LOGIN LOGIC (Existing Accounts Only) ---
+        const { data, error } = await _supabase.auth.signInWithPassword({ 
+            email: email, 
+            password: pass 
+        });
+
+        if (error) {
+            // This triggers if the email doesn't exist or password is wrong
+            alert("Login Failed: Invalid email or password.");
+        } else if (data.user) {
+            // Successful login
+            location.reload(); 
+        }
     }
+
     function resetBtn() {
         text.style.display = 'inline';
         loader.style.display = 'none';
