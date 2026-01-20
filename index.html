@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroSocial | Secure Communication</title>
+    <title>AeroSocial | Secure</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -11,122 +11,58 @@
 
     <div id="gatekeeper" class="hidden">
         <div class="auth-box">
-            <div class="logo-container">
-                <h1 id="auth-title">AeroSocial</h1>
-                <div class="logo-accent"></div>
+            <h1>AeroSocial</h1>
+            <div id="signup-fields" style="display: none;">
+                <input type="text" id="username-in" class="aero-input" placeholder="Username">
             </div>
-            <p id="auth-subtitle">Encrypted Frequency Access</p>
-
-            <div class="auth-form">
-                <div id="signup-fields" style="display: none;">
-                    <input type="text" id="username-in" class="aero-input" placeholder="Username">
-                    <small class="input-hint">Used for friend requests</small>
-                </div>
-
-                <input type="email" id="email-in" class="aero-input" placeholder="Email Address">
-                <input type="password" id="pass-in" class="aero-input" placeholder="Password">
-
-                <div class="auth-actions">
-                    <button id="main-auth-btn" class="gel-button" onclick="handleAuth()">
-                        <span class="btn-text">Log In</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="auth-footer">
-                <p><span id="auth-toggle-text">New user?</span> 
-                   <a href="#" class="auth-link" onclick="toggleAuthMode()">Switch Mode</a>
-                </p>
-                <p class="privacy-notice">Secure end-to-end encrypted protocol</p>
-            </div>
+            <input type="email" id="email-in" class="aero-input" placeholder="Email">
+            <input type="password" id="pass-in" class="aero-input" placeholder="Password">
+            <button id="main-auth-btn" class="gel-button" onclick="handleAuth()">Log In</button>
+            <p><a href="#" onclick="toggleAuthMode()">Switch Login/Signup</a></p>
         </div>
     </div>
 
     <div id="app-root" class="hidden">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="brand">
-                    <span class="brand-icon">💠</span>
-                    <span>Aero</span>
-                </div>
-                <div class="header-actions">
-                    <button class="icon-btn-header" onclick="promptAddFriend()" title="Add Friend">➕</button>
-                    <button class="settings-btn" onclick="openSettings()">⚙️</button>
-                </div>
+                <span class="brand">💠 Aero</span>
+                <button onclick="openSettings()">⚙️</button>
             </div>
-
             <nav class="tab-nav">
-                <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">
-                    <span>Direct</span>
-                </button>
-                <button id="tab-groups" class="tab-btn" onclick="setView('groups')">
-                    <span>Groups</span>
-                </button>
+                <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">Direct</button>
+                <button id="tab-groups" class="tab-btn" onclick="setView('groups')">Groups</button>
             </nav>
-
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search transmissions...">
-            </div>
-
-            <div id="sidebar-list">
-                </div>
-
+            <div id="sidebar-list"></div>
             <div class="profile-tray">
-                <div class="pfp-container" onclick="openPfpManager()">
-                    <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=default" alt="Profile">
-                    <div class="status-indicator online"></div>
-                </div>
+                <img id="my-pfp" src="" class="mini-pfp">
                 <div class="user-info">
-                    <div id="my-display-name">Loading...</div>
+                    <div id="my-display-name">User</div>
                     <div id="my-full-id">#0000</div>
                 </div>
-                <button class="mini-logout" onclick="logout()" title="Secure Logout">⏻</button>
+                <button onclick="logout()">⏻</button>
             </div>
         </aside>
 
         <main class="chat-area">
             <header class="chat-header">
-                <div class="chat-header-info">
-                    <h2 id="chat-title">Global Hub</h2>
-                    <p id="chat-subtitle">Public community space</p>
-                </div>
+                <h2 id="chat-title">Global Hub</h2>
             </header>
-
-            <div id="chat-messages">
-                </div>
-
+            <div id="chat-messages"></div>
             <footer class="chat-footer">
-                <input type="text" id="chat-in" class="aero-input message-input" 
-                       placeholder="Type a message..." onkeydown="handleMessageInput(event)">
-                <button class="gel-button send-btn" onclick="sendMessage()">Send</button>
+                <input type="text" id="chat-in" class="aero-input" placeholder="Message..." onkeydown="handleMessageInput(event)">
+                <button class="gel-button" onclick="sendMessage()">Send</button>
             </footer>
         </main>
     </div>
 
-    <div id="settings-modal" class="modal" style="display: none;">
+    <div id="settings-modal" class="modal" style="display:none;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>System Settings</h2>
-                <button onclick="closeSettings()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="settings-section">
-                    <h3>Profile Identity</h3>
-                    <button class="gel-button" onclick="openPfpManager()">Change Avatar</button>
-                    <input type="file" id="pfp-upload-input" style="display: none;" accept="image/*" onchange="handlePfpUpload(event)">
-                </div>
-                <div class="settings-section">
-                    <h3>Account Security</h3>
-                    <button class="gel-button" style="background: #ff4d4d;" onclick="logout()">Terminate Session</button>
-                </div>
-            </div>
+            <h3>Settings</h3>
+            <button class="gel-button" onclick="logout()" style="background:red">Logout</button>
+            <button class="gel-button" onclick="closeSettings()">Close</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
-    
     <script src="script.js"></script>
 </body>
 </html>
