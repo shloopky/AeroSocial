@@ -3,153 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroSocial</title>
+    <title>AeroSocial - Next-Gen Communication Platform</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body, html { margin: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #a1c4fd; }
-        #app-root { display: none; height: 100vh; width: 100vw; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); display: flex; }
-        
-        /* Sidebar Logic */
-        .sidebar {
-            width: 300px; min-width: 300px;
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.5);
-            display: flex; flex-direction: column;
-        }
-        .sidebar-header { padding: 20px; font-weight: bold; font-size: 20px; color: #1e5799; }
-        .tab-nav { display: flex; gap: 5px; padding: 0 15px 15px; }
-        .tab-btn { 
-            flex: 1; padding: 8px; border-radius: 15px; 
-            border: 1px solid #1e5799; cursor: pointer; 
-            font-size: 12px; background: white; transition: 0.2s;
-        }
-        .tab-btn.active { background: #4096ee; color: white; }
-        #sidebar-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .list-label { font-size: 10px; opacity: 0.6; padding: 10px; letter-spacing: 1px; }
-        .tray-item { 
-            padding: 12px; display: flex; align-items: center; 
-            gap: 10px; border-radius: 12px; cursor: pointer; 
-            transition: 0.2s; 
-        }
-        .tray-item:hover { background: rgba(255,255,255,0.3); }
-        .mini-pfp { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; }
-        
-        /* Chat Area Logic */
-        .chat-area {
-            flex-grow: 1;
-            display: flex; flex-direction: column;
-        }
-        #chat-messages { 
-            flex: 1; overflow-y: auto; padding: 30px; 
-            display: flex; flex-direction: column; gap: 10px; 
-        }
-        .msg { 
-            background: white; padding: 12px; border-radius: 18px; 
-            max-width: 70%; align-self: flex-start; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-        }
-        .msg.own { align-self: flex-end; background: #4096ee; color: white; }
-        .msg small { font-size: 10px; display: block; margin-bottom: 4px; opacity: 0.8; }
-        .chat-footer { 
-            padding: 20px; display: flex; gap: 10px; 
-            background: rgba(255,255,255,0.2); 
-        }
-        
-        /* Profile Footer */
-        .profile-tray { 
-            padding: 15px; background: rgba(255,255,255,0.5); 
-            border-top: 1px solid rgba(255,255,255,0.3); 
-            display: flex; align-items: center; gap: 10px; 
-            margin-top: auto; 
-        }
-        .pfp-container { display: flex; align-items: center; }
-        #my-pfp { 
-            width: 45px; height: 45px; border-radius: 50%; 
-            border: 2px solid white; cursor: pointer; 
-        }
-        .mini-logout { 
-            background: #ff4d4d; border: none; color: white; 
-            border-radius: 50%; width: 25px; height: 25px; 
-            cursor: pointer; font-size: 14px;
-        }
-        
-        /* Gatekeeper Logic */
-        #gatekeeper { 
-            position: fixed; inset: 0; 
-            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); 
-            z-index: 1000; display: flex; align-items: center; 
-            justify-content: center; transition: opacity 0.5s; 
-        }
-        .auth-box { width: 350px; text-align: center; }
-        .aero-input { 
-            width: 100%; padding: 12px; border-radius: 20px; 
-            border: 1px solid rgba(0,0,0,0.1); margin-bottom: 10px; 
-            font-size: 14px;
-        }
-        .gel-button { 
-            background: linear-gradient(#7abcff, #4096ee); 
-            color: white; border: 1px solid #1e5799; 
-            border-radius: 20px; padding: 10px 25px; 
-            font-weight: bold; cursor: pointer; 
-        }
-        .gel-button:hover { opacity: 0.9; }
-    </style>
 </head>
 <body>
+    <!-- Authentication Gateway -->
     <div id="gatekeeper">
         <div class="auth-box">
-            <h1 id="auth-title" style="margin-bottom: 5px;">AeroSocial</h1>
-            <p id="auth-subtitle" style="margin-bottom: 25px; opacity: 0.7;">Identification Required</p>
+            <div class="logo-container">
+                <h1 id="auth-title">AeroSocial</h1>
+                <div class="logo-accent"></div>
+            </div>
+            <p id="auth-subtitle">Secure Identification Required</p>
             
             <div id="signup-fields" style="display: none;">
-                <input type="text" id="username-in" class="aero-input" placeholder="Username">
+                <input type="text" id="username-in" class="aero-input" placeholder="Choose Username" maxlength="20">
+                <small class="input-hint">3-20 characters, alphanumeric only</small>
             </div>
             
-            <input type="email" id="email-in" class="aero-input" placeholder="Email Address">
-            <input type="password" id="pass-in" class="aero-input" placeholder="Password">
+            <input type="email" id="email-in" class="aero-input" placeholder="Email Address" autocomplete="email">
+            <input type="password" id="pass-in" class="aero-input" placeholder="Password" autocomplete="current-password">
             
-            <div style="margin-top: 20px;">
-                <button id="main-auth-btn" class="gel-button" onclick="handleAuth()">Log In</button>
+            <div class="auth-actions">
+                <button id="main-auth-btn" class="gel-button primary" onclick="handleAuth()">
+                    <span class="btn-text">Log In</span>
+                    <span class="btn-loader" style="display: none;">●●●</span>
+                </button>
             </div>
             
-            <p style="margin-top: 20px; font-size: 13px;">
-                <span id="auth-toggle-text">New user?</span> 
-                <a href="#" onclick="toggleAuthMode(); return false;" style="color: #1e5799; font-weight: bold; text-decoration: none;">Create Account</a>
-            </p>
+            <div class="auth-footer">
+                <p>
+                    <span id="auth-toggle-text">New user?</span> 
+                    <a href="#" onclick="toggleAuthMode(); return false;" class="auth-link">Create Account</a>
+                </p>
+                <p class="privacy-notice">By continuing, you agree to our Terms of Service</p>
+            </div>
         </div>
     </div>
     
+    <!-- Main Application Interface -->
     <div id="app-root">
+        <!-- Left Sidebar: Navigation & Contacts -->
         <div class="sidebar">
-            <div class="sidebar-header">AeroSocial</div>
-            
-            <div class="tab-nav">
-                <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">Friends</button>
-                <button id="tab-groups" class="tab-btn" onclick="setView('group')">Groups</button>
+            <div class="sidebar-header">
+                <div class="brand">
+                    <span class="brand-icon">⚡</span>
+                    <span class="brand-text">AeroSocial</span>
+                </div>
+                <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
             </div>
             
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button id="tab-friends" class="tab-btn active" onclick="setView('dm')">
+                    <span class="tab-icon">👥</span>
+                    <span>Friends</span>
+                </button>
+                <button id="tab-groups" class="tab-btn" onclick="setView('group')">
+                    <span class="tab-icon">🌐</span>
+                    <span>Groups</span>
+                </button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="contact-search" class="search-input" placeholder="Search conversations..." oninput="filterContacts(this.value)">
+            </div>
+            
+            <!-- Contact/Group List -->
             <div id="sidebar-list"></div>
             
+            <!-- User Profile Tray -->
             <div class="profile-tray">
                 <div class="pfp-container">
                     <img id="my-pfp" src="https://api.dicebear.com/7.x/bottts/svg?seed=default" alt="Profile" onclick="openPfpManager()">
-                    <input type="file" id="pfp-upload-input" style="display: none;" accept="image/*">
+                    <div class="status-indicator online"></div>
+                    <input type="file" id="pfp-upload-input" style="display: none;" accept="image/*" onchange="handlePfpUpload(event)">
                 </div>
-                <div style="flex: 1;">
-                    <div id="my-display-name" style="font-weight: bold; font-size: 14px;">Loading...</div>
-                    <div id="my-full-id" style="font-size: 10px; opacity: 0.6;">#0000</div>
+                <div class="user-info">
+                    <div id="my-display-name">Loading...</div>
+                    <div id="my-full-id">#0000</div>
                 </div>
                 <button class="mini-logout" title="Logout" onclick="logout()">✕</button>
             </div>
         </div>
         
+        <!-- Main Chat Area -->
         <div class="chat-area">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <h2 id="chat-title">Global Hub</h2>
+                    <p id="chat-subtitle">Public community space</p>
+                </div>
+                <div class="chat-header-actions">
+                    <button class="icon-btn" onclick="toggleChatInfo()" title="Chat Info">ℹ</button>
+                    <button class="icon-btn" onclick="toggleSearch()" title="Search Messages">🔍</button>
+                </div>
+            </div>
+            
+            <!-- Messages Container -->
             <div id="chat-messages"></div>
+            
+            <!-- Typing Indicator -->
+            <div id="typing-indicator" style="display: none;">
+                <span class="typing-dots">Someone is typing...</span>
+            </div>
+            
+            <!-- Message Input Footer -->
             <div class="chat-footer">
-                <input type="text" id="chat-in" class="aero-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()" class="gel-button">Send</button>
+                <button class="attach-btn" onclick="attachFile()" title="Attach File">📎</button>
+                <input type="text" id="chat-in" class="aero-input message-input" placeholder="Type a message..." 
+                       onkeydown="handleMessageInput(event)" 
+                       oninput="handleTyping()">
+                <button onclick="sendMessage()" class="gel-button send-btn" title="Send Message">
+                    <span>Send</span>
+                    <span class="send-icon">➤</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Right Sidebar: Chat Info (Hidden by default) -->
+        <div id="chat-info-panel" class="info-panel" style="display: none;">
+            <div class="info-header">
+                <h3>Chat Information</h3>
+                <button onclick="toggleChatInfo()">✕</button>
+            </div>
+            <div class="info-content">
+                <p>Additional chat details will appear here</p>
             </div>
         </div>
     </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Appearance</h3>
+                    <label>
+                        <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()"> Dark Mode
+                    </label>
+                </div>
+                <div class="settings-section">
+                    <h3>Notifications</h3>
+                    <label>
+                        <input type="checkbox" id="sound-toggle" checked onchange="toggleSounds()"> Sound Effects
+                    </label>
+                </div>
+                <div class="settings-section">
+                    <h3>Privacy</h3>
+                    <label>
+                        <input type="checkbox" id="read-receipts" checked> Read Receipts
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
