@@ -129,34 +129,36 @@ async function loadMyProfile() {
         .from('profiles')
         .select('*')
         .eq('id', currentUser.id)
-        .maybeSingle();  // ← Change this line!
+        .maybeSingle();
 
     if (error) {
         console.error('Profile fetch error:', error);
-        // Optional: show a nice message or fallback UI
-        document.getElementById('my-display-name').textContent = 'User';
-        document.getElementById('my-full-id').textContent = '#0000';
-        document.getElementById('my-pfp').src = 'https://api.dicebear.com/7.x/bottts/svg?seed=fallback';
         return;
     }
 
     if (data) {
         document.getElementById('my-display-name').textContent = data.display_name || 'User';
         document.getElementById('my-full-id').textContent = `#${data.id_tag || '0000'}`;
-        document.getElementById('my-pfp').src = data.pfp || `https://api.dicebear.com/7.x/bottts/svg?seed=${data.display_name || currentUser.id}`;
+        document.getElementById('my-pfp').src = data.pfp || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.id}`;
     } else {
-        // No profile row exists yet → create one automatically (common pattern)
         console.warn('No profile found – creating default');
         const defaultProfile = {
             id: currentUser.id,
-            username: currentUser.email?.split('@')[0] || 'user',
+            username: currentUser.email?.split('@')[0] || 'user' + Math.floor(Math.random() * 1000),
             display_name: currentUser.email?.split('@')[0] || 'User',
             id_tag: Math.floor(1000 + Math.random() * 9000),
             pfp: `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.id}`
         };
-        await _supabase.from('profiles').insert([defaultProfile]);
-        // Reload profile after insert
-        await loadMyProfile();  // recursive call (or just set UI directly)
+        
+        const { error: insertError } = await _supabase.from('profiles').insert([defaultProfile]);
+        
+        if (insertError) {
+            console.error('Failed to create profile:', insertError);
+            // STOP HERE: Don't call loadMyProfile() again if the insert failed
+        } else {
+            // Only reload if the insert actually worked
+            await loadMyProfile(); 
+        }
     }
 }
 
