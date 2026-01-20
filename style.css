@@ -108,6 +108,17 @@ body, html {
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* Ensure the app is hidden until JS confirms the user */
+#app-root {
+    display: none !important;
+}
+
+/* Ensure the login is visible until JS hides it */
+#gatekeeper {
+    display: flex !important;
+    opacity: 1 !important;
+}
+
 .tab-btn {
     flex: 1;
     padding: 10px 15px;
