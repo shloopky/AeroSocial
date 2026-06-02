@@ -60,6 +60,50 @@
             border-bottom: 1px solid rgba(255,255,255,0.3);
         }
 
+        /* SECRET ADMIN CONTROLS CONTAINER */
+        #admin-panel {
+            display: none; /* Controlled via JS */
+            background: rgba(20, 20, 25, 0.85);
+            backdrop-filter: blur(5px);
+            color: white;
+            padding: 10px 20px;
+            gap: 12px;
+            align-items: center;
+            border-bottom: 2px solid #ff0055;
+            z-index: 100;
+            animation: slideDown 0.3s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+
+        .admin-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #ff0055;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255,0,85,0.6);
+        }
+
+        #admin-alert-input {
+            flex: 1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #222;
+            color: #fff;
+            outline: none;
+        }
+
+        .admin-btn {
+            padding: 6px 14px !important;
+            border-radius: 6px !important;
+            font-size: 0.85rem;
+            box-shadow: none !important;
+        }
+
+        .btn-danger {
+            background: linear-gradient(180deg, #ff5e7e 0%, #d7003a 100%) !important;
+        }
+
+        /* Chat Layout */
         #chat-window {
             flex: 1;
             overflow-y: auto;
@@ -71,7 +115,6 @@
             scrollbar-color: rgba(255,255,255,0.5) transparent;
         }
 
-        /* Message Layout with Profile Picture */
         .message {
             background: rgba(255, 255, 255, 0.85);
             padding: 10px 15px;
@@ -98,7 +141,7 @@
             margin-bottom: 3px;
         }
 
-        /* Circular Profile Pictures */
+        /* Circular Avatar Photos */
         .pfp-circle {
             width: 36px;
             height: 36px;
@@ -109,14 +152,14 @@
             flex-shrink: 0;
         }
 
-        /* Special User Glow Effects */
+        /* User Special Glowing Filters */
         .glow-admin {
             color: #ff0055 !important;
             text-shadow: 0 0 8px rgba(255, 0, 85, 0.6), 0 0 15px rgba(255, 0, 85, 0.4);
             animation: pulseGlow 2s infinite alternate;
         }
 
-        /* Controls & Inputs */
+        /* Input Controls Area */
         #controls {
             padding: 15px 20px;
             background: rgba(255, 255, 255, 0.2);
@@ -127,7 +170,7 @@
             z-index: 10;
         }
 
-        /* Drag and Drop Zone Style */
+        /* Photo Drag Zone Profile Circle */
         #pfp-dropzone {
             width: 45px;
             height: 45px;
@@ -189,10 +232,15 @@
 
         button:active { transform: scale(0.95); }
 
-        /* Animations */
+        /* Animation Keyframes */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         @keyframes pulseGlow {
@@ -205,6 +253,13 @@
 
 <div id="app-container">
     <header>AERO CHAT v1.0</header>
+
+    <div id="admin-panel">
+        <span class="admin-title">ADMIN HUB:</span>
+        <input type="text" id="admin-alert-input" placeholder="Type global announcement summary...">
+        <button id="admin-send-alert-btn" class="admin-btn">Broadcast Alert</button>
+        <button id="admin-clear-btn" class="admin-btn btn-danger">Wipe History</button>
+    </div>
     
     <div id="chat-window">
         <div class="message">
@@ -231,7 +286,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // Configured with target database configuration
+    // Configured database credentials
     const firebaseConfig = {
         authDomain: "aero-977a5.firebaseapp.com",
         databaseURL: "https://aero-977a5-default-rtdb.firebaseio.com/",
@@ -243,23 +298,32 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // UI Nodes
+    // Core App UI Nodes
     const chatWindow = document.getElementById('chat-window');
     const messageInput = document.getElementById('message-input');
     const usernameInput = document.getElementById('username-input');
     const sendBtn = document.getElementById('send-btn');
     const dropzone = document.getElementById('pfp-dropzone');
-    const dropzoneLabel = document.getElementById('dropzone-label');
 
-    // Default Fallback PFP string (Base64 placeholder or generated placeholder asset)
+    // Admin Specific UI Nodes
+    const adminPanel = document.getElementById('admin-panel');
+    const adminAlertInput = document.getElementById('admin-alert-input');
+    const adminSendAlertBtn = document.getElementById('admin-send-alert-btn');
+    const adminClearBtn = document.getElementById('admin-clear-btn');
+
+    // Default Fallback Avatar Seed
     let currentUserPfp = "https://api.dicebear.com/7.x/identicon/svg?seed=" + Math.random();
 
-    // Check if current user is admin
-    function isAdmin() {
-        return usernameInput.value.trim() === "ADMIN12345";
-    }
+    // REAL-TIME USERNAME DETECTOR (Toggles Admin UI panel instantly)
+    usernameInput.addEventListener('input', () => {
+        if (usernameInput.value.trim() === "ADMIN12345") {
+            adminPanel.style.display = "flex";
+        } else {
+            adminPanel.style.display = "none";
+        }
+    });
 
-    // Drag and Drop Image Handlers
+    // Drag and Drop Profile Image Functionality
     ['dragenter', 'dragover'].forEach(eventName => {
         dropzone.addEventListener(eventName, (e) => {
             e.preventDefault();
@@ -288,19 +352,12 @@
         }
     });
 
-    // Send Message / Parse Administrative Commands
+    // Standard Chat Message Delivery Setup
     function sendMessage() {
         const text = messageInput.value.trim();
         const user = usernameInput.value.trim() || "Anonymous";
 
         if (text === "") return;
-
-        // Command Routing
-        if (text.startsWith('/') && isAdmin()) {
-            handleAdminCommand(text);
-            messageInput.value = "";
-            return;
-        }
 
         db.ref('messages').push({
             username: user,
@@ -311,48 +368,48 @@
         messageInput.value = "";
     }
 
-    // Process Command Logic safely
-    function handleAdminCommand(commandString) {
-        const args = commandString.split(' ');
-        const command = args[0].toLowerCase();
-
-        if (command === '/clear') {
+    // INTERACTIVE BUTTON COMMANDS (ADMIN EXCLUSIVE)
+    adminClearBtn.addEventListener('click', () => {
+        if (confirm("Are you sure you want to permanently clear the global message log?")) {
             db.ref('messages').remove()
                 .catch(err => console.error("Database deletion failed:", err));
-        } 
-        else if (command === '/alert') {
-            const alertText = args.slice(1).join(' ');
-            if (!alertText) return;
-            
-            db.ref('messages').push({
-                username: "🚨 SYSTEM BROADCAST",
-                text: alertText.toUpperCase(),
-                pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
-                timestamp: Date.now()
-            });
         }
-    }
+    });
 
-    // Listen for incoming database additions
+    adminSendAlertBtn.addEventListener('click', () => {
+        const alertText = adminAlertInput.value.trim();
+        if (alertText === "") return;
+
+        db.ref('messages').push({
+            username: "🚨 SYSTEM BROADCAST",
+            text: alertText.toUpperCase(),
+            pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
+            timestamp: Date.now()
+        });
+        adminAlertInput.value = "";
+    });
+
+    // Render Inbound Firebase Logs onto Client Screens
     db.ref('messages').on('child_added', (snapshot) => {
         const data = snapshot.val();
         
         const msgDiv = document.createElement('div');
         msgDiv.className = 'message';
         
-        // Match specific usernames to assign glowing dynamic filters
+        // Apply glow style to specific elite accounts
         let glowClass = "";
         if (data.username === "ADMIN12345") {
             glowClass = "glow-admin";
         }
 
-        // Apply distinct formatting for system broadcast banners
+        // Apply custom colors for emergency broadcast notifications
         if (data.username === "🚨 SYSTEM BROADCAST") {
             msgDiv.style.background = "rgba(255, 70, 70, 0.2)";
             msgDiv.style.borderColor = "rgba(255, 0, 0, 0.4)";
+            msgDiv.style.alignSelf = "center";
+            msgDiv.style.maxWidth = "90%";
         }
 
-        // Generate element structures containing the circular image wrapper and message details
         const avatarUrl = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=default";
         msgDiv.innerHTML = `
             <img class="pfp-circle" src="${avatarUrl}" alt="User Avatar">
@@ -366,7 +423,7 @@
         chatWindow.scrollTop = chatWindow.scrollHeight;
     });
 
-    // Sync clear actions uniformly across external browsers
+    // Synchronize Clear actions instantly on every user's computer screen
     db.ref('messages').on('value', (snapshot) => {
         if (!snapshot.exists()) {
             chatWindow.innerHTML = `
@@ -380,7 +437,7 @@
         }
     });
 
-    // Control listeners
+    // Standard DOM Input Triggers
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
