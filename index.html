@@ -148,29 +148,54 @@
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 <script>
+    // 2. Initialize Firebase (PASTE YOUR CONFIG HERE)
+    const firebaseConfig = {
+projectId: "aero-977a5", authDomain: "aero-977a5.firebaseapp.com", databaseURL: "https://aero-977a5-default-rtdb.firebaseio.com/", messagingSenderId: "800936590653", and storageBucket: "aero-977a5.appspot.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 3. UI Elements
     const chatWindow = document.getElementById('chat-window');
     const messageInput = document.getElementById('message-input');
     const usernameInput = document.getElementById('username-input');
     const sendBtn = document.getElementById('send-btn');
 
+    // 4. Send Message to Database (Instead of directly to the screen)
     function sendMessage() {
         const text = messageInput.value.trim();
         const user = usernameInput.value.trim() || "Anonymous";
 
         if (text !== "") {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            msgDiv.innerHTML = `<div class="username">${user}</div><div>${text}</div>`;
-            
-            chatWindow.appendChild(msgDiv);
+            // Push to the 'messages' folder in Firebase
+            db.ref('messages').push({
+                username: user,
+                text: text,
+                timestamp: Date.now()
+            });
             messageInput.value = "";
-            
-            // Auto-scroll to bottom
-            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
     }
 
+    // 5. Listen for New Messages from the Database
+    db.ref('messages').on('child_added', (snapshot) => {
+        const data = snapshot.val();
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message';
+        msgDiv.innerHTML = `<div class="username">${data.username}</div><div>${data.text}</div>`;
+        
+        chatWindow.appendChild(msgDiv);
+        
+        // Auto-scroll to bottom
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
+
+    // 6. Event Listeners
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
