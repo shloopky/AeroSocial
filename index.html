@@ -8,7 +8,7 @@
         :root {
             --glass: rgba(255, 255, 255, 0.3);
             --gloss: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%);
-            --primary: #4096ee;
+            --primary: #0078d7;
         }
 
         body {
@@ -41,7 +41,6 @@
             overflow: hidden;
         }
 
-        /* Glossy Overlay Effect */
         #app-container::before {
             content: "";
             position: absolute;
@@ -67,13 +66,14 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             scrollbar-width: thin;
             scrollbar-color: rgba(255,255,255,0.5) transparent;
         }
 
+        /* Message Layout with Profile Picture */
         .message {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             padding: 10px 15px;
             border-radius: 15px;
             max-width: 70%;
@@ -81,6 +81,14 @@
             box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
             animation: fadeIn 0.3s ease;
             align-self: flex-start;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
         }
 
         .message .username {
@@ -90,14 +98,70 @@
             margin-bottom: 3px;
         }
 
-        /* Input Area */
+        /* Circular Profile Pictures */
+        .pfp-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: #eee;
+            flex-shrink: 0;
+        }
+
+        /* Special User Glow Effects */
+        .glow-admin {
+            color: #ff0055 !important;
+            text-shadow: 0 0 8px rgba(255, 0, 85, 0.6), 0 0 15px rgba(255, 0, 85, 0.4);
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        /* Controls & Inputs */
         #controls {
-            padding: 20px;
+            padding: 15px 20px;
             background: rgba(255, 255, 255, 0.2);
             display: flex;
+            align-items: center;
             gap: 10px;
             border-top: 1px solid rgba(255,255,255,0.3);
             z-index: 10;
+        }
+
+        /* Drag and Drop Zone Style */
+        #pfp-dropzone {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            background: rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        #pfp-dropzone.dragover {
+            background: rgba(0, 120, 215, 0.4);
+            border-color: #0078d7;
+            transform: scale(1.05);
+        }
+
+        #pfp-dropzone img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #pfp-dropzone .drop-text {
+            font-size: 0.6rem;
+            color: #333;
+            text-align: center;
+            pointer-events: none;
+            line-height: 1;
         }
 
         input {
@@ -125,9 +189,15 @@
 
         button:active { transform: scale(0.95); }
 
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            from { text-shadow: 0 0 8px rgba(255, 0, 85, 0.6), 0 0 15px rgba(255, 0, 85, 0.4); }
+            to { text-shadow: 0 0 14px rgba(255, 0, 85, 0.9), 0 0 25px rgba(255, 0, 85, 0.6); }
         }
     </style>
 </head>
@@ -138,12 +208,19 @@
     
     <div id="chat-window">
         <div class="message">
-            <div class="username">System</div>
-            Welcome to the digital horizon. Choose a name and start chatting!
+            <img class="pfp-circle" src="https://api.dicebear.com/7.x/bottts/svg?seed=system" alt="PFP">
+            <div class="message-content">
+                <div class="username">System</div>
+                <div>Welcome to the digital horizon. Drag an image onto the circle icon to set your profile picture, choose a name, and start chatting!</div>
+            </div>
         </div>
     </div>
 
     <div id="controls">
+        <div id="pfp-dropzone" title="Drag & Drop an image here to set your PFP">
+            <div class="drop-text" id="dropzone-label">Drop<br>PFP</div>
+        </div>
+        
         <input type="text" id="username-input" placeholder="Display Name" value="User123">
         <input type="text" id="message-input" placeholder="Type a message...">
         <button id="send-btn">Send</button>
@@ -154,7 +231,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // Your specific Firebase configuration
+    // Configured with target database configuration
     const firebaseConfig = {
         authDomain: "aero-977a5.firebaseapp.com",
         databaseURL: "https://aero-977a5-default-rtdb.firebaseio.com/",
@@ -163,46 +240,147 @@
         messagingSenderId: "800936590653"
     };
     
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // UI Elements
+    // UI Nodes
     const chatWindow = document.getElementById('chat-window');
     const messageInput = document.getElementById('message-input');
     const usernameInput = document.getElementById('username-input');
     const sendBtn = document.getElementById('send-btn');
+    const dropzone = document.getElementById('pfp-dropzone');
+    const dropzoneLabel = document.getElementById('dropzone-label');
 
-    // Send Message to Firebase
+    // Default Fallback PFP string (Base64 placeholder or generated placeholder asset)
+    let currentUserPfp = "https://api.dicebear.com/7.x/identicon/svg?seed=" + Math.random();
+
+    // Check if current user is admin
+    function isAdmin() {
+        return usernameInput.value.trim() === "ADMIN12345";
+    }
+
+    // Drag and Drop Image Handlers
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.readAsDataURL(files[0]);
+            reader.onloadend = function() {
+                currentUserPfp = reader.result;
+                dropzone.innerHTML = `<img src="${currentUserPfp}" alt="Preview">`;
+            }
+        }
+    });
+
+    // Send Message / Parse Administrative Commands
     function sendMessage() {
         const text = messageInput.value.trim();
         const user = usernameInput.value.trim() || "Anonymous";
 
-        if (text !== "") {
+        if (text === "") return;
+
+        // Command Routing
+        if (text.startsWith('/') && isAdmin()) {
+            handleAdminCommand(text);
+            messageInput.value = "";
+            return;
+        }
+
+        db.ref('messages').push({
+            username: user,
+            text: text,
+            pfp: currentUserPfp,
+            timestamp: Date.now()
+        });
+        messageInput.value = "";
+    }
+
+    // Process Command Logic safely
+    function handleAdminCommand(commandString) {
+        const args = commandString.split(' ');
+        const command = args[0].toLowerCase();
+
+        if (command === '/clear') {
+            db.ref('messages').remove()
+                .catch(err => console.error("Database deletion failed:", err));
+        } 
+        else if (command === '/alert') {
+            const alertText = args.slice(1).join(' ');
+            if (!alertText) return;
+            
             db.ref('messages').push({
-                username: user,
-                text: text,
+                username: "🚨 SYSTEM BROADCAST",
+                text: alertText.toUpperCase(),
+                pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
                 timestamp: Date.now()
             });
-            messageInput.value = "";
         }
     }
 
-    // Listen for New Messages from Firebase
+    // Listen for incoming database additions
     db.ref('messages').on('child_added', (snapshot) => {
         const data = snapshot.val();
         
         const msgDiv = document.createElement('div');
         msgDiv.className = 'message';
-        msgDiv.innerHTML = `<div class="username">${data.username}</div><div>${data.text}</div>`;
+        
+        // Match specific usernames to assign glowing dynamic filters
+        let glowClass = "";
+        if (data.username === "ADMIN12345") {
+            glowClass = "glow-admin";
+        }
+
+        // Apply distinct formatting for system broadcast banners
+        if (data.username === "🚨 SYSTEM BROADCAST") {
+            msgDiv.style.background = "rgba(255, 70, 70, 0.2)";
+            msgDiv.style.borderColor = "rgba(255, 0, 0, 0.4)";
+        }
+
+        // Generate element structures containing the circular image wrapper and message details
+        const avatarUrl = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=default";
+        msgDiv.innerHTML = `
+            <img class="pfp-circle" src="${avatarUrl}" alt="User Avatar">
+            <div class="message-content">
+                <div class="username ${glowClass}">${data.username}</div>
+                <div>${data.text}</div>
+            </div>
+        `;
         
         chatWindow.appendChild(msgDiv);
-        
-        // Auto-scroll to bottom
         chatWindow.scrollTop = chatWindow.scrollHeight;
     });
 
-    // Event Listeners
+    // Sync clear actions uniformly across external browsers
+    db.ref('messages').on('value', (snapshot) => {
+        if (!snapshot.exists()) {
+            chatWindow.innerHTML = `
+                <div class="message">
+                    <img class="pfp-circle" src="https://api.dicebear.com/7.x/bottts/svg?seed=system" alt="PFP">
+                    <div class="message-content">
+                        <div class="username">System</div>
+                        <div>The message logs were reset by an administrator.</div>
+                    </div>
+                </div>`;
+        }
+    });
+
+    // Control listeners
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
