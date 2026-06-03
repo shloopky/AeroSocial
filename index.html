@@ -462,7 +462,7 @@
     let myHandle = "";
     let myFriends = [];
     let currentChannel = "global";
-    let activeListener = null;
+    let activeListenerRef = null; // FIXED: Keep track of the actual query reference to detach cleanly
     let currentUserPfp = null;
 
     const authErrorDisplay = document.getElementById('auth-error-display');
@@ -576,21 +576,28 @@
         else { const node = document.getElementById(`chan-${channelId.replace('dm_', '')}`); if(node) node.classList.add('active'); }
 
         chatMessages.innerHTML = '';
-        const db = firebase.database();
-        if (activeListener) db.ref(`channels/${activeListener.path}`).off('child_added', activeListener.fn);
+        
+        // STALE LISTENER FIX: Completely close down the previous query hook before opening a new one
+        if (activeListenerRef) {
+            activeListenerRef.off();
+            activeListenerRef = null;
+        }
 
-        // PERFORMANCE FIX: Only grab the latest 50 messages based on timestamp
-        const listenerFn = db.ref(`channels/${channelId}`)
-            .orderByChild('timestamp')
-            .limitToLast(15)
-            .on('child_added', (snapshot) => renderMessage(snapshot.val()));
+        const db = firebase.database();
+        
+        // Define a clean, fresh reference targeted directly at the channel chunk
+        const targetQuery = db.ref(`channels/${channelId}`).orderByChild('timestamp').limitToLast(50);
+        
+        targetQuery.on('child_added', (snapshot) => {
+            renderMessage(snapshot.val());
+        });
             
-        activeListener = { path: channelId, fn: listenerFn };
+        activeListenerRef = targetQuery;
     }
 
     function sendMessage() {
         const text = messageBox.value.trim();
-        if (text === "" || text.length > 500) return; // Hardstop for limits
+        if (text === "" || text.length > 500) return;
 
         if (text.startsWith('/')) {
             if (myHandle.toLowerCase() === "admin12345") {
@@ -659,7 +666,7 @@
         if (!isSystem && !isOwn) {
             headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc);
         } else if (!isSystem && isOwn) {
-            headerDiv.onclick = () => openSettings(); // Clicking yourself opens your settings
+            headerDiv.onclick = () => openSettings(); 
         }
 
         msgDiv.appendChild(headerDiv);
@@ -804,7 +811,6 @@
         const u = firebase.auth().currentUser;
         if (!u) return;
         
-        // Prevent duplicates
         const alreadyExists = myFriends.some(f => f.toLowerCase() === friendName.toLowerCase());
         if (!alreadyExists) {
             const newFriendsList = [...myFriends, friendName];
