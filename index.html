@@ -3,204 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AERO - Terminal Interface</title>
+    <title>AeroSocial - Digital Horizon</title>
     <style>
         :root {
-            --dark-green-bg: #041206;
-            --panel-green: #0a240d;
-            --terminal-green: #39ff14;
-            --border-white: #ffffff;
-            --white-glow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 255, 255, 0.3);
-            --green-glow: 0 0 8px rgba(57, 255, 20, 0.4);
-            --steam-header: #020a03;
+            --primary: #0078d7;
+            --primary-gloss: linear-gradient(180deg, #5ecfff 0%, #0078d7 100%);
+            --glass-bg: rgba(255, 255, 255, 0.35);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #0f2a4a;
+            --text-muted: #4e6d8c;
+            --gloss-layer: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%);
         }
 
         body, html {
             margin: 0; padding: 0; height: 100vh;
-            font-family: 'Courier New', Courier, monospace;
-            background: var(--dark-green-bg); color: #e2f0e4;
-            overflow: hidden; user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('https://images.unsplash.com/photo-1500622388414-8555a1042564?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+            user-select: none;
         }
 
-        /* --- CRT MONITOR SCANLINE SIMULATION --- */
-        .crt::before {
-            content: " "; display: block; position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(10, 30, 10, 0) 50%, rgba(0, 0, 0, 0.4) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 999; background-size: 100% 3px, 4px 100%; pointer-events: none;
+        /* --- GLOSSY OVERLAY REFLECTION --- */
+        .glass-glare::before {
+            content: ""; position: absolute;
+            top: 0; left: 0; right: 0; height: 50%;
+            background: var(--gloss-layer); pointer-events: none; z-index: 5;
         }
 
-        /* --- PS1 STYLE BOOT SEQUENCE ANIMATION CORES --- */
+        /* --- FRUTIGER AERO INTERACTIVE BUBBLE INTRO --- */
         #boot-screen {
-            position: fixed; inset: 0; background: #000; z-index: 1000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; text-align: center; transition: background-color 2s ease;
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        #press-start {
-            font-size: 1.5rem; letter-spacing: 5px; color: #fff;
-            animation: blink 1s infinite; cursor: pointer; padding: 20px; border: 2px solid transparent;
+        .bubble-canvas {
+            position: absolute; inset: 0; pointer-events: none;
         }
-        #press-start:hover { border: 2px solid var(--border-white); box-shadow: var(--white-glow); }
 
-        #boot-logo-1, #boot-logo-2 { display: none; opacity: 0; transition: opacity 1.5s ease; }
-        #boot-logo-1 h1 { font-family: Arial, sans-serif; font-size: 3rem; color: #00ff33; letter-spacing: 10px; margin: 0; text-shadow: 0 0 15px #00ff33; }
-        #boot-logo-1 p { font-family: Arial, sans-serif; font-size: 1rem; letter-spacing: 5px; color: #88a888; }
-        #boot-logo-2 .diamond { width: 100px; height: 100px; background: #fff; transform: rotate(45deg); margin: 0 auto 40px; box-shadow: var(--white-glow); }
-        #boot-logo-2 h2 { font-size: 2.5rem; letter-spacing: 15px; margin: 0; color: #000; font-weight: bold; }
-        #boot-logo-2 p { color: #224422; letter-spacing: 4px; font-weight: bold; }
+        /* Glossy sphere CSS elements */
+        .aero-orb {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 50%, rgba(0,120,215,0.25) 100%);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 10px 25px rgba(0,0,0,0.08);
+            animation: floatUp linear infinite;
+            pointer-events: auto; cursor: pointer;
+        }
 
-        /* --- RETRO TERMINAL AUTH SCREEN --- */
+        #intro-center-pod {
+            text-align: center; z-index: 10; transform: scale(0.9); opacity: 0;
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #intro-center-pod.reveal {
+            transform: scale(1); opacity: 1;
+        }
+
+        .title-display {
+            font-size: 4rem; font-weight: 800; color: #fff; letter-spacing: 8px;
+            text-shadow: 0 4px 15px rgba(0, 120, 215, 0.4), 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0 0 10px 0;
+        }
+
+        .subtitle-display {
+            font-size: 1.1rem; color: #fff; font-weight: 600; letter-spacing: 4px;
+            opacity: 0.85; text-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) translateX(0) scale(1); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-15vh) translateX(var(--drift, 20px)) scale(1.1); opacity: 0; }
+        }
+
+        /* --- AUTH VIEW ACCESS PORTALS --- */
         #auth-screen {
-            display: none; position: fixed; inset: 0; background: #020803; z-index: 900;
-            align-items: center; justify-content: center; opacity: 0; transition: opacity 1s ease;
+            display: none; position: fixed; inset: 0; z-index: 900;
+            align-items: center; justify-content: center; opacity: 0; transition: opacity 0.8s ease;
         }
-        .auth-box {
-            background: var(--panel-green); border: 3px solid var(--border-white); padding: 40px; width: 340px;
-            box-shadow: var(--white-glow); display: flex; flex-direction: column; gap: 15px;
-        }
-        .auth-title {
-            font-size: 1.3rem; color: #fff; text-align: center; letter-spacing: 3px;
-            text-shadow: var(--white-glow); margin-bottom: 10px; font-weight: bold;
-        }
-        .auth-toggle-text { font-size: 0.8rem; color: #88a888; text-align: center; cursor: pointer; margin-top: 10px; }
-        .auth-toggle-text span { color: #fff; text-decoration: underline; font-weight: bold; text-shadow: var(--white-glow); }
-        .error-msg { color: #ff5555; font-size: 0.8rem; text-align: center; display: none; min-height: 20px; font-weight: bold; line-height: 1.2; }
 
-        /* --- STEAM APPARATUS ENGINE APP LAYOUT --- */
+        .auth-card {
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); padding: 40px; width: 340px; border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 15px;
+            position: relative; overflow: hidden;
+        }
+
+        .auth-header-title {
+            font-size: 1.6rem; font-weight: 700; color: var(--text-main); text-align: center;
+            letter-spacing: 1px; margin-bottom: 5px;
+        }
+
+        .auth-toggle-caption {
+            font-size: 0.85rem; color: var(--text-muted); text-align: center; cursor: pointer; margin-top: 8px;
+        }
+        .auth-toggle-caption span { color: var(--primary); font-weight: 600; text-decoration: underline; }
+        
+        .error-banner {
+            background: rgba(255, 85, 85, 0.15); border: 1px solid rgba(255, 85, 85, 0.3);
+            color: #d63030; font-size: 0.85rem; padding: 10px; border-radius: 10px;
+            text-align: center; font-weight: 600; display: none; line-height: 1.3;
+        }
+
+        /* --- APP WORKSPACE SYSTEM INTERFACES --- */
         #app-root {
-            display: none; height: 100vh; border: 4px solid var(--border-white); box-shadow: var(--white-glow); box-sizing: border-box; opacity: 0; transition: opacity 1.5s ease;
+            display: none; width: 90%; max-width: 1000px; height: 85vh;
+            background: var(--glass-bg); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            box-shadow: 0 25px 55px rgba(0,0,0,0.2); position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95); opacity: 0;
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
         }
 
-        /* Sidebar Deck Components */
-        .sidebar { width: 300px; background: var(--panel-green); border-right: 3px solid var(--border-white); display: flex; flex-direction: column; }
-        
-        .sidebar-header {
-            background: var(--steam-header); padding: 15px; font-size: 1.3rem; font-weight: bold; color: #fff;
-            border-bottom: 3px solid var(--border-white); text-shadow: var(--white-glow); text-align: center; letter-spacing: 3px;
+        #app-root.active {
+            transform: translate(-50%, -50%) scale(1); opacity: 1;
         }
-        
-        .navigation-pane { flex: 1; overflow-y: auto; padding: 12px; }
-        
-        /* Steam Style User Profile Badge */
-        .steam-profile-card {
-            background: var(--steam-header); border: 2px solid var(--border-white); padding: 12px;
-            display: flex; flex-direction: column; gap: 8px; box-shadow: var(--white-glow); margin-bottom: 15px;
+
+        /* Sidebar Glass Component Panel */
+        .sidebar-deck {
+            width: 280px; background: rgba(255, 255, 255, 0.25);
+            border-right: 1px solid rgba(255, 255, 255, 0.4); display: flex; flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px; font-size: 1.3rem; font-weight: 800; color: var(--text-main);
+            border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; letter-spacing: 1.5px;
+        }
+
+        .nav-scroller { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
+        .nav-scroller::-webkit-scrollbar { display: none; }
+
+        /* User Identity Card Component */
+        .profile-badge {
+            background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(255,255,255,0.6);
+            padding: 12px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px;
         }
         .profile-meta { display: flex; align-items: center; gap: 10px; }
-        .avatar-placeholder { width: 35px; height: 35px; border: 2px solid var(--border-white); background: var(--dark-green-bg); display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
-        .identity-name { color: #fff; font-weight: bold; font-size: 1rem; text-shadow: var(--white-glow); overflow: hidden; text-overflow: ellipsis; }
-
-        .section-title { font-size: 0.75rem; color: var(--terminal-green); text-transform: uppercase; letter-spacing: 2px; margin: 15px 0 8px 5px; text-shadow: var(--green-glow); font-weight: bold; }
-        
-        .nav-item {
-            background: var(--steam-header); border: 1px solid rgba(255,255,255,0.2); padding: 10px 12px; margin-bottom: 8px;
-            cursor: pointer; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; color: #a2bfa6; transition: all 0.2s;
+        .avatar-sphere {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--primary-gloss);
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(0,120,215,0.3);
         }
-        .nav-item:hover, .nav-item.active {
-            color: #fff; border-color: var(--border-white); background: #0d2b12; transform: translateX(5px); box-shadow: var(--white-glow);
+        .identity-handle { color: var(--text-main); font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; }
+
+        .deck-section-title {
+            font-size: 0.75rem; color: var(--text-muted); font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.5px; margin: 15px 0 8px 5px;
         }
 
-        /* Steam Add Friend Interface Components */
-        .add-friend-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        .add-friend-box input { flex: 1; background: #020803; border: 1px solid rgba(255,255,255,0.3); color: var(--terminal-green); padding: 8px; font-family: monospace; outline: none; }
-        .add-friend-box input:focus { border-color: var(--border-white); }
-        .add-friend-box button { background: var(--steam-header); border: 1px solid var(--border-white); color: #fff; cursor: pointer; padding: 0 12px; font-weight: bold; }
-        .add-friend-box button:hover { background: #fff; color: #000; box-shadow: var(--white-glow); }
+        .channel-link {
+            background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 600; display: flex; justify-content: space-between;
+            align-items: center; color: var(--text-main); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .channel-link:hover, .channel-link.active {
+            background: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.8);
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,120,215,0.1);
+        }
+        .channel-link.active { color: var(--primary); }
 
-        /* Chat Frame Systems */
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--dark-green-bg); position: relative; }
-        .chat-header { background: var(--panel-green); padding: 15px; border-bottom: 3px solid var(--border-white); z-index: 1; display: flex; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-        .chat-header h2 { margin: 0; font-size: 1.2rem; color: #fff; letter-spacing: 1px; text-shadow: var(--white-glow); }
+        /* Friend Setup Core Inputs */
+        .friend-input-box { display: flex; gap: 6px; margin-bottom: 15px; }
+        .friend-input-box input {
+            flex: 1; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.5);
+            color: var(--text-main); padding: 8px 12px; border-radius: 10px; font-weight: 500; font-family: inherit; outline: none; font-size: 0.85rem;
+        }
+        .friend-input-box input:focus { background: #fff; border-color: var(--primary); }
+        .friend-input-box button {
+            background: var(--primary-gloss); border: none; color: white; cursor: pointer;
+            padding: 0 14px; border-radius: 10px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,120,215,0.2);
+        }
 
-        #chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 1; }
+        /* Streaming Chat Container Frame */
+        .chat-deck { flex: 1; display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.15); position: relative; }
         
-        /* Tactical Grid Chat Component Layouts */
-        .msg { background: var(--panel-green); border: 1px solid rgba(255,255,255,0.15); border-left: 4px solid var(--border-white); padding: 8px 15px; max-width: 75%; align-self: flex-start; display: flex; flex-direction: column; gap: 4px; box-shadow: 3px 3px 8px rgba(0,0,0,0.5); }
-        .msg.own { align-self: flex-end; border-left: 1px solid rgba(255,255,255,0.15); border-right: 4px solid var(--border-white); text-align: right; background: #0e2d13; box-shadow: var(--white-glow); }
-        .msg .username { font-size: 0.8rem; font-weight: bold; color: var(--terminal-green); letter-spacing: 1px; text-shadow: var(--green-glow); }
-        .msg.own .username { color: #fff; text-shadow: var(--white-glow); }
-        .msg .text { font-size: 1rem; color: #e2f0e4; word-wrap: break-word; line-height: 1.3; }
+        .chat-header-bar {
+            background: rgba(255, 255, 255, 0.3); padding: 18px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.4); display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-header-bar h2 { margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; }
 
-        /* Input Controls Footer Layout */
-        .input-footer { padding: 20px; background: var(--panel-green); border-top: 3px solid var(--border-white); display: flex; gap: 10px; z-index: 1; box-shadow: 0 -4px 10px rgba(0,0,0,0.4); }
-        .retro-input { background: #020803; border: 1px solid rgba(255,255,255,0.3); padding: 12px; color: var(--terminal-green); font-family: 'Courier New', Courier, monospace; outline: none; font-size: 1rem; }
-        .retro-input:focus { border-color: var(--border-white); box-shadow: inset 0 0 8px rgba(255,255,255,0.2); }
+        #chat-messages {
+            flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px;
+            scrollbar-width: thin; scrollbar-color: rgba(0,120,215,0.2) transparent;
+        }
+
+        /* Message Bubble Micro-Aesthetics */
+        .msg {
+            background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255,255,255,0.8);
+            padding: 10px 16px; border-radius: 16px 16px 16px 4px; max-width: 65%;
+            align-self: flex-start; display: flex; flex-direction: column; gap: 3px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.03); animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .msg.own {
+            align-self: flex-end; border-radius: 16px 16px 4px 16px;
+            background: var(--primary-gloss); border: 1px solid rgba(255,255,255,0.2); color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 120, 215, 0.25);
+        }
+        .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
+        .msg.own .username { color: rgba(255,255,255,0.9); }
+        .msg .text { font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+
+        /* Chat Controls Footer */
+        .chat-controls-footer {
+            padding: 20px 24px; background: rgba(255, 255, 255, 0.3);
+            border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 12px;
+        }
+
+        /* Input Elements & Gel Style Buttons */
+        .aero-input {
+            background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.6);
+            padding: 12px 18px; color: var(--text-main); font-family: inherit; outline: none;
+            font-size: 0.95rem; font-weight: 500; border-radius: 18px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .aero-input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,120,215,0.15); }
         
-        .retro-btn { background: var(--steam-header); border: 2px solid var(--border-white); color: #fff; padding: 10px 30px; font-weight: bold; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; transition: 0.1s; }
-        .retro-btn:hover { background: #fff; color: #000; box-shadow: var(--white-glow); }
+        .gel-btn {
+            background: var(--primary-gloss); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 10px 24px; font-weight: 700; border-radius: 18px;
+            cursor: pointer; font-size: 0.9rem; letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0,120,215,0.2), inset 0 1px 1px rgba(255,255,255,0.4);
+            position: relative; overflow: hidden; transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .gel-btn:hover { box-shadow: 0 6px 16px rgba(0,120,215,0.3); transform: translateY(-1px); }
+        .gel-btn:active { transform: scale(0.98); }
+        .gel-btn::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); pointer-events: none;
+        }
 
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes bubblePop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
-<body class="crt">
+<body>
 
-<div id="boot-screen">
-    <div id="press-start" onclick="startBootSequence()">INSERT DISC / PRESS START</div>
-    <div id="boot-logo-1">
-        <h1>A E R O</h1>
-        <p>COMPUTER ENTERTAINMENT</p>
-    </div>
-    <div id="boot-logo-2">
-        <div class="diamond"></div>
-        <h2>AERO</h2>
-        <p>LICENSED BY THE SYSTEM</p>
+<div id="boot-screen" class="glass-glare">
+    <div class="bubble-canvas" id="canvas-layer"></div>
+    <div id="intro-center-pod">
+        <h1 class="title-display">AEROSOCIAL</h1>
+        <p class="subtitle-display">CONNECT TO THE HORIZON</p>
+        <button class="gel-btn" style="font-size:1rem; padding:12px 36px; border-radius:24px;" onclick="triggerBubbleBurst()">ENTER CORE</button>
     </div>
 </div>
 
-<div id="auth-screen">
-    <div class="auth-box">
-        <div class="auth-title" id="auth-box-title">SYSTEM LOGIN</div>
-        <div class="error-msg" id="auth-error-display"></div>
+<div id="auth-screen" class="glass-glare">
+    <div class="auth-card glass-glare">
+        <div class="auth-header-title" id="auth-box-title">Welcome Back</div>
+        <div class="error-banner" id="auth-error-display"></div>
         
-        <input type="text" id="auth-username" class="retro-input" placeholder="USERNAME" autocomplete="off">
-        <input type="password" id="auth-password" class="retro-input" placeholder="PASSWORD">
+        <input type="text" id="auth-username" class="aero-input" placeholder="Username Handle" autocomplete="off">
+        <input type="password" id="auth-password" class="aero-input" placeholder="Security Password">
         
-        <button class="retro-btn" id="auth-submit-btn" onclick="processAuthSubmission()">EXECUTE</button>
+        <button class="gel-btn" id="auth-submit-btn" onclick="processAuthSubmission()">Sign In</button>
         
-        <div class="auth-toggle-text" id="auth-toggle-link" onclick="toggleAuthMode()">
-            New user? <span>Create Account</span>
+        <div class="auth-toggle-caption" id="auth-toggle-link" onclick="toggleAuthMode()">
+            New to the connection? <span>Create Account</span>
         </div>
     </div>
 </div>
 
-<div id="app-root">
-    <div class="sidebar">
-        <div class="sidebar-header">A E R O _ O S</div>
+<div id="app-root" class="glass-glare">
+    <div class="sidebar-deck">
+        <div class="sidebar-header">AeroOS</div>
         
-        <div class="navigation-pane">
-            <div class="section-title">Identity Profile</div>
-            <div class="steam-profile-card">
+        <div class="nav-scroller">
+            <div class="deck-section-title">Identity Node</div>
+            <div class="profile-badge">
                 <div class="profile-meta">
-                    <div class="avatar-placeholder">🕹️</div>
-                    <span class="identity-name" id="my-handle-display">Connecting...</span>
+                    <div class="avatar-sphere">🌊</div>
+                    <span class="identity-name identity-handle" id="my-handle-display">Connecting...</span>
                 </div>
-                <button class="retro-btn" style="padding:4px; font-size:0.7rem; width:100%; border-color:rgba(255,255,255,0.4); color:#aaa; margin-top:5px;" onclick="terminateUserSession()">LOG OUT DECK</button>
+                <button class="gel-btn" style="padding:6px; font-size:0.75rem; width:100%; border-radius:10px; background: linear-gradient(180deg, #ff8888 0%, #d63030 100%); box-shadow:none;" onclick="terminateUserSession()">Disconnect Node</button>
             </div>
 
-            <div class="section-title">Network</div>
-            <div class="nav-item active" id="chan-global" onclick="switchChannel('global', 'GLOBAL HUB', true)">
-                <span>🌐 GLOBAL HUB (EVERYBODY)</span>
+            <div class="deck-section-title">Network Channels</div>
+            <div class="channel-link active" id="chan-global" onclick="switchChannel('global', 'Global Hub', true)">
+                <span>🌐 Global Mainframe</span>
             </div>
 
-            <div class="section-title">Secure Comms (Friends)</div>
-            <div class="add-friend-box">
-                <input type="text" id="add-friend-input" placeholder="Target handle...">
-                <button onclick="addFriend()">ADD</button>
+            <div class="deck-section-title">Secure Links</div>
+            <div class="friend-input-box">
+                <input type="text" id="add-friend-input" placeholder="Search handles...">
+                <button onclick="addFriend()">Add</button>
             </div>
             <div id="friend-list-container"></div>
         </div>
     </div>
 
-    <div class="chat-area">
-        <div class="chat-header">
-            <h2 id="active-channel-title">GLOBAL HUB</h2>
-            <span style="color:var(--terminal-green); font-size:0.8rem; line-height: 1.5rem; text-shadow: var(--green-glow);">[ONLINE_DECK]</span>
+    <div class="chat-deck">
+        <div class="chat-header-bar">
+            <h2 id="active-channel-title">Global Hub</h2>
+            <span style="color:var(--primary); font-size:0.8rem; font-weight:700; background:rgba(0,120,215,0.1); padding:4px 10px; border-radius:20px;">Secure Connection</span>
         </div>
         <div id="chat-messages"></div>
-        <div class="input-footer">
-            <input type="text" id="message-box" class="retro-input" placeholder="Broadcast message stream..." style="flex: 1;">
-            <button class="retro-btn" id="send-button">TX / SEND</button>
+        <div class="chat-controls-footer">
+            <input type="text" id="message-box" class="aero-input" placeholder="Type a message stream..." style="flex: 1;">
+            <button class="gel-btn" id="send-button">Broadcast</button>
         </div>
     </div>
 </div>
@@ -233,54 +342,76 @@
         console.error("Initialization Vector Failure:", e);
     }
 
-    /* =========================================
-       2. PS1 BOOT SEQUENCE AUDIO SYNTH REGISTRY
-       ========================================= */
+    /* =========================================================================
+       2. DYNAMIC BUBBLE CORE GENERATOR ENGINE
+       ========================================================================= */
+    const canvasLayer = document.getElementById('canvas-layer');
+    const introCenterPod = document.getElementById('intro-center-pod');
     const bootScreen = document.getElementById('boot-screen');
     const authScreen = document.getElementById('auth-screen');
     const appRoot = document.getElementById('app-root');
-    const pressStart = document.getElementById('press-start');
-    const logo1 = document.getElementById('boot-logo-1');
-    const logo2 = document.getElementById('boot-logo-2');
     let bootCompleted = false;
 
-    function playRetroSynth() {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(52, ctx.currentTime); 
-        osc.frequency.exponentialRampToValueAtTime(104, ctx.currentTime + 3);
-        osc2.type = 'square';
-        osc2.frequency.setValueAtTime(155.56, ctx.currentTime); 
-
-        gainNode.gain.setValueAtTime(0, ctx.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 5);
-
-        osc.connect(gainNode); osc2.connect(gainNode); gainNode.connect(ctx.destination);
-        osc.start(); osc2.start(); osc.stop(ctx.currentTime + 5); osc2.stop(ctx.currentTime + 5);
+    function generateOrganicBubbles() {
+        if(bootCompleted) return;
+        const totalBubbles = 15;
+        for (let i = 0; i < totalBubbles; i++) {
+            createBubbleInstance();
+        }
     }
 
-    function startBootSequence() {
-        pressStart.style.display = 'none';
-        playRetroSynth();
-        logo1.style.display = 'block';
-        setTimeout(() => logo1.style.opacity = '1', 100);
+    function createBubbleInstance() {
+        if(bootCompleted) return;
+        const orb = document.createElement('div');
+        orb.className = 'aero-orb';
+        
+        const size = Math.random() * 60 + 20; 
+        const leftPosition = Math.random() * 100;
+        const duration = Math.random() * 6 + 4;
+        const drift = (Math.random() * 40 - 20) + "px";
 
+        orb.style.width = size + "px";
+        orb.style.height = size + "px";
+        orb.style.left = leftPosition + "%";
+        orb.style.animationDuration = duration + "s";
+        orb.style.setProperty('--drift', drift);
+
+        orb.addEventListener('click', () => {
+            orb.style.transform = 'scale(1.4)';
+            orb.style.opacity = '0';
+            setTimeout(() => orb.remove(), 200);
+            createBubbleInstance();
+        });
+
+        canvasLayer.appendChild(orb);
+        
+        // Remove once animation lifecycle completes
         setTimeout(() => {
-            logo1.style.opacity = '0';
-            bootScreen.style.backgroundColor = '#ffffff';
+            if(orb.parentNode) {
+                orb.remove();
+                createBubbleInstance();
+            }
+        }, duration * 1000);
+    }
+
+    // Trigger initial load sequences
+    generateOrganicBubbles();
+    setTimeout(() => {
+        introCenterPod.classList.add('reveal');
+    }, 300);
+
+    function triggerBubbleBurst() {
+        // Pop all floating orbs at once
+        const orbs = document.querySelectorAll('.aero-orb');
+        orbs.forEach((o, index) => {
             setTimeout(() => {
-                logo1.style.display = 'none';
-                logo2.style.display = 'block';
-                setTimeout(() => logo2.style.opacity = '1', 100);
-            }, 1000);
-        }, 3000);
+                o.style.transform = 'scale(1.8)';
+                o.style.opacity = '0';
+            }, index * 25);
+        });
+
+        introCenterPod.style.transform = 'scale(0.8)';
+        introCenterPod.style.opacity = '0';
 
         setTimeout(() => {
             bootScreen.style.opacity = '0';
@@ -288,13 +419,13 @@
                 bootScreen.style.display = 'none';
                 bootCompleted = true;
                 evaluateGlobalDisplayState();
-            }, 2000);
-        }, 7000);
+            }, 1000);
+        }, 800);
     }
 
-    /* =========================================
+    /* =========================================================================
        3. ACCOUNT CONFIGURATION GATEWAY ROUTER
-       ========================================= */
+       ========================================================================= */
     let authModeIsLogin = true; 
     let myHandle = "";
     let myFriends = [];
@@ -319,22 +450,24 @@
         authUsernameInput.value = "";
         authPasswordInput.value = "";
         if (authModeIsLogin) {
-            authBoxTitle.innerText = "SYSTEM LOGIN";
-            authToggleLink.innerHTML = "New user? <span>Create Account</span>";
+            authBoxTitle.innerText = "Welcome Back";
+            document.getElementById('auth-submit-btn').innerText = "Sign In";
+            authToggleLink.innerHTML = "New to the connection? <span>Create Account</span>";
         } else {
-            authBoxTitle.innerText = "CREATE ACCOUNT";
-            authToggleLink.innerHTML = "Have account? <span>Sign In</span>";
+            authBoxTitle.innerText = "Create Identity Profile";
+            document.getElementById('auth-submit-btn').innerText = "Register System Node";
+            authToggleLink.innerHTML = "Have account profile? <span>Sign In</span>";
         }
     }
 
     function showAuthError(msg) {
-        authErrorDisplay.innerText = "ERROR: " + msg.toUpperCase();
+        authErrorDisplay.innerText = msg;
         authErrorDisplay.style.display = "block";
     }
 
     function processAuthSubmission() {
         if (!firebaseActive) {
-            showAuthError("Firebase engine configuration error.");
+            showAuthError("Core connectivity matrix error.");
             return;
         }
         const username = authUsernameInput.value.trim();
@@ -342,7 +475,7 @@
         const cleanName = username.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '');
 
         if (!cleanName || password.length < 6) {
-            showAuthError("Incomplete data entry (Password min 6 characters).");
+            showAuthError("Please complete entry profile configuration. (Password min 6 characters)");
             return;
         }
 
@@ -350,13 +483,13 @@
 
         if (authModeIsLogin) {
             firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
-                .catch(err => showAuthError("Access mapping denied. Check entry profile keys."));
+                .catch(err => showAuthError("Access denied. Check configuration mapping keys."));
         } else {
             const db = firebase.database();
             const reservationRef = db.ref('usernames/' + cleanName);
             reservationRef.once('value').then((snapshot) => {
                 if (snapshot.exists()) {
-                    showAuthError("Handle claimed by another active mainframe node.");
+                    showAuthError("Handle claimed by another active connection node.");
                 } else {
                     firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
                         .then((cred) => {
@@ -376,28 +509,27 @@
         }
     }
 
-    /* =========================================
-       4. PERSISTENCE PERSPECTIVE FRAME VIEW SHIFT
-       ========================================= */
+    /* =========================================================================
+       4. PERSISTENCE VIEW PORTAL TRANSITIONS
+       ========================================================================= */
     function evaluateGlobalDisplayState() {
         if (!bootCompleted) return;
         
         const user = firebase.auth().currentUser;
         if (user) {
             authScreen.style.opacity = '0';
-            appRoot.style.display = 'none';
             setTimeout(() => {
                 authScreen.style.display = 'none';
                 appRoot.style.display = 'flex';
-                setTimeout(() => appRoot.style.opacity = '1', 100);
-            }, 500);
+                setTimeout(() => appRoot.classList.add('active'), 50);
+            }, 400);
         } else {
-            appRoot.style.opacity = '0';
+            appRoot.classList.remove('active');
             setTimeout(() => {
                 appRoot.style.display = 'none';
                 authScreen.style.display = 'flex';
-                setTimeout(() => authScreen.style.opacity = '1', 100);
-            }, 500);
+                setTimeout(() => authScreen.style.opacity = '1', 50);
+            }, 400);
         }
     }
 
@@ -405,13 +537,13 @@
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 firebase.database().ref('users/' + user.uid + '/handle').once('value').then((snap) => {
-                    myHandle = snap.val() || "Unknown_Entity";
+                    myHandle = snap.val() || "Entity_Node";
                     myHandleDisplay.innerText = myHandle;
                     myFriends = JSON.parse(localStorage.getItem('aero_friends_' + user.uid) || '[]');
                     
                     evaluateGlobalDisplayState();
                     renderFriendList();
-                    switchChannel('global', 'GLOBAL HUB', true);
+                    switchChannel('global', 'Global Hub', true);
                 });
             } else {
                 evaluateGlobalDisplayState();
@@ -419,9 +551,9 @@
         });
     }
 
-    /* =========================================
+    /* =========================================================================
        5. CLIENT ROUTING MATRIX (FRIENDS & DMS)
-       ========================================= */
+       ========================================================================= */
     function addFriend() {
         const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
         if (!firebaseActive) return;
@@ -443,7 +575,7 @@
         if(!u) return;
         myFriends = myFriends.filter(f => f !== target);
         localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
-        if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'GLOBAL HUB', true);
+        if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
         renderFriendList();
     }
 
@@ -453,13 +585,13 @@
             const div = document.createElement('div');
             const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
             
-            div.className = 'nav-item';
+            div.className = 'channel-link';
             div.id = `chan-${dmRoomId}`;
             div.innerHTML = `
                 <span>👤 ${friend}</span>
-                <span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeFriend('${friend}', event)">[X]</span>
+                <span style="color:#d63030; font-weight:800; cursor:pointer;" onclick="removeFriend('${friend}', event)">✕</span>
             `;
-            div.onclick = () => switchChannel(`dm_${dmRoomId}`, `SECURE DM // ${friend.toUpperCase()}`, false);
+            div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
             friendContainer.appendChild(div);
         });
     }
@@ -468,9 +600,8 @@
         if (!firebaseActive) return;
         currentChannel = channelId;
         channelHeaderTitle.innerText = layoutTitle;
-        channelHeaderTitle.style.color = isGlobal ? '#fff' : 'var(--terminal-green)';
 
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.channel-link').forEach(n => n.classList.remove('active'));
         if (isGlobal) {
             document.getElementById('chan-global').classList.add('active');
         } else {
