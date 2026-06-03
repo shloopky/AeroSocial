@@ -298,12 +298,9 @@
                 </label>
             </div>
             
-            <label style="font-size:0.8rem; font-weight:800; color:var(--text-main); margin-bottom:-8px; margin-left: 5px;">DISPLAY NAME</label>
-            <input type="text" id="settings-name-input" class="aero-input" placeholder="Display Name" maxlength="20">
-            
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button class="gel-btn" style="flex:1; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); color: var(--text-main); border: 1px solid rgba(0,0,0,0.15);" onclick="closeSettings()">Cancel</button>
-                <button class="gel-btn" style="flex:1;" onclick="saveSettingsChanges()">Save</button>
+                <button class="gel-btn" style="flex:1;" onclick="saveSettingsChanges()">Save Avatar</button>
             </div>
         </div>
     </div>
@@ -498,7 +495,10 @@
         authErrorDisplay.style.display = "none";
         if (authModeIsLogin) {
             firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
-                .catch(err => { authErrorDisplay.innerText = "Access denied."; authErrorDisplay.style.display = "block"; });
+                .catch(err => { 
+                    authErrorDisplay.innerText = "Access denied: " + err.message; 
+                    authErrorDisplay.style.display = "block"; 
+                });
         } else {
             const db = firebase.database();
             db.ref('usernames/' + cleanName).once('value').then((snapshot) => {
@@ -509,8 +509,7 @@
                         .then((cred) => {
                             return db.ref('usernames/' + cleanName).set(cred.user.uid)
                                 .then(() => {
-                                    // DATABASE SIGNUP FIX: Do not push an empty array []. Realtime DB cannot parse it. 
-                                    // Storing a structural placeholder object prevents data loops from crashing on login.
+                                    // DATABASE SIGNUP STRUCTURE PATTERN FIX
                                     return db.ref('users/' + cred.user.uid).set({ 
                                         handle: username, 
                                         pfp: "", 
@@ -518,7 +517,10 @@
                                     });
                                 });
                         })
-                        .catch(err => { authErrorDisplay.innerText = err.message; authErrorDisplay.style.display = "block"; });
+                        .catch(err => { 
+                            authErrorDisplay.innerText = "Registration Error: " + err.message; 
+                            authErrorDisplay.style.display = "block"; 
+                        });
                 }
             });
         }
@@ -549,7 +551,6 @@
                     if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
                     else sidebarPfp.innerHTML = "🌊";
 
-                    // SYNC DATA FIX: Process raw placeholder maps securely to avoid loop failures on brand new nodes
                     const rawFriends = userData.friends;
                     if (rawFriends && Array.isArray(rawFriends)) {
                         myFriends = rawFriends;
@@ -571,7 +572,7 @@
     }
 
     /* =========================================================================
-       4. CLIENT ROUTING MATRIX & CHAT RENDERING
+       4. CLIENT ROUTING MATRIX & CHAT RENDERING (LAG FREE OPTIMIZED)
        ========================================================================= */
     const chatMessages = document.getElementById('chat-messages');
     const messageBox = document.getElementById('message-box');
@@ -599,6 +600,7 @@
         }
 
         const db = firebase.database();
+        // REMOVED .orderByChild() TO RESOLVE HIGH-VOLUME FETCH TRANSFERS OVER UNINDEXED KEYS
         const targetQuery = db.ref(`channels/${channelId}`).limitToLast(50);
         
         targetQuery.on('child_added', (snapshot) => {
@@ -732,16 +734,14 @@
     }
 
     /* =========================================================================
-       6. MINI-PROFILE & SETTINGS CONTROLLERS
+       6. MINI-PROFILE & SETTINGS CONTROLLERS (SECURE: IMMUTABLE USERNAMES)
        ========================================================================= */
     const settingsModal = document.getElementById('settings-modal');
-    const settingsNameInput = document.getElementById('settings-name-input');
     const settingsPfpPreview = document.getElementById('settings-pfp-preview');
     let holdingBase64Pfp = null;
 
     function openSettings() {
         if(!firebaseActive) return;
-        settingsNameInput.value = myHandle;
         holdingBase64Pfp = currentUserPfp;
         
         if(holdingBase64Pfp) settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
@@ -764,14 +764,17 @@
     }
 
     function saveSettingsChanges() {
-        const structuralName = settingsNameInput.value.trim();
         const activeUser = firebase.auth().currentUser;
-        if (!structuralName || !activeUser) return;
+        if (!activeUser) return;
 
+        // SAFE GUARD SECURE UPDATE: EXCLUSIVELY SYNC THE PROFILE IMAGE NODE
         firebase.database().ref('users/' + activeUser.uid).update({
-            handle: structuralName,
             pfp: holdingBase64Pfp || ""
-        }).then(() => { closeSettings(); }).catch(() => { alert("Error syncing database infrastructure changes."); });
+        }).then(() => { 
+            closeSettings(); 
+        }).catch(() => { 
+            alert("Error syncing database infrastructure changes."); 
+        });
     }
 
     let targetMiniProfileHandle = "";
