@@ -211,23 +211,21 @@
 
 <script>
     /* =========================================================================
-       1. FIREBASE CONFIGURATION MATRIX (CRITICAL BUG REPAIR COMPLETED HERE)
+       1. FIREBASE CONFIGURATION MATRIX (POPULATED WITH YOUR LIVE APPLICATION KEYS)
        ========================================================================= */
     const firebaseConfig = {
-        apiKey: "YOUR_FIREBASE_API_KEY", // <--- INSERT YOUR REAL FIREBASE API KEY HERE!
+        apiKey: "AIzaSyDe16FtXqLTNX6mJv6LEtx77sQlO5pyNiA",
         authDomain: "aero-977a5.firebaseapp.com",
         databaseURL: "https://aero-977a5-default-rtdb.firebaseio.com/",
         projectId: "aero-977a5",
-        storageBucket: "aero-977a5.appspot.com",
-        messagingSenderId: "800936590653"
+        storageBucket: "aero-977a5.firebasestorage.app",
+        messagingSenderId: "800936590653",
+        appId: "1:800936590653:web:843ad8511676aa475d5954",
+        measurementId: "G-7YX2P933CJ"
     };
 
-    // Failsafe execution verification structure
     let firebaseActive = false;
     try {
-        if (firebaseConfig.apiKey === "YOUR_FIREBASE_API_KEY") {
-            console.warn("CRITICAL: Firebase configuration requires your valid apiKey parameter value!");
-        }
         firebase.initializeApp(firebaseConfig);
         firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
         firebaseActive = true;
@@ -336,7 +334,7 @@
 
     function processAuthSubmission() {
         if (!firebaseActive) {
-            showAuthError("Firebase engine configuration error. Missing API Key.");
+            showAuthError("Firebase engine configuration error.");
             return;
         }
         const username = authUsernameInput.value.trim();
@@ -384,14 +382,6 @@
     function evaluateGlobalDisplayState() {
         if (!bootCompleted) return;
         
-        // Failsafe handling window
-        if (!firebaseActive || firebaseConfig.apiKey === "AIzaSyDe16FtXqLTNX6mJv6LEtx77sQlO5pyNiA") {
-            authScreen.style.display = 'flex';
-            authScreen.style.opacity = '1';
-            showAuthError("Failsafe warning: Please update firebaseConfig with your real parameters inside the script block.");
-            return;
-        }
-
         const user = firebase.auth().currentUser;
         if (user) {
             authScreen.style.opacity = '0';
