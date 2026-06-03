@@ -196,10 +196,13 @@
         }
         
         /* Message PFP Display */
-        .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer; padding: 2px; border-radius: 12px; transition: background 0.2s; }
+        .msg-header:hover { background: rgba(0,0,0,0.05); }
+        .msg.own .msg-header:hover { background: rgba(255,255,255,0.15); }
+
         .msg-pfp { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
         
-        .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
+        .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; pointer-events: none; }
         .msg.own .username { color: rgba(255,255,255,0.9); }
         .msg .text { font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
         .msg .media-attachment { max-width: 260px; max-height: 300px; border-radius: 12px; margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
@@ -235,9 +238,15 @@
             border: 2px dashed rgba(0,120,215,0.4);
         }
 
-        #settings-modal {
+        .modal-overlay {
             position: absolute; inset: 0; background: rgba(255,255,255,0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             display: none; align-items: center; justify-content: center; z-index: 200; border-radius: 24px;
+        }
+
+        .mini-profile-card {
+            background: var(--glass-bg); padding: 30px; border-radius: 24px;
+            text-align: center; border: 1px solid var(--glass-border);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.25); width: 280px; display: flex; flex-direction: column; align-items: center;
         }
 
         @keyframes bubblePop {
@@ -275,7 +284,7 @@
 
 <div id="app-root" class="glass-glare">
     
-    <div id="settings-modal">
+    <div id="settings-modal" class="modal-overlay">
         <div class="auth-card glass-glare" style="width: 350px; box-shadow: 0 30px 70px rgba(0,0,0,0.25);">
             <div class="auth-header-title" style="font-size:1.3rem;">Identity parameters</div>
             
@@ -297,6 +306,21 @@
         </div>
     </div>
 
+    <div id="mini-profile-modal" class="modal-overlay">
+        <div class="mini-profile-card glass-glare">
+            <button style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);" onclick="closeMiniProfile()">✕</button>
+            
+            <div class="avatar-sphere" id="mini-profile-avatar" style="width:90px; height:90px; font-size:2.5rem; margin-bottom:15px; box-shadow: 0 5px 20px rgba(0,120,215,0.3);">👤</div>
+            <h2 id="mini-profile-name" style="margin:0 0 5px 0; color:var(--text-main); font-weight:800; font-size:1.4rem;">Username</h2>
+            <p style="margin:0 0 20px 0; font-size:0.85rem; color:var(--text-muted); font-weight:600;">Verified Node</p>
+            
+            <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                <button class="gel-btn" style="width:100%; border-radius:12px;" onclick="actionAddFriend()">➕ Add to Connections</button>
+                <button class="gel-btn" style="width:100%; border-radius:12px; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); color: var(--text-main); border: 1px solid rgba(0,0,0,0.15);" onclick="actionDMUser()">💬 Direct Message</button>
+            </div>
+        </div>
+    </div>
+
     <div class="sidebar-deck">
         <div class="sidebar-header">AeroOS</div>
         
@@ -306,7 +330,7 @@
                 <div class="profile-meta">
                     <div class="avatar-sphere" id="sidebar-pfp">🌊</div>
                     <span class="identity-name identity-handle" id="my-handle-display">Connecting...</span>
-                    <span style="cursor:pointer; font-size:1.1rem; margin-left:auto; transition: transform 0.3s; user-select:none;" onclick="openSettings()" onmouseover="this.style.transform='rotate(45deg)'" onmouseout="this.style.transform='rotate(0deg)'">⚙️</span>
+                    <span style="cursor:pointer; font-size:1.1rem; margin-left:auto; transition: transform 0.3s; user-select:none;" onclick="openSettings()" title="Settings" onmouseover="this.style.transform='rotate(45deg)'" onmouseout="this.style.transform='rotate(0deg)'">⚙️</span>
                 </div>
                 <button class="gel-btn" style="padding:6px; font-size:0.75rem; width:100%; border-radius:10px; background: linear-gradient(180deg, #ff8888 0%, #d63030 100%); box-shadow:none;" onclick="terminateUserSession()">Disconnect Node</button>
             </div>
@@ -319,7 +343,7 @@
             <div class="deck-section-title">Secure Links</div>
             <div class="friend-input-box">
                 <input type="text" id="add-friend-input" placeholder="Search handles...">
-                <button onclick="addFriend()">Add</button>
+                <button onclick="manualAddFriend()">Add</button>
             </div>
             <div id="friend-list-container"></div>
         </div>
@@ -429,7 +453,7 @@
     }
 
     /* =========================================================================
-       3. ACCOUNT CONFIGURATION MATRIX
+       3. ACCOUNT CONFIGURATION MATRIX & FIREBASE FRIENDS SYNC
        ========================================================================= */
     let authModeIsLogin = true; 
     let myHandle = "";
@@ -480,7 +504,7 @@
                 } else {
                     firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
                         .then((cred) => db.ref('usernames/' + cleanName).set(cred.user.uid)
-                        .then(() => db.ref('users/' + cred.user.uid).set({ handle: username, pfp: "" })))
+                        .then(() => db.ref('users/' + cred.user.uid).set({ handle: username, pfp: "", friends: [] })))
                         .catch(err => { authErrorDisplay.innerText = err.message; authErrorDisplay.style.display = "block"; });
                 }
             });
@@ -503,7 +527,8 @@
     if (firebaseActive) {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                firebase.database().ref('users/' + user.uid).once('value').then((snap) => {
+                // Listen to the user document live to sync friends
+                firebase.database().ref('users/' + user.uid).on('value', (snap) => {
                     const userData = snap.val() || {};
                     myHandle = userData.handle || "Entity_Node";
                     currentUserPfp = userData.pfp || null;
@@ -512,17 +537,21 @@
                     if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
                     else sidebarPfp.innerHTML = "🌊";
 
-                    myFriends = JSON.parse(localStorage.getItem('aero_friends_' + user.uid) || '[]');
-                    evaluateGlobalDisplayState();
+                    // Sync Friends List from Firebase
+                    myFriends = userData.friends || [];
                     renderFriendList();
-                    switchChannel('global', 'Global Hub', true);
+                    
+                    if (appRoot.style.display === 'none' || !appRoot.classList.contains('active')) {
+                        evaluateGlobalDisplayState();
+                        switchChannel('global', 'Global Hub', true);
+                    }
                 });
             } else evaluateGlobalDisplayState();
         });
     }
 
     /* =========================================================================
-       4. CLIENT ROUTING MATRIX & ADMIN COMMANDS
+       4. CLIENT ROUTING MATRIX & CHAT RENDERING
        ========================================================================= */
     const chatMessages = document.getElementById('chat-messages');
     const messageBox = document.getElementById('message-box');
@@ -546,7 +575,6 @@
         const text = messageBox.value.trim();
         if (text === "") return;
 
-        // ---- ADMIN COMMAND INTERCEPTOR ----
         if (text.startsWith('/')) {
             if (myHandle.toLowerCase() === "admin12345") {
                 if (text === '/clear') {
@@ -566,7 +594,6 @@
             }
         }
 
-        // Standard Text Send
         firebase.database().ref(`channels/${currentChannel}`).push({
             username: myHandle,
             text: text,
@@ -585,26 +612,42 @@
         let contentHtml = '';
         if (data.text) contentHtml += `<div class="text">${data.text}</div>`;
         
-        // Handles dropped base64 images/gifs or previously cached formats
         const displayMedia = data.mediaUrl || data.gifUrl;
         if (displayMedia) contentHtml += `<img src="${displayMedia}" class="media-attachment">`;
 
         let adminStyle = "";
+        let isSystem = false;
         if (data.username === "🚨 SYSTEM ALERT") {
             msgDiv.style.background = "rgba(255, 85, 85, 0.2)";
             msgDiv.style.borderColor = "#ff5555";
             adminStyle = "color: #d63030; font-size: 0.9rem;";
+            isSystem = true;
         }
 
         const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
 
-        msgDiv.innerHTML = `
-            <div class="msg-header">
-                <img src="${avatarSrc}" class="msg-pfp">
-                <div class="username" style="${adminStyle}">${data.username}</div>
-            </div>
-            ${contentHtml}
+        // Make the header clickable for the Mini Profile (if not system message)
+        const headerDiv = document.createElement('div');
+        headerDiv.className = "msg-header";
+        headerDiv.innerHTML = `
+            <img src="${avatarSrc}" class="msg-pfp">
+            <div class="username" style="${adminStyle}">${data.username}</div>
         `;
+
+        if (!isSystem && !isOwn) {
+            headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc);
+        } else if (!isSystem && isOwn) {
+            headerDiv.onclick = () => openSettings(); // Clicking yourself opens your settings
+        }
+
+        msgDiv.appendChild(headerDiv);
+        
+        if (contentHtml !== '') {
+            const contentWrapper = document.createElement('div');
+            contentWrapper.innerHTML = contentHtml;
+            msgDiv.appendChild(contentWrapper);
+        }
+
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -618,31 +661,19 @@
     const chatDeck = document.querySelector('.chat-deck');
     const dragOverlay = document.getElementById('drag-overlay');
 
-    chatDeck.addEventListener('dragenter', (e) => {
-        e.preventDefault();
-        dragOverlay.style.display = 'flex';
-    });
-
-    chatDeck.addEventListener('dragover', (e) => {
-        e.preventDefault();
-    });
-
-    dragOverlay.addEventListener('dragleave', () => {
-        dragOverlay.style.display = 'none';
-    });
+    chatDeck.addEventListener('dragenter', (e) => { e.preventDefault(); dragOverlay.style.display = 'flex'; });
+    chatDeck.addEventListener('dragover', (e) => { e.preventDefault(); });
+    dragOverlay.addEventListener('dragleave', () => { dragOverlay.style.display = 'none'; });
 
     chatDeck.addEventListener('drop', (e) => {
         e.preventDefault();
         dragOverlay.style.display = 'none';
-        
         const droppedFiles = e.dataTransfer.files;
         if (droppedFiles.length > 0) {
             const targetFile = droppedFiles[0];
             if (targetFile.type.startsWith('image/')) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    broadcastMediaNode(event.target.result);
-                };
+                reader.onload = function(event) { broadcastMediaNode(event.target.result); };
                 reader.readAsDataURL(targetFile);
             }
         }
@@ -660,8 +691,9 @@
     }
 
     /* =========================================================================
-       6. GLASSMORPHIC SETTINGS AREA CONTROLLER
+       6. MINI-PROFILE & SETTINGS CONTROLLERS
        ========================================================================= */
+    // Settings Layer
     const settingsModal = document.getElementById('settings-modal');
     const settingsNameInput = document.getElementById('settings-name-input');
     const settingsPfpPreview = document.getElementById('settings-pfp-preview');
@@ -678,9 +710,7 @@
         settingsModal.style.display = 'flex';
     }
 
-    function closeSettings() {
-        settingsModal.style.display = 'none';
-    }
+    function closeSettings() { settingsModal.style.display = 'none'; }
 
     function previewSettingsPfp(inputElement) {
         if (inputElement.files && inputElement.files[0]) {
@@ -696,52 +726,79 @@
     function saveSettingsChanges() {
         const structuralName = settingsNameInput.value.trim();
         const activeUser = firebase.auth().currentUser;
-        
         if (!structuralName || !activeUser) return;
 
         firebase.database().ref('users/' + activeUser.uid).update({
             handle: structuralName,
             pfp: holdingBase64Pfp || ""
-        }).then(() => {
-            myHandle = structuralName;
-            currentUserPfp = holdingBase64Pfp;
-            myHandleDisplay.innerText = myHandle;
-            
-            if (currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
-            else sidebarPfp.innerHTML = "🌊";
-            
-            closeSettings();
-        }).catch(() => {
-            alert("Error syncing database infrastructure changes.");
-        });
+        }).then(() => { closeSettings(); }).catch(() => { alert("Error syncing database infrastructure changes."); });
+    }
+
+    // Mini Profile Layer
+    let targetMiniProfileHandle = "";
+    const miniProfileModal = document.getElementById('mini-profile-modal');
+    
+    function openMiniProfile(username, pfpUrl) {
+        targetMiniProfileHandle = username;
+        document.getElementById('mini-profile-name').innerText = username;
+        document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        miniProfileModal.style.display = 'flex';
+    }
+
+    function closeMiniProfile() {
+        miniProfileModal.style.display = 'none';
+        targetMiniProfileHandle = "";
+    }
+
+    function actionAddFriend() {
+        if (!targetMiniProfileHandle) return;
+        submitFriendToDatabase(targetMiniProfileHandle);
+        closeMiniProfile();
+    }
+
+    function actionDMUser() {
+        if (!targetMiniProfileHandle) return;
+        const target = targetMiniProfileHandle;
+        closeMiniProfile();
+        
+        const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+        switchChannel(`dm_${dmRoomId}`, `DM // ${target}`, false);
     }
 
     /* =========================================================================
-       7. LINKS AND NETWORK SCROLLER UTILITIES
+       7. LINKS AND NETWORK SCROLLER UTILITIES (FIREBASE SYNCED)
        ========================================================================= */
     const friendInput = document.getElementById('add-friend-input');
     const friendContainer = document.getElementById('friend-list-container');
 
-    function addFriend() {
+    function manualAddFriend() {
         const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
-        const u = firebase.auth().currentUser;
-        if (!target || target.toLowerCase() === myHandle.toLowerCase() || !u) return;
-        if (!myFriends.includes(target)) {
-            myFriends.push(target);
-            localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
-            renderFriendList();
-        }
+        if (!target || target.toLowerCase() === myHandle.toLowerCase()) return;
+        submitFriendToDatabase(target);
         friendInput.value = '';
+    }
+
+    function submitFriendToDatabase(friendName) {
+        const u = firebase.auth().currentUser;
+        if (!u) return;
+        
+        // Prevent duplicates
+        const alreadyExists = myFriends.some(f => f.toLowerCase() === friendName.toLowerCase());
+        if (!alreadyExists) {
+            const newFriendsList = [...myFriends, friendName];
+            firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList);
+        }
     }
 
     function removeFriend(target, e) {
         e.stopPropagation();
         const u = firebase.auth().currentUser;
         if(!u) return;
-        myFriends = myFriends.filter(f => f !== target);
-        localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
-        if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
-        renderFriendList();
+        
+        const newFriendsList = myFriends.filter(f => f !== target);
+        firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList).then(() => {
+            if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
+        });
     }
 
     function renderFriendList() {
@@ -753,7 +810,7 @@
             div.id = `chan-${dmRoomId}`;
             div.innerHTML = `
                 <span>👤 ${friend}</span>
-                <span style="color:#d63030; font-weight:800; cursor:pointer;" onclick="removeFriend('${friend}', event)">✕</span>
+                <span style="color:#d63030; font-weight:800; cursor:pointer;" title="Remove Connection" onclick="removeFriend('${friend}', event)">✕</span>
             `;
             div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
             friendContainer.appendChild(div);
