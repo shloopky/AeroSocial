@@ -19,15 +19,12 @@
             margin: 0; padding: 0; height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: url('https://images.unsplash.com/photo-1500622388414-8555a1042564?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover;
-            overflow: hidden;
-            user-select: none;
+            background-size: cover; overflow: hidden; user-select: none;
         }
 
         /* --- GLOSSY OVERLAY REFLECTION --- */
         .glass-glare::before {
-            content: ""; position: absolute;
-            top: 0; left: 0; right: 0; height: 50%;
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%;
             background: var(--gloss-layer); pointer-events: none; z-index: 5;
         }
 
@@ -39,18 +36,14 @@
             overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .bubble-canvas {
-            position: absolute; inset: 0; pointer-events: none;
-        }
+        .bubble-canvas { position: absolute; inset: 0; pointer-events: none; }
 
-        /* Glossy sphere CSS elements */
         .aero-orb {
             position: absolute; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 50%, rgba(0,120,215,0.25) 100%);
             border: 1px solid rgba(255,255,255,0.5);
             box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 10px 25px rgba(0,0,0,0.08);
-            animation: floatUp linear infinite;
-            pointer-events: auto; cursor: pointer;
+            animation: floatUp linear infinite; pointer-events: auto; cursor: pointer;
         }
 
         #intro-center-pod {
@@ -58,14 +51,11 @@
             transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        #intro-center-pod.reveal {
-            transform: scale(1); opacity: 1;
-        }
+        #intro-center-pod.reveal { transform: scale(1); opacity: 1; }
 
         .title-display {
             font-size: 4rem; font-weight: 800; color: #fff; letter-spacing: 8px;
-            text-shadow: 0 4px 15px rgba(0, 120, 215, 0.4), 0 2px 4px rgba(0,0,0,0.1);
-            margin: 0 0 10px 0;
+            text-shadow: 0 4px 15px rgba(0, 120, 215, 0.4), 0 2px 4px rgba(0,0,0,0.1); margin: 0 0 10px 0;
         }
 
         .subtitle-display {
@@ -75,8 +65,7 @@
 
         @keyframes floatUp {
             0% { transform: translateY(105vh) translateX(0) scale(1); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
+            10% { opacity: 1; } 90% { opacity: 1; }
             100% { transform: translateY(-15vh) translateX(var(--drift, 20px)) scale(1.1); opacity: 0; }
         }
 
@@ -98,9 +87,7 @@
             letter-spacing: 1px; margin-bottom: 5px;
         }
 
-        .auth-toggle-caption {
-            font-size: 0.85rem; color: var(--text-muted); text-align: center; cursor: pointer; margin-top: 8px;
-        }
+        .auth-toggle-caption { font-size: 0.85rem; color: var(--text-muted); text-align: center; cursor: pointer; margin-top: 8px; }
         .auth-toggle-caption span { color: var(--primary); font-weight: 600; text-decoration: underline; }
         
         .error-banner {
@@ -117,17 +104,15 @@
             box-shadow: 0 25px 55px rgba(0,0,0,0.2); position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.95); opacity: 0;
             transition: opacity 1s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
         }
 
-        #app-root.active {
-            transform: translate(-50%, -50%) scale(1); opacity: 1;
-        }
+        #app-root.active { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         /* Sidebar Glass Component Panel */
         .sidebar-deck {
             width: 280px; background: rgba(255, 255, 255, 0.25);
             border-right: 1px solid rgba(255, 255, 255, 0.4); display: flex; flex-direction: column;
+            z-index: 10;
         }
 
         .sidebar-header {
@@ -145,11 +130,14 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px;
         }
         .profile-meta { display: flex; align-items: center; gap: 10px; }
+        
         .avatar-sphere {
-            width: 36px; height: 36px; border-radius: 50%; background: var(--primary-gloss);
+            width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gloss);
             display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-            box-shadow: 0 2px 8px rgba(0,120,215,0.3);
+            box-shadow: 0 2px 8px rgba(0,120,215,0.3); overflow: hidden; flex-shrink: 0;
         }
+        .avatar-sphere img { width: 100%; height: 100%; object-fit: cover; }
+        
         .identity-handle { color: var(--text-main); font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; }
 
         .deck-section-title {
@@ -169,7 +157,6 @@
         }
         .channel-link.active { color: var(--primary); }
 
-        /* Friend Setup Core Inputs */
         .friend-input-box { display: flex; gap: 6px; margin-bottom: 15px; }
         .friend-input-box input {
             flex: 1; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.5);
@@ -185,14 +172,14 @@
         .chat-deck { flex: 1; display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.15); position: relative; }
         
         .chat-header-bar {
-            background: rgba(255, 255, 255, 0.3); padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.3); padding: 18px 24px; z-index: 10;
             border-bottom: 1px solid rgba(255,255,255,0.4); display: flex; justify-content: space-between; align-items: center;
         }
         .chat-header-bar h2 { margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; }
 
         #chat-messages {
             flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px;
-            scrollbar-width: thin; scrollbar-color: rgba(0,120,215,0.2) transparent;
+            scrollbar-width: thin; scrollbar-color: rgba(0,120,215,0.2) transparent; z-index: 10;
         }
 
         /* Message Bubble Micro-Aesthetics */
@@ -207,17 +194,44 @@
             background: var(--primary-gloss); border: 1px solid rgba(255,255,255,0.2); color: #fff;
             box-shadow: 0 4px 15px rgba(0, 120, 215, 0.25);
         }
+        
+        /* Message PFP Display */
+        .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .msg-pfp { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
+        
         .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
         .msg.own .username { color: rgba(255,255,255,0.9); }
         .msg .text { font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+        .msg .gif-attachment { max-width: 220px; border-radius: 10px; margin-top: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+        /* --- GIF PANEL UI --- */
+        #gif-picker-panel {
+            position: absolute; bottom: 85px; left: 24px; right: 24px;
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.8); border-radius: 16px;
+            padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: none; flex-direction: column; z-index: 100;
+        }
+        #gif-picker-panel.active { display: flex; animation: bubblePop 0.2s ease; }
+        
+        #gif-results-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px; max-height: 220px; overflow-y: auto; margin-top: 10px;
+            scrollbar-width: thin;
+        }
+        
+        .gif-item {
+            width: 100%; height: 100px; object-fit: cover; border-radius: 8px;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .gif-item:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,120,215,0.3); }
 
         /* Chat Controls Footer */
         .chat-controls-footer {
             padding: 20px 24px; background: rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 12px;
+            border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 12px; z-index: 10;
         }
 
-        /* Input Elements & Gel Style Buttons */
         .aero-input {
             background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.6);
             padding: 12px 18px; color: var(--text-main); font-family: inherit; outline: none;
@@ -235,10 +249,6 @@
         }
         .gel-btn:hover { box-shadow: 0 6px 16px rgba(0,120,215,0.3); transform: translateY(-1px); }
         .gel-btn:active { transform: scale(0.98); }
-        .gel-btn::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); pointer-events: none;
-        }
 
         @keyframes bubblePop {
             0% { transform: scale(0.8); opacity: 0; }
@@ -281,7 +291,7 @@
             <div class="deck-section-title">Identity Node</div>
             <div class="profile-badge">
                 <div class="profile-meta">
-                    <div class="avatar-sphere">🌊</div>
+                    <div class="avatar-sphere" id="sidebar-pfp">🌊</div>
                     <span class="identity-name identity-handle" id="my-handle-display">Connecting...</span>
                 </div>
                 <button class="gel-btn" style="padding:6px; font-size:0.75rem; width:100%; border-radius:10px; background: linear-gradient(180deg, #ff8888 0%, #d63030 100%); box-shadow:none;" onclick="terminateUserSession()">Disconnect Node</button>
@@ -306,9 +316,20 @@
             <h2 id="active-channel-title">Global Hub</h2>
             <span style="color:var(--primary); font-size:0.8rem; font-weight:700; background:rgba(0,120,215,0.1); padding:4px 10px; border-radius:20px;">Secure Connection</span>
         </div>
+        
         <div id="chat-messages"></div>
+        
+        <div id="gif-picker-panel" class="glass-glare">
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="gif-search-input" class="aero-input" placeholder="Search GIPHY..." style="flex:1; padding:8px 12px;">
+                <button class="gel-btn" id="gif-search-btn" style="padding:8px 18px;">Search</button>
+            </div>
+            <div id="gif-results-grid"></div>
+        </div>
+
         <div class="chat-controls-footer">
-            <input type="text" id="message-box" class="aero-input" placeholder="Type a message stream..." style="flex: 1;">
+            <button class="gel-btn" id="gif-toggle-btn" style="padding: 10px 18px; border-radius:18px;">GIF</button>
+            <input type="text" id="message-box" class="aero-input" placeholder="Type a message or command..." style="flex: 1;">
             <button class="gel-btn" id="send-button">Broadcast</button>
         </div>
     </div>
@@ -320,7 +341,7 @@
 
 <script>
     /* =========================================================================
-       1. FIREBASE CONFIGURATION MATRIX (POPULATED WITH YOUR LIVE APPLICATION KEYS)
+       1. FIREBASE CONFIGURATION MATRIX
        ========================================================================= */
     const firebaseConfig = {
         apiKey: "AIzaSyDe16FtXqLTNX6mJv6LEtx77sQlO5pyNiA",
@@ -329,8 +350,7 @@
         projectId: "aero-977a5",
         storageBucket: "aero-977a5.firebasestorage.app",
         messagingSenderId: "800936590653",
-        appId: "1:800936590653:web:843ad8511676aa475d5954",
-        measurementId: "G-7YX2P933CJ"
+        appId: "1:800936590653:web:843ad8511676aa475d5954"
     };
 
     let firebaseActive = false;
@@ -354,10 +374,7 @@
 
     function generateOrganicBubbles() {
         if(bootCompleted) return;
-        const totalBubbles = 15;
-        for (let i = 0; i < totalBubbles; i++) {
-            createBubbleInstance();
-        }
+        for (let i = 0; i < 15; i++) createBubbleInstance();
     }
 
     function createBubbleInstance() {
@@ -366,170 +383,111 @@
         orb.className = 'aero-orb';
         
         const size = Math.random() * 60 + 20; 
-        const leftPosition = Math.random() * 100;
         const duration = Math.random() * 6 + 4;
-        const drift = (Math.random() * 40 - 20) + "px";
 
-        orb.style.width = size + "px";
-        orb.style.height = size + "px";
-        orb.style.left = leftPosition + "%";
+        orb.style.width = size + "px"; orb.style.height = size + "px";
+        orb.style.left = (Math.random() * 100) + "%";
         orb.style.animationDuration = duration + "s";
-        orb.style.setProperty('--drift', drift);
+        orb.style.setProperty('--drift', (Math.random() * 40 - 20) + "px");
 
         orb.addEventListener('click', () => {
-            orb.style.transform = 'scale(1.4)';
-            orb.style.opacity = '0';
-            setTimeout(() => orb.remove(), 200);
-            createBubbleInstance();
+            orb.style.transform = 'scale(1.4)'; orb.style.opacity = '0';
+            setTimeout(() => orb.remove(), 200); createBubbleInstance();
         });
 
         canvasLayer.appendChild(orb);
-        
-        // Remove once animation lifecycle completes
-        setTimeout(() => {
-            if(orb.parentNode) {
-                orb.remove();
-                createBubbleInstance();
-            }
-        }, duration * 1000);
+        setTimeout(() => { if(orb.parentNode) { orb.remove(); createBubbleInstance(); } }, duration * 1000);
     }
 
-    // Trigger initial load sequences
     generateOrganicBubbles();
-    setTimeout(() => {
-        introCenterPod.classList.add('reveal');
-    }, 300);
+    setTimeout(() => { introCenterPod.classList.add('reveal'); }, 300);
 
     function triggerBubbleBurst() {
-        // Pop all floating orbs at once
-        const orbs = document.querySelectorAll('.aero-orb');
-        orbs.forEach((o, index) => {
-            setTimeout(() => {
-                o.style.transform = 'scale(1.8)';
-                o.style.opacity = '0';
-            }, index * 25);
+        document.querySelectorAll('.aero-orb').forEach((o, i) => {
+            setTimeout(() => { o.style.transform = 'scale(1.8)'; o.style.opacity = '0'; }, i * 25);
         });
-
-        introCenterPod.style.transform = 'scale(0.8)';
-        introCenterPod.style.opacity = '0';
+        introCenterPod.style.transform = 'scale(0.8)'; introCenterPod.style.opacity = '0';
 
         setTimeout(() => {
             bootScreen.style.opacity = '0';
             setTimeout(() => {
-                bootScreen.style.display = 'none';
-                bootCompleted = true;
-                evaluateGlobalDisplayState();
+                bootScreen.style.display = 'none'; bootCompleted = true; evaluateGlobalDisplayState();
             }, 1000);
         }, 800);
     }
 
     /* =========================================================================
-       3. ACCOUNT CONFIGURATION GATEWAY ROUTER
+       3. ACCOUNT CONFIGURATION & PFP LOGIC
        ========================================================================= */
     let authModeIsLogin = true; 
     let myHandle = "";
     let myFriends = [];
     let currentChannel = "global";
     let activeListener = null;
+    let currentUserPfp = localStorage.getItem('aero_pfp') || null;
 
-    const authUsernameInput = document.getElementById('auth-username');
-    const authPasswordInput = document.getElementById('auth-password');
-    const authBoxTitle = document.getElementById('auth-box-title');
-    const authToggleLink = document.getElementById('auth-toggle-link');
     const authErrorDisplay = document.getElementById('auth-error-display');
     const myHandleDisplay = document.getElementById('my-handle-display');
-    const friendInput = document.getElementById('add-friend-input');
-    const friendContainer = document.getElementById('friend-list-container');
-    const chatMessages = document.getElementById('chat-messages');
-    const messageBox = document.getElementById('message-box');
-    const channelHeaderTitle = document.getElementById('active-channel-title');
+    const sidebarPfp = document.getElementById('sidebar-pfp');
+
+    // Restore PFP on load if available
+    if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
 
     function toggleAuthMode() {
         authModeIsLogin = !authModeIsLogin;
         authErrorDisplay.style.display = "none";
-        authUsernameInput.value = "";
-        authPasswordInput.value = "";
+        document.getElementById('auth-username').value = "";
+        document.getElementById('auth-password').value = "";
         if (authModeIsLogin) {
-            authBoxTitle.innerText = "Welcome Back";
+            document.getElementById('auth-box-title').innerText = "Welcome Back";
             document.getElementById('auth-submit-btn').innerText = "Sign In";
-            authToggleLink.innerHTML = "New to the connection? <span>Create Account</span>";
+            document.getElementById('auth-toggle-link').innerHTML = "New to the connection? <span>Create Account</span>";
         } else {
-            authBoxTitle.innerText = "Create Identity Profile";
+            document.getElementById('auth-box-title').innerText = "Create Identity Profile";
             document.getElementById('auth-submit-btn').innerText = "Register System Node";
-            authToggleLink.innerHTML = "Have account profile? <span>Sign In</span>";
+            document.getElementById('auth-toggle-link').innerHTML = "Have account profile? <span>Sign In</span>";
         }
-    }
-
-    function showAuthError(msg) {
-        authErrorDisplay.innerText = msg;
-        authErrorDisplay.style.display = "block";
     }
 
     function processAuthSubmission() {
-        if (!firebaseActive) {
-            showAuthError("Core connectivity matrix error.");
-            return;
-        }
-        const username = authUsernameInput.value.trim();
-        const password = authPasswordInput.value;
+        const username = document.getElementById('auth-username').value.trim();
+        const password = document.getElementById('auth-password').value;
         const cleanName = username.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '');
 
         if (!cleanName || password.length < 6) {
-            showAuthError("Please complete entry profile configuration. (Password min 6 characters)");
-            return;
+            authErrorDisplay.innerText = "Please complete entry profile configuration. (Password min 6 characters)";
+            authErrorDisplay.style.display = "block"; return;
         }
 
         authErrorDisplay.style.display = "none";
-
         if (authModeIsLogin) {
             firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
-                .catch(err => showAuthError("Access denied. Check configuration mapping keys."));
+                .catch(err => { authErrorDisplay.innerText = "Access denied."; authErrorDisplay.style.display = "block"; });
         } else {
             const db = firebase.database();
-            const reservationRef = db.ref('usernames/' + cleanName);
-            reservationRef.once('value').then((snapshot) => {
+            db.ref('usernames/' + cleanName).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
-                    showAuthError("Handle claimed by another active connection node.");
+                    authErrorDisplay.innerText = "Handle claimed."; authErrorDisplay.style.display = "block";
                 } else {
                     firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
-                        .then((cred) => {
-                            return reservationRef.set(cred.user.uid).then(() => {
-                                return db.ref('users/' + cred.user.uid).set({ handle: username });
-                            });
-                        })
-                        .catch(err => showAuthError(err.message));
+                        .then((cred) => db.ref('usernames/' + cleanName).set(cred.user.uid)
+                        .then(() => db.ref('users/' + cred.user.uid).set({ handle: username })))
+                        .catch(err => { authErrorDisplay.innerText = err.message; authErrorDisplay.style.display = "block"; });
                 }
             });
         }
     }
 
-    function terminateUserSession() {
-        if(firebaseActive) {
-            firebase.auth().signOut().then(() => { location.reload(); });
-        }
-    }
+    function terminateUserSession() { firebase.auth().signOut().then(() => { location.reload(); }); }
 
-    /* =========================================================================
-       4. PERSISTENCE VIEW PORTAL TRANSITIONS
-       ========================================================================= */
     function evaluateGlobalDisplayState() {
         if (!bootCompleted) return;
-        
-        const user = firebase.auth().currentUser;
-        if (user) {
+        if (firebase.auth().currentUser) {
             authScreen.style.opacity = '0';
-            setTimeout(() => {
-                authScreen.style.display = 'none';
-                appRoot.style.display = 'flex';
-                setTimeout(() => appRoot.classList.add('active'), 50);
-            }, 400);
+            setTimeout(() => { authScreen.style.display = 'none'; appRoot.style.display = 'flex'; setTimeout(() => appRoot.classList.add('active'), 50); }, 400);
         } else {
             appRoot.classList.remove('active');
-            setTimeout(() => {
-                appRoot.style.display = 'none';
-                authScreen.style.display = 'flex';
-                setTimeout(() => authScreen.style.opacity = '1', 50);
-            }, 400);
+            setTimeout(() => { appRoot.style.display = 'none'; authScreen.style.display = 'flex'; setTimeout(() => authScreen.style.opacity = '1', 50); }, 400);
         }
     }
 
@@ -540,95 +498,64 @@
                     myHandle = snap.val() || "Entity_Node";
                     myHandleDisplay.innerText = myHandle;
                     myFriends = JSON.parse(localStorage.getItem('aero_friends_' + user.uid) || '[]');
-                    
                     evaluateGlobalDisplayState();
                     renderFriendList();
                     switchChannel('global', 'Global Hub', true);
                 });
-            } else {
-                evaluateGlobalDisplayState();
-            }
+            } else evaluateGlobalDisplayState();
         });
     }
 
     /* =========================================================================
-       5. CLIENT ROUTING MATRIX (FRIENDS & DMS)
+       4. CLIENT ROUTING MATRIX & ADMIN COMMANDS
        ========================================================================= */
-    function addFriend() {
-        const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
-        if (!firebaseActive) return;
-        const u = firebase.auth().currentUser;
-        if (!target || target.toLowerCase() === myHandle.toLowerCase() || !u) return;
-
-        if (!myFriends.includes(target)) {
-            myFriends.push(target);
-            localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
-            renderFriendList();
-        }
-        friendInput.value = '';
-    }
-
-    function removeFriend(target, e) {
-        e.stopPropagation();
-        if (!firebaseActive) return;
-        const u = firebase.auth().currentUser;
-        if(!u) return;
-        myFriends = myFriends.filter(f => f !== target);
-        localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
-        if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
-        renderFriendList();
-    }
-
-    function renderFriendList() {
-        friendContainer.innerHTML = '';
-        myFriends.forEach(friend => {
-            const div = document.createElement('div');
-            const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
-            
-            div.className = 'channel-link';
-            div.id = `chan-${dmRoomId}`;
-            div.innerHTML = `
-                <span>👤 ${friend}</span>
-                <span style="color:#d63030; font-weight:800; cursor:pointer;" onclick="removeFriend('${friend}', event)">✕</span>
-            `;
-            div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
-            friendContainer.appendChild(div);
-        });
-    }
+    const chatMessages = document.getElementById('chat-messages');
+    const messageBox = document.getElementById('message-box');
 
     function switchChannel(channelId, layoutTitle, isGlobal) {
-        if (!firebaseActive) return;
         currentChannel = channelId;
-        channelHeaderTitle.innerText = layoutTitle;
-
+        document.getElementById('active-channel-title').innerText = layoutTitle;
         document.querySelectorAll('.channel-link').forEach(n => n.classList.remove('active'));
-        if (isGlobal) {
-            document.getElementById('chan-global').classList.add('active');
-        } else {
-            const node = document.getElementById(`chan-${channelId.replace('dm_', '')}`);
-            if(node) node.classList.add('active');
-        }
+        if (isGlobal) document.getElementById('chan-global').classList.add('active');
+        else { const node = document.getElementById(`chan-${channelId.replace('dm_', '')}`); if(node) node.classList.add('active'); }
 
         chatMessages.innerHTML = '';
         const db = firebase.database();
-        if (activeListener) {
-            db.ref(`channels/${activeListener.path}`).off('child_added', activeListener.fn);
-        }
+        if (activeListener) db.ref(`channels/${activeListener.path}`).off('child_added', activeListener.fn);
 
-        const listenerFn = db.ref(`channels/${channelId}`).on('child_added', (snapshot) => {
-            renderMessage(snapshot.val());
-        });
+        const listenerFn = db.ref(`channels/${channelId}`).on('child_added', (snapshot) => renderMessage(snapshot.val()));
         activeListener = { path: channelId, fn: listenerFn };
     }
 
     function sendMessage() {
-        if (!firebaseActive) return;
         const text = messageBox.value.trim();
         if (text === "") return;
 
+        // ---- ADMIN COMMAND INTERCEPTOR ----
+        if (text.startsWith('/')) {
+            if (myHandle.toLowerCase() === "admin12345") {
+                if (text === '/clear') {
+                    firebase.database().ref(`channels/${currentChannel}`).remove();
+                    chatMessages.innerHTML = ''; // Wipe visually
+                    messageBox.value = ''; return;
+                }
+                if (text.startsWith('/alert ')) {
+                    firebase.database().ref(`channels/${currentChannel}`).push({
+                        username: "🚨 SYSTEM ALERT",
+                        text: text.replace('/alert ', '').toUpperCase(),
+                        pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
+                        timestamp: Date.now()
+                    });
+                    messageBox.value = ''; return;
+                }
+            }
+        }
+
+        // Standard Message Send
         firebase.database().ref(`channels/${currentChannel}`).push({
             username: myHandle,
             text: text,
+            pfp: currentUserPfp,
             timestamp: Date.now()
         });
         messageBox.value = '';
@@ -638,9 +565,26 @@
         const msgDiv = document.createElement('div');
         const isOwn = data.username === myHandle;
         msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
+        
+        let contentHtml = '';
+        if (data.text) contentHtml += `<div class="text">${data.text}</div>`;
+        if (data.gifUrl) contentHtml += `<img src="${data.gifUrl}" class="gif-attachment">`;
+
+        let adminStyle = "";
+        if (data.username === "🚨 SYSTEM ALERT") {
+            msgDiv.style.background = "rgba(255, 85, 85, 0.2)";
+            msgDiv.style.borderColor = "#ff5555";
+            adminStyle = "color: #d63030; font-size: 0.9rem;";
+        }
+
+        const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
+
         msgDiv.innerHTML = `
-            <div class="username">${data.username}</div>
-            <div class="text">${data.text}</div>
+            <div class="msg-header">
+                <img src="${avatarSrc}" class="msg-pfp">
+                <div class="username" style="${adminStyle}">${data.username}</div>
+            </div>
+            ${contentHtml}
         `;
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -648,6 +592,82 @@
 
     document.getElementById('send-button').addEventListener('click', sendMessage);
     messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    /* =========================================================================
+       5. GIPHY SEARCH ENGINE INTEGRATION
+       ========================================================================= */
+    const gifToggleBtn = document.getElementById('gif-toggle-btn');
+    const gifPickerPanel = document.getElementById('gif-picker-panel');
+    const gifSearchInput = document.getElementById('gif-search-input');
+    const gifSearchBtn = document.getElementById('gif-search-btn');
+    const gifResultsGrid = document.getElementById('gif-results-grid');
+
+    // Public Test Key (GIPHY)
+    const GIPHY_API_KEY = "GlVGYHqc3SyCEwnnPRuEzJIcqNcN8UjA"; 
+
+    gifToggleBtn.addEventListener('click', () => { gifPickerPanel.classList.toggle('active'); });
+    gifSearchBtn.addEventListener('click', fetchGifs);
+    gifSearchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') fetchGifs(); });
+
+    async function fetchGifs() {
+        const query = gifSearchInput.value.trim() || "frutiger aero aesthetic";
+        const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=16&rating=g`;
+        
+        gifResultsGrid.innerHTML = '<span style="color:var(--text-muted); padding:10px;">Searching database...</span>';
+        try {
+            const res = await fetch(url);
+            const json = await res.json();
+            gifResultsGrid.innerHTML = '';
+            
+            if(json.data.length === 0) {
+                gifResultsGrid.innerHTML = '<span style="color:var(--text-muted);">No results found.</span>'; return;
+            }
+
+            json.data.forEach(gif => {
+                const img = document.createElement('img');
+                img.src = gif.images.fixed_height_small.url;
+                img.className = 'gif-item';
+                img.onclick = () => handleGifClick(gif.images.fixed_height.url);
+                gifResultsGrid.appendChild(img);
+            });
+        } catch(e) {
+            gifResultsGrid.innerHTML = '<span style="color:#d63030;">API Error. Service may be rate-limited.</span>';
+        }
+    }
+
+    function handleGifClick(gifUrl) {
+        if (confirm("Press OK to broadcast GIF to the chat.\nPress Cancel to set it as your Profile Picture.")) {
+            // Send to Chat
+            firebase.database().ref(`channels/${currentChannel}`).push({
+                username: myHandle,
+                text: "",
+                gifUrl: gifUrl,
+                pfp: currentUserPfp,
+                timestamp: Date.now()
+            });
+        } else {
+            // Set as Profile Picture
+            currentUserPfp = gifUrl;
+            localStorage.setItem('aero_pfp', gifUrl);
+            sidebarPfp.innerHTML = `<img src="${gifUrl}">`;
+        }
+        gifPickerPanel.classList.remove('active');
+    }
+
+    /* Friend List Utilities (Re-attached) */
+    const friendInput = document.getElementById('add-friend-input');
+    const friendContainer = document.getElementById('friend-list-container');
+    function addFriend() {
+        const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+        const u = firebase.auth().currentUser;
+        if (!target || target.toLowerCase() === myHandle.toLowerCase() || !u) return;
+        if (!myFriends.includes(target)) {
+            myFriends.push(target);
+            localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
+            renderFriendList();
+        }
+        friendInput.value = '';
+    }
 </script>
 </body>
 </html>
