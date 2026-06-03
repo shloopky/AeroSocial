@@ -528,4 +528,332 @@
 
     function evaluateGlobalDisplayState() {
         if (!bootCompleted) return;
-        if
+        if (firebase.auth().currentUser) {
+            authScreen.style.opacity = '0';
+            setTimeout(() => { authScreen.style.display = 'none'; appRoot.style.display = 'flex'; setTimeout(() => appRoot.classList.add('active'), 50); }, 400);
+        } else {
+            appRoot.classList.remove('active');
+            setTimeout(() => { appRoot.style.display = 'none'; authScreen.style.display = 'flex'; setTimeout(() => authScreen.style.opacity = '1', 50); }, 400);
+        }
+    }
+
+    if (firebaseActive) {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                firebase.database().ref('users/' + user.uid).on('value', (snap) => {
+                    const userData = snap.val() || {};
+                    myHandle = userData.handle || "Entity_Node";
+                    currentUserPfp = userData.pfp || null;
+                    
+                    myHandleDisplay.innerText = myHandle;
+                    if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
+                    else sidebarPfp.innerHTML = "🌊";
+
+                    // SYNC DATA FIX: Process raw placeholder maps securely to avoid loop failures on brand new nodes
+                    const rawFriends = userData.friends;
+                    if (rawFriends && Array.isArray(rawFriends)) {
+                        myFriends = rawFriends;
+                    } else if (rawFriends && typeof rawFriends === 'object') {
+                        myFriends = Object.values(rawFriends).filter(val => typeof val === 'string');
+                    } else {
+                        myFriends = [];
+                    }
+                    
+                    renderFriendList();
+                    
+                    if (appRoot.style.display === 'none' || !appRoot.classList.contains('active')) {
+                        evaluateGlobalDisplayState();
+                        switchChannel('global', 'Global Hub', true);
+                    }
+                });
+            } else evaluateGlobalDisplayState();
+        });
+    }
+
+    /* =========================================================================
+       4. CLIENT ROUTING MATRIX & CHAT RENDERING
+       ========================================================================= */
+    const chatMessages = document.getElementById('chat-messages');
+    const messageBox = document.getElementById('message-box');
+    const charCountDisplay = document.getElementById('char-count');
+
+    messageBox.addEventListener('input', () => {
+        const length = messageBox.value.length;
+        charCountDisplay.innerText = `${length}/500`;
+        if (length >= 500) charCountDisplay.style.color = '#d63030';
+        else charCountDisplay.style.color = 'var(--text-muted)';
+    });
+
+    function switchChannel(channelId, layoutTitle, isGlobal) {
+        currentChannel = channelId;
+        document.getElementById('active-channel-title').innerText = layoutTitle;
+        document.querySelectorAll('.channel-link').forEach(n => n.classList.remove('active'));
+        if (isGlobal) document.getElementById('chan-global').classList.add('active');
+        else { const node = document.getElementById(`chan-${channelId.replace('dm_', '')}`); if(node) node.classList.add('active'); }
+
+        chatMessages.innerHTML = '';
+        
+        if (activeListenerRef) {
+            activeListenerRef.off();
+            activeListenerRef = null;
+        }
+
+        const db = firebase.database();
+        const targetQuery = db.ref(`channels/${channelId}`).limitToLast(50);
+        
+        targetQuery.on('child_added', (snapshot) => {
+            renderMessage(snapshot.val());
+        });
+            
+        activeListenerRef = targetQuery;
+    }
+
+    function sendMessage() {
+        const text = messageBox.value.trim();
+        if (text === "" || text.length > 500) return;
+
+        if (text.startsWith('/')) {
+            if (myHandle.toLowerCase() === "admin12345") {
+                if (text === '/clear') {
+                    firebase.database().ref(`channels/${currentChannel}`).remove();
+                    chatMessages.innerHTML = ''; 
+                    messageBox.value = ''; 
+                    charCountDisplay.innerText = "0/500";
+                    return;
+                }
+                if (text.startsWith('/alert ')) {
+                    firebase.database().ref(`channels/${currentChannel}`).push({
+                        username: "🚨 SYSTEM ALERT",
+                        text: text.replace('/alert ', '').toUpperCase(),
+                        pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
+                        timestamp: Date.now()
+                    });
+                    messageBox.value = ''; 
+                    charCountDisplay.innerText = "0/500";
+                    return;
+                }
+            }
+        }
+
+        firebase.database().ref(`channels/${currentChannel}`).push({
+            username: myHandle,
+            text: text,
+            pfp: currentUserPfp,
+            timestamp: Date.now()
+        });
+        messageBox.value = '';
+        charCountDisplay.innerText = "0/500";
+    }
+
+    function renderMessage(data) {
+        if(!data) return;
+        const msgDiv = document.createElement('div');
+        const isOwn = data.username === myHandle;
+        msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
+        
+        let contentHtml = '';
+        if (data.text) contentHtml += `<div class="text">${data.text}</div>`;
+        
+        const displayMedia = data.mediaUrl || data.gifUrl;
+        if (displayMedia) contentHtml += `<img src="${displayMedia}" class="media-attachment">`;
+
+        let adminStyle = "";
+        let isSystem = false;
+        if (data.username === "🚨 SYSTEM ALERT") {
+            msgDiv.style.background = "rgba(255, 85, 85, 0.2)";
+            msgDiv.style.borderColor = "#ff5555";
+            adminStyle = "color: #d63030; font-size: 0.9rem;";
+            isSystem = true;
+        }
+
+        const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = "msg-header";
+        headerDiv.innerHTML = `
+            <img src="${avatarSrc}" class="msg-pfp">
+            <div class="username" style="${adminStyle}">${data.username}</div>
+        `;
+
+        if (!isSystem && !isOwn) {
+            headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc);
+        } else if (!isSystem && isOwn) {
+            headerDiv.onclick = () => openSettings(); 
+        }
+
+        msgDiv.appendChild(headerDiv);
+        
+        if (contentHtml !== '') {
+            const contentWrapper = document.createElement('div');
+            contentWrapper.innerHTML = contentHtml;
+            msgDiv.appendChild(contentWrapper);
+        }
+
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    document.getElementById('send-button').addEventListener('click', sendMessage);
+    messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    /* =========================================================================
+       5. DRAG & DROP MEDIA LAYER
+       ========================================================================= */
+    const chatDeck = document.querySelector('.chat-deck');
+    const dragOverlay = document.getElementById('drag-overlay');
+
+    chatDeck.addEventListener('dragenter', (e) => { e.preventDefault(); dragOverlay.style.display = 'flex'; });
+    chatDeck.addEventListener('dragover', (e) => { e.preventDefault(); });
+    dragOverlay.addEventListener('dragleave', () => { dragOverlay.style.display = 'none'; });
+
+    chatDeck.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragOverlay.style.display = 'none';
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles.length > 0) {
+            const targetFile = droppedFiles[0];
+            if (targetFile.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) { broadcastMediaNode(event.target.result); };
+                reader.readAsDataURL(targetFile);
+            }
+        }
+    });
+
+    function broadcastMediaNode(base64Data) {
+        if (!firebaseActive) return;
+        firebase.database().ref(`channels/${currentChannel}`).push({
+            username: myHandle,
+            text: "",
+            mediaUrl: base64Data,
+            pfp: currentUserPfp,
+            timestamp: Date.now()
+        });
+    }
+
+    /* =========================================================================
+       6. MINI-PROFILE & SETTINGS CONTROLLERS
+       ========================================================================= */
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsNameInput = document.getElementById('settings-name-input');
+    const settingsPfpPreview = document.getElementById('settings-pfp-preview');
+    let holdingBase64Pfp = null;
+
+    function openSettings() {
+        if(!firebaseActive) return;
+        settingsNameInput.value = myHandle;
+        holdingBase64Pfp = currentUserPfp;
+        
+        if(holdingBase64Pfp) settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
+        else settingsPfpPreview.innerHTML = "🌊";
+        
+        settingsModal.style.display = 'flex';
+    }
+
+    function closeSettings() { settingsModal.style.display = 'none'; }
+
+    function previewSettingsPfp(inputElement) {
+        if (inputElement.files && inputElement.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                holdingBase64Pfp = e.target.result;
+                settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
+            };
+            reader.readAsDataURL(inputElement.files[0]);
+        }
+    }
+
+    function saveSettingsChanges() {
+        const structuralName = settingsNameInput.value.trim();
+        const activeUser = firebase.auth().currentUser;
+        if (!structuralName || !activeUser) return;
+
+        firebase.database().ref('users/' + activeUser.uid).update({
+            handle: structuralName,
+            pfp: holdingBase64Pfp || ""
+        }).then(() => { closeSettings(); }).catch(() => { alert("Error syncing database infrastructure changes."); });
+    }
+
+    let targetMiniProfileHandle = "";
+    const miniProfileModal = document.getElementById('mini-profile-modal');
+    
+    function openMiniProfile(username, pfpUrl) {
+        targetMiniProfileHandle = username;
+        document.getElementById('mini-profile-name').innerText = username;
+        document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        miniProfileModal.style.display = 'flex';
+    }
+
+    function closeMiniProfile() {
+        miniProfileModal.style.display = 'none';
+        targetMiniProfileHandle = "";
+    }
+
+    function actionAddFriend() {
+        if (!targetMiniProfileHandle) return;
+        submitFriendToDatabase(targetMiniProfileHandle);
+        closeMiniProfile();
+    }
+
+    function actionDMUser() {
+        if (!targetMiniProfileHandle) return;
+        const target = targetMiniProfileHandle;
+        closeMiniProfile();
+        
+        const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+        switchChannel(`dm_${dmRoomId}`, `DM // ${target}`, false);
+    }
+
+    /* =========================================================================
+       7. LINKS AND NETWORK SCROLLER UTILITIES (FIREBASE SYNCED)
+       ========================================================================= */
+    const friendInput = document.getElementById('add-friend-input');
+    const friendContainer = document.getElementById('friend-list-container');
+
+    function manualAddFriend() {
+        const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+        if (!target || target.toLowerCase() === myHandle.toLowerCase()) return;
+        submitFriendToDatabase(target);
+        friendInput.value = '';
+    }
+
+    function submitFriendToDatabase(friendName) {
+        const u = firebase.auth().currentUser;
+        if (!u) return;
+        
+        const alreadyExists = myFriends.some(f => f.toLowerCase() === friendName.toLowerCase());
+        if (!alreadyExists) {
+            const newFriendsList = [...myFriends, friendName];
+            firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList);
+        }
+    }
+
+    function removeFriend(target, e) {
+        e.stopPropagation();
+        const u = firebase.auth().currentUser;
+        if(!u) return;
+        
+        const newFriendsList = myFriends.filter(f => f !== target);
+        firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList).then(() => {
+            if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
+        });
+    }
+
+    function renderFriendList() {
+        friendContainer.innerHTML = '';
+        myFriends.forEach(friend => {
+            const div = document.createElement('div');
+            const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+            div.className = 'channel-link';
+            div.id = `chan-${dmRoomId}`;
+            div.innerHTML = `
+                <span>👤 ${friend}</span>
+                <span style="color:#d63030; font-weight:800; cursor:pointer;" title="Remove Connection" onclick="removeFriend('${friend}', event)">✕</span>
+            `;
+            div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
+            friendContainer.appendChild(div);
+        });
+    }
+</script>
+</body>
+</html>
