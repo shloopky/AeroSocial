@@ -210,7 +210,7 @@
         /* Chat Controls Footer */
         .chat-controls-footer {
             padding: 20px 24px; background: rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 12px; z-index: 10;
+            border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 12px; z-index: 10; align-items: center;
         }
 
         .aero-input {
@@ -230,6 +230,8 @@
         }
         .gel-btn:hover { box-shadow: 0 6px 16px rgba(0,120,215,0.3); transform: translateY(-1px); }
         .gel-btn:active { transform: scale(0.98); }
+
+        .char-counter { font-size: 0.75rem; color: var(--text-muted); margin-right: 10px; font-weight: 600; min-width: 45px; text-align: right; }
 
         /* --- PRESET INTERFACE OVERLAYS --- */
         #drag-overlay {
@@ -271,7 +273,7 @@
         <div class="auth-header-title" id="auth-box-title">Welcome Back</div>
         <div class="error-banner" id="auth-error-display"></div>
         
-        <input type="text" id="auth-username" class="aero-input" placeholder="Username Handle" autocomplete="off">
+        <input type="text" id="auth-username" class="aero-input" placeholder="Username Handle" autocomplete="off" maxlength="20">
         <input type="password" id="auth-password" class="aero-input" placeholder="Security Password">
         
         <button class="gel-btn" id="auth-submit-btn" onclick="processAuthSubmission()">Sign In</button>
@@ -297,7 +299,7 @@
             </div>
             
             <label style="font-size:0.8rem; font-weight:800; color:var(--text-main); margin-bottom:-8px; margin-left: 5px;">DISPLAY NAME</label>
-            <input type="text" id="settings-name-input" class="aero-input" placeholder="Display Name">
+            <input type="text" id="settings-name-input" class="aero-input" placeholder="Display Name" maxlength="20">
             
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button class="gel-btn" style="flex:1; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); color: var(--text-main); border: 1px solid rgba(0,0,0,0.15);" onclick="closeSettings()">Cancel</button>
@@ -365,7 +367,8 @@
         </div>
 
         <div class="chat-controls-footer">
-            <input type="text" id="message-box" class="aero-input" placeholder="Type a message stream or drop images here..." style="flex: 1;">
+            <input type="text" id="message-box" class="aero-input" placeholder="Type a message (max 500 chars)..." style="flex: 1;" maxlength="500">
+            <span id="char-count" class="char-counter">0/500</span>
             <button class="gel-btn" id="send-button">Broadcast</button>
         </div>
     </div>
@@ -555,6 +558,15 @@
        ========================================================================= */
     const chatMessages = document.getElementById('chat-messages');
     const messageBox = document.getElementById('message-box');
+    const charCountDisplay = document.getElementById('char-count');
+
+    // Update Character Counter Live
+    messageBox.addEventListener('input', () => {
+        const length = messageBox.value.length;
+        charCountDisplay.innerText = `${length}/500`;
+        if (length >= 500) charCountDisplay.style.color = '#d63030';
+        else charCountDisplay.style.color = 'var(--text-muted)';
+    });
 
     function switchChannel(channelId, layoutTitle, isGlobal) {
         currentChannel = channelId;
@@ -567,20 +579,27 @@
         const db = firebase.database();
         if (activeListener) db.ref(`channels/${activeListener.path}`).off('child_added', activeListener.fn);
 
-        const listenerFn = db.ref(`channels/${channelId}`).on('child_added', (snapshot) => renderMessage(snapshot.val()));
+        // PERFORMANCE FIX: Only grab the latest 50 messages based on timestamp
+        const listenerFn = db.ref(`channels/${channelId}`)
+            .orderByChild('timestamp')
+            .limitToLast(15)
+            .on('child_added', (snapshot) => renderMessage(snapshot.val()));
+            
         activeListener = { path: channelId, fn: listenerFn };
     }
 
     function sendMessage() {
         const text = messageBox.value.trim();
-        if (text === "") return;
+        if (text === "" || text.length > 500) return; // Hardstop for limits
 
         if (text.startsWith('/')) {
             if (myHandle.toLowerCase() === "admin12345") {
                 if (text === '/clear') {
                     firebase.database().ref(`channels/${currentChannel}`).remove();
                     chatMessages.innerHTML = ''; 
-                    messageBox.value = ''; return;
+                    messageBox.value = ''; 
+                    charCountDisplay.innerText = "0/500";
+                    return;
                 }
                 if (text.startsWith('/alert ')) {
                     firebase.database().ref(`channels/${currentChannel}`).push({
@@ -589,7 +608,9 @@
                         pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
                         timestamp: Date.now()
                     });
-                    messageBox.value = ''; return;
+                    messageBox.value = ''; 
+                    charCountDisplay.innerText = "0/500";
+                    return;
                 }
             }
         }
@@ -601,6 +622,7 @@
             timestamp: Date.now()
         });
         messageBox.value = '';
+        charCountDisplay.innerText = "0/500";
     }
 
     function renderMessage(data) {
