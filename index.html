@@ -129,16 +129,16 @@
             padding: 12px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px;
         }
-        .profile-meta { display: flex; align-items: center; gap: 10px; }
+        .profile-meta { display: flex; align-items: center; gap: 10px; position: relative; }
         
         .avatar-sphere {
             width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gloss);
             display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
             box-shadow: 0 2px 8px rgba(0,120,215,0.3); overflow: hidden; flex-shrink: 0;
         }
-        .avatar-sphere img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-sphere img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         
-        .identity-handle { color: var(--text-main); font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; }
+        .identity-handle { color: var(--text-main); font-weight: 700; font-size: 0.95rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .deck-section-title {
             font-size: 0.75rem; color: var(--text-muted); font-weight: 800;
@@ -202,29 +202,7 @@
         .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
         .msg.own .username { color: rgba(255,255,255,0.9); }
         .msg .text { font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
-        .msg .gif-attachment { max-width: 220px; border-radius: 10px; margin-top: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-
-        /* --- GIF PANEL UI --- */
-        #gif-picker-panel {
-            position: absolute; bottom: 85px; left: 24px; right: 24px;
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.8); border-radius: 16px;
-            padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: none; flex-direction: column; z-index: 100;
-        }
-        #gif-picker-panel.active { display: flex; animation: bubblePop 0.2s ease; }
-        
-        #gif-results-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 10px; max-height: 220px; overflow-y: auto; margin-top: 10px;
-            scrollbar-width: thin;
-        }
-        
-        .gif-item {
-            width: 100%; height: 100px; object-fit: cover; border-radius: 8px;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .gif-item:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,120,215,0.3); }
+        .msg .media-attachment { max-width: 260px; max-height: 300px; border-radius: 12px; margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
 
         /* Chat Controls Footer */
         .chat-controls-footer {
@@ -249,6 +227,18 @@
         }
         .gel-btn:hover { box-shadow: 0 6px 16px rgba(0,120,215,0.3); transform: translateY(-1px); }
         .gel-btn:active { transform: scale(0.98); }
+
+        /* --- PRESET INTERFACE OVERLAYS --- */
+        #drag-overlay {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: none; align-items: center; justify-content: center; z-index: 99; border-radius: 0px 0px 24px 0px; pointer-events: none;
+            border: 2px dashed rgba(0,120,215,0.4);
+        }
+
+        #settings-modal {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            display: none; align-items: center; justify-content: center; z-index: 200; border-radius: 24px;
+        }
 
         @keyframes bubblePop {
             0% { transform: scale(0.8); opacity: 0; }
@@ -284,6 +274,29 @@
 </div>
 
 <div id="app-root" class="glass-glare">
+    
+    <div id="settings-modal">
+        <div class="auth-card glass-glare" style="width: 350px; box-shadow: 0 30px 70px rgba(0,0,0,0.25);">
+            <div class="auth-header-title" style="font-size:1.3rem;">Identity parameters</div>
+            
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin: 10px 0;">
+                <div class="avatar-sphere" id="settings-pfp-preview" style="width:75px; height:75px; font-size:2rem;">🌊</div>
+                <label class="gel-btn" style="padding:6px 14px; font-size:0.8rem; border-radius:12px; background: rgba(255,255,255,0.5); color: var(--text-main); border:1px solid rgba(0,0,0,0.15);">
+                    Change Avatar
+                    <input type="file" id="settings-file-input" accept="image/*" style="display:none;" onchange="previewSettingsPfp(this)">
+                </label>
+            </div>
+            
+            <label style="font-size:0.8rem; font-weight:800; color:var(--text-main); margin-bottom:-8px; margin-left: 5px;">DISPLAY NAME</label>
+            <input type="text" id="settings-name-input" class="aero-input" placeholder="Display Name">
+            
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="gel-btn" style="flex:1; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); color: var(--text-main); border: 1px solid rgba(0,0,0,0.15);" onclick="closeSettings()">Cancel</button>
+                <button class="gel-btn" style="flex:1;" onclick="saveSettingsChanges()">Save</button>
+            </div>
+        </div>
+    </div>
+
     <div class="sidebar-deck">
         <div class="sidebar-header">AeroOS</div>
         
@@ -293,6 +306,7 @@
                 <div class="profile-meta">
                     <div class="avatar-sphere" id="sidebar-pfp">🌊</div>
                     <span class="identity-name identity-handle" id="my-handle-display">Connecting...</span>
+                    <span style="cursor:pointer; font-size:1.1rem; margin-left:auto; transition: transform 0.3s; user-select:none;" onclick="openSettings()" onmouseover="this.style.transform='rotate(45deg)'" onmouseout="this.style.transform='rotate(0deg)'">⚙️</span>
                 </div>
                 <button class="gel-btn" style="padding:6px; font-size:0.75rem; width:100%; border-radius:10px; background: linear-gradient(180deg, #ff8888 0%, #d63030 100%); box-shadow:none;" onclick="terminateUserSession()">Disconnect Node</button>
             </div>
@@ -319,17 +333,15 @@
         
         <div id="chat-messages"></div>
         
-        <div id="gif-picker-panel" class="glass-glare">
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="gif-search-input" class="aero-input" placeholder="Search GIPHY..." style="flex:1; padding:8px 12px;">
-                <button class="gel-btn" id="gif-search-btn" style="padding:8px 18px;">Search</button>
+        <div id="drag-overlay">
+            <div style="text-align: center; color: var(--primary); font-weight: 800; font-size: 1.2rem; text-shadow: 0 2px 10px rgba(255,255,255,0.8);">
+                <div style="font-size: 3.5rem; margin-bottom: 10px; animation: floatUp 2s ease infinite alternate;">💧</div>
+                DROP IMAGE OR GIF TO BROADCAST
             </div>
-            <div id="gif-results-grid"></div>
         </div>
 
         <div class="chat-controls-footer">
-            <button class="gel-btn" id="gif-toggle-btn" style="padding: 10px 18px; border-radius:18px;">GIF</button>
-            <input type="text" id="message-box" class="aero-input" placeholder="Type a message or command..." style="flex: 1;">
+            <input type="text" id="message-box" class="aero-input" placeholder="Type a message stream or drop images here..." style="flex: 1;">
             <button class="gel-btn" id="send-button">Broadcast</button>
         </div>
     </div>
@@ -417,21 +429,18 @@
     }
 
     /* =========================================================================
-       3. ACCOUNT CONFIGURATION & PFP LOGIC
+       3. ACCOUNT CONFIGURATION MATRIX
        ========================================================================= */
     let authModeIsLogin = true; 
     let myHandle = "";
     let myFriends = [];
     let currentChannel = "global";
     let activeListener = null;
-    let currentUserPfp = localStorage.getItem('aero_pfp') || null;
+    let currentUserPfp = null;
 
     const authErrorDisplay = document.getElementById('auth-error-display');
     const myHandleDisplay = document.getElementById('my-handle-display');
     const sidebarPfp = document.getElementById('sidebar-pfp');
-
-    // Restore PFP on load if available
-    if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
 
     function toggleAuthMode() {
         authModeIsLogin = !authModeIsLogin;
@@ -471,7 +480,7 @@
                 } else {
                     firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
                         .then((cred) => db.ref('usernames/' + cleanName).set(cred.user.uid)
-                        .then(() => db.ref('users/' + cred.user.uid).set({ handle: username })))
+                        .then(() => db.ref('users/' + cred.user.uid).set({ handle: username, pfp: "" })))
                         .catch(err => { authErrorDisplay.innerText = err.message; authErrorDisplay.style.display = "block"; });
                 }
             });
@@ -494,9 +503,15 @@
     if (firebaseActive) {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                firebase.database().ref('users/' + user.uid + '/handle').once('value').then((snap) => {
-                    myHandle = snap.val() || "Entity_Node";
+                firebase.database().ref('users/' + user.uid).once('value').then((snap) => {
+                    const userData = snap.val() || {};
+                    myHandle = userData.handle || "Entity_Node";
+                    currentUserPfp = userData.pfp || null;
+                    
                     myHandleDisplay.innerText = myHandle;
+                    if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
+                    else sidebarPfp.innerHTML = "🌊";
+
                     myFriends = JSON.parse(localStorage.getItem('aero_friends_' + user.uid) || '[]');
                     evaluateGlobalDisplayState();
                     renderFriendList();
@@ -536,7 +551,7 @@
             if (myHandle.toLowerCase() === "admin12345") {
                 if (text === '/clear') {
                     firebase.database().ref(`channels/${currentChannel}`).remove();
-                    chatMessages.innerHTML = ''; // Wipe visually
+                    chatMessages.innerHTML = ''; 
                     messageBox.value = ''; return;
                 }
                 if (text.startsWith('/alert ')) {
@@ -551,7 +566,7 @@
             }
         }
 
-        // Standard Message Send
+        // Standard Text Send
         firebase.database().ref(`channels/${currentChannel}`).push({
             username: myHandle,
             text: text,
@@ -562,13 +577,17 @@
     }
 
     function renderMessage(data) {
+        if(!data) return;
         const msgDiv = document.createElement('div');
         const isOwn = data.username === myHandle;
         msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
         
         let contentHtml = '';
         if (data.text) contentHtml += `<div class="text">${data.text}</div>`;
-        if (data.gifUrl) contentHtml += `<img src="${data.gifUrl}" class="gif-attachment">`;
+        
+        // Handles dropped base64 images/gifs or previously cached formats
+        const displayMedia = data.mediaUrl || data.gifUrl;
+        if (displayMedia) contentHtml += `<img src="${displayMedia}" class="media-attachment">`;
 
         let adminStyle = "";
         if (data.username === "🚨 SYSTEM ALERT") {
@@ -594,69 +613,115 @@
     messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
     /* =========================================================================
-       5. GIPHY SEARCH ENGINE INTEGRATION
+       5. DRAG & DROP MEDIA LAYER
        ========================================================================= */
-    const gifToggleBtn = document.getElementById('gif-toggle-btn');
-    const gifPickerPanel = document.getElementById('gif-picker-panel');
-    const gifSearchInput = document.getElementById('gif-search-input');
-    const gifSearchBtn = document.getElementById('gif-search-btn');
-    const gifResultsGrid = document.getElementById('gif-results-grid');
+    const chatDeck = document.querySelector('.chat-deck');
+    const dragOverlay = document.getElementById('drag-overlay');
 
-    // Public Test Key (GIPHY)
-    const GIPHY_API_KEY = "GlVGYHqc3SyCEwnnPRuEzJIcqNcN8UjA"; 
+    chatDeck.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dragOverlay.style.display = 'flex';
+    });
 
-    gifToggleBtn.addEventListener('click', () => { gifPickerPanel.classList.toggle('active'); });
-    gifSearchBtn.addEventListener('click', fetchGifs);
-    gifSearchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') fetchGifs(); });
+    chatDeck.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
 
-    async function fetchGifs() {
-        const query = gifSearchInput.value.trim() || "frutiger aero aesthetic";
-        const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=16&rating=g`;
+    dragOverlay.addEventListener('dragleave', () => {
+        dragOverlay.style.display = 'none';
+    });
+
+    chatDeck.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragOverlay.style.display = 'none';
         
-        gifResultsGrid.innerHTML = '<span style="color:var(--text-muted); padding:10px;">Searching database...</span>';
-        try {
-            const res = await fetch(url);
-            const json = await res.json();
-            gifResultsGrid.innerHTML = '';
-            
-            if(json.data.length === 0) {
-                gifResultsGrid.innerHTML = '<span style="color:var(--text-muted);">No results found.</span>'; return;
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles.length > 0) {
+            const targetFile = droppedFiles[0];
+            if (targetFile.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    broadcastMediaNode(event.target.result);
+                };
+                reader.readAsDataURL(targetFile);
             }
+        }
+    });
 
-            json.data.forEach(gif => {
-                const img = document.createElement('img');
-                img.src = gif.images.fixed_height_small.url;
-                img.className = 'gif-item';
-                img.onclick = () => handleGifClick(gif.images.fixed_height.url);
-                gifResultsGrid.appendChild(img);
-            });
-        } catch(e) {
-            gifResultsGrid.innerHTML = '<span style="color:#d63030;">API Error. Service may be rate-limited.</span>';
+    function broadcastMediaNode(base64Data) {
+        if (!firebaseActive) return;
+        firebase.database().ref(`channels/${currentChannel}`).push({
+            username: myHandle,
+            text: "",
+            mediaUrl: base64Data,
+            pfp: currentUserPfp,
+            timestamp: Date.now()
+        });
+    }
+
+    /* =========================================================================
+       6. GLASSMORPHIC SETTINGS AREA CONTROLLER
+       ========================================================================= */
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsNameInput = document.getElementById('settings-name-input');
+    const settingsPfpPreview = document.getElementById('settings-pfp-preview');
+    let holdingBase64Pfp = null;
+
+    function openSettings() {
+        if(!firebaseActive) return;
+        settingsNameInput.value = myHandle;
+        holdingBase64Pfp = currentUserPfp;
+        
+        if(holdingBase64Pfp) settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
+        else settingsPfpPreview.innerHTML = "🌊";
+        
+        settingsModal.style.display = 'flex';
+    }
+
+    function closeSettings() {
+        settingsModal.style.display = 'none';
+    }
+
+    function previewSettingsPfp(inputElement) {
+        if (inputElement.files && inputElement.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                holdingBase64Pfp = e.target.result;
+                settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
+            };
+            reader.readAsDataURL(inputElement.files[0]);
         }
     }
 
-    function handleGifClick(gifUrl) {
-        if (confirm("Press OK to broadcast GIF to the chat.\nPress Cancel to set it as your Profile Picture.")) {
-            // Send to Chat
-            firebase.database().ref(`channels/${currentChannel}`).push({
-                username: myHandle,
-                text: "",
-                gifUrl: gifUrl,
-                pfp: currentUserPfp,
-                timestamp: Date.now()
-            });
-        } else {
-            // Set as Profile Picture
-            currentUserPfp = gifUrl;
-            localStorage.setItem('aero_pfp', gifUrl);
-            sidebarPfp.innerHTML = `<img src="${gifUrl}">`;
-        }
-        gifPickerPanel.classList.remove('active');
+    function saveSettingsChanges() {
+        const structuralName = settingsNameInput.value.trim();
+        const activeUser = firebase.auth().currentUser;
+        
+        if (!structuralName || !activeUser) return;
+
+        firebase.database().ref('users/' + activeUser.uid).update({
+            handle: structuralName,
+            pfp: holdingBase64Pfp || ""
+        }).then(() => {
+            myHandle = structuralName;
+            currentUserPfp = holdingBase64Pfp;
+            myHandleDisplay.innerText = myHandle;
+            
+            if (currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
+            else sidebarPfp.innerHTML = "🌊";
+            
+            closeSettings();
+        }).catch(() => {
+            alert("Error syncing database infrastructure changes.");
+        });
     }
 
-    /* Friend List Utilities (Re-attached) */
+    /* =========================================================================
+       7. LINKS AND NETWORK SCROLLER UTILITIES
+       ========================================================================= */
     const friendInput = document.getElementById('add-friend-input');
     const friendContainer = document.getElementById('friend-list-container');
+
     function addFriend() {
         const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
         const u = firebase.auth().currentUser;
@@ -667,6 +732,32 @@
             renderFriendList();
         }
         friendInput.value = '';
+    }
+
+    function removeFriend(target, e) {
+        e.stopPropagation();
+        const u = firebase.auth().currentUser;
+        if(!u) return;
+        myFriends = myFriends.filter(f => f !== target);
+        localStorage.setItem('aero_friends_' + u.uid, JSON.stringify(myFriends));
+        if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
+        renderFriendList();
+    }
+
+    function renderFriendList() {
+        friendContainer.innerHTML = '';
+        myFriends.forEach(friend => {
+            const div = document.createElement('div');
+            const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+            div.className = 'channel-link';
+            div.id = `chan-${dmRoomId}`;
+            div.innerHTML = `
+                <span>👤 ${friend}</span>
+                <span style="color:#d63030; font-weight:800; cursor:pointer;" onclick="removeFriend('${friend}', event)">✕</span>
+            `;
+            div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
+            friendContainer.appendChild(div);
+        });
     }
 </script>
 </body>
