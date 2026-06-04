@@ -13,6 +13,7 @@
             --text-main: #0f2a4a;
             --text-muted: #4e6d8c;
             --gloss-layer: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%);
+            --notif-color: linear-gradient(180deg, #ff6b6b 0%, #e60000 100%);
         }
 
         body, html {
@@ -152,12 +153,22 @@
             padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; cursor: pointer;
             font-size: 0.9rem; font-weight: 600; display: flex; justify-content: space-between;
             align-items: center; color: var(--text-main); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
         }
         .channel-link:hover, .channel-link.active {
             background: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.8);
             transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,120,215,0.1);
         }
         .channel-link.active { color: var(--primary); }
+
+        /* Glossy Notification Badge Styling */
+        .notif-badge {
+            background: var(--notif-color); color: white; font-size: 0.75rem;
+            font-weight: 800; padding: 2px 7px; border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(230, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.25); min-width: 10px; text-align: center;
+            margin-left: 8px; display: inline-block; animation: bubblePop 0.3s ease;
+        }
 
         .friend-input-box { display: flex; gap: 6px; margin-bottom: 15px; }
         .friend-input-box input {
@@ -345,7 +356,7 @@
             </div>
             <div id="dynamic-channels-list-container">
                 <div class="channel-link active" id="chan-global" onclick="switchChannel('global', 'Global Hub', true)">
-                    <span>🌐 Global Mainframe</span>
+                    <span class="chan-label">🌐 Global Mainframe</span>
                 </div>
             </div>
 
@@ -631,6 +642,7 @@
                         evaluateGlobalDisplayState();
                         syncChannelsListListener();
                         switchChannel('global', 'Global Hub', true);
+                        setupGlobalNotificationTrackers();
                     }
                 });
             } else evaluateGlobalDisplayState();
@@ -641,12 +653,12 @@
        5. CHANNEL CREATION PIPELINE WITH ONE-ROOM ENFORCEMENT & DELETIONS
        ========================================================================= */
     const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
+    let dynamicChannelsCache = {};
     
     function triggerChannelCreationWizard() {
         const u = firebase.auth().currentUser;
         if (!u) return;
 
-        // QUERY MATRIX ENFORCEMENT: SCAN INDEX TO PREVENT MULTIPLE CHANNELS
         firebase.database().ref('channels_list').once('value').then((snapshot) => {
             const data = snapshot.val();
             let ownedCount = 0;
@@ -685,7 +697,13 @@
         const confirmation = confirm(`Are you completely sure you want to permanently delete the channel reference "${channelId}" and all its logs?`);
         if (!confirmation) return;
 
-        // COMPREHENSIVE FLUSH OPERATION
+        if(channelListeners[channelId]) {
+            firebase.database().ref(`channels/${channelId}`).off('child_added', channelListeners[channelId]);
+            delete channelListeners[channelId];
+        }
+        delete unreadCounts[channelId];
+        updateGlobalTitleBanner();
+
         firebase.database().ref('channels_list/' + channelId).remove();
         firebase.database().ref('channels/' + channelId).remove().then(() => {
             if (currentChannel === channelId) {
@@ -696,44 +714,123 @@
 
     function syncChannelsListListener() {
         firebase.database().ref('channels_list').on('value', (snapshot) => {
-            dynamicChannelsContainer.innerHTML = `
-                <div class="channel-link active" id="chan-global" onclick="switchChannel('global', 'Global Hub', true)">
-                    <span>🌐 Global Mainframe</span>
+            dynamicChannelsCache = snapshot.val() || {};
+            renderChannelsSidebarDOM();
+        });
+    }
+
+    function renderChannelsSidebarDOM() {
+        dynamicChannelsContainer.innerHTML = `
+            <div class="channel-link ${currentChannel === 'global' ? 'active' : ''}" id="chan-global" onclick="switchChannel('global', 'Global Hub', true)">
+                <span class="chan-label">🌐 Global Mainframe</span>
+                ${renderBadgeHtml('global')}
+            </div>
+        `;
+        
+        Object.values(dynamicChannelsCache).forEach(chan => {
+            const div = document.createElement('div');
+            div.className = `channel-link ${currentChannel === chan.id ? 'active' : ''}`;
+            div.id = `chan-${chan.id}`;
+            
+            let deleteIconHtml = "";
+            if (myHandle === "DAMXIAFAN69") {
+                deleteIconHtml = `<span style="color:#ff5555; margin-left:8px; padding:0 5px; font-weight:bold; cursor:pointer; z-index:20;" title="Delete Channel Network" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
+            }
+
+            div.innerHTML = `
+                <span class="chan-label">💬 ${chan.name}</span> 
+                <div style="display:flex; align-items:center; margin-left:auto;">
+                    ${renderBadgeHtml(chan.id)}
+                    ${deleteIconHtml}
                 </div>
             `;
-            const data = snapshot.val();
-            if (data) {
-                Object.values(data).forEach(chan => {
-                    const div = document.createElement('div');
-                    div.className = 'channel-link';
-                    div.id = `chan-${chan.id}`;
-                    
-                    // ADMIN IDENTIFIER DETECTION MATRIX FOR ACTIONABLE ELEMENT
-                    let deleteIconHtml = "";
-                    if (myHandle === "DAMXIAFAN69") {
-                        deleteIconHtml = `<span style="color:#ff5555; margin-left:auto; padding:0 5px; font-weight:bold; cursor:pointer;" title="Delete Channel Network" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
-                    }
-
-                    div.innerHTML = `<span>💬 ${chan.name}</span> ${deleteIconHtml}`;
-                    div.onclick = () => switchChannel(chan.id, chan.name, false);
-                    dynamicChannelsContainer.appendChild(div);
-                });
-                const activeNode = document.getElementById(`chan-${currentChannel}`);
-                if (activeNode) {
-                    document.querySelectorAll('.channel-link').forEach(n => n.classList.remove('active'));
-                    activeNode.classList.add('active');
-                }
-            }
+            div.onclick = () => switchChannel(chan.id, chan.name, false);
+            dynamicChannelsContainer.appendChild(div);
         });
     }
 
     /* =========================================================================
-       6. CHAT ROUTING & MULTIMEDIA PREVIEW PIPELINE
+       6. CHAT ROUTING, MULTIMEDIA PREVIEW, & NOTIFICATION LOGIC
        ========================================================================= */
     const chatMessages = document.getElementById('chat-messages');
     const messageBox = document.getElementById('message-box');
     const charCountDisplay = document.getElementById('char-count');
     let isInitialLoad = true;
+
+    // Notification State Tracking Metrics
+    let unreadCounts = {};
+    let channelListeners = {};
+    let channelTracksInitialized = {};
+
+    function setupGlobalNotificationTrackers() {
+        trackChannelNotifications('global');
+        
+        firebase.database().ref('channels_list').on('child_added', (snap) => {
+            const chan = snap.val();
+            if(chan && chan.id) trackChannelNotifications(chan.id);
+        });
+
+        firebase.database().ref('users/' + firebase.auth().currentUser.uid).on('value', (snap) => {
+            const userData = snap.val() || {};
+            let friendsList = [];
+            if (userData.friends && Array.isArray(userData.friends)) friendsList = userData.friends;
+            else if (userData.friends && typeof userData.friends === 'object') friendsList = Object.values(userData.friends);
+            
+            friendsList.forEach(friend => {
+                if (typeof friend === 'string') {
+                    const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+                    trackChannelNotifications(`dm_${dmRoomId}`);
+                }
+            });
+        });
+    }
+
+    function trackChannelNotifications(channelId) {
+        if (channelListeners[channelId]) return;
+        
+        unreadCounts[channelId] = 0;
+        channelTracksInitialized[channelId] = false;
+        
+        const dbRef = firebase.database().ref(`channels/${channelId}`);
+        
+        dbRef.once('value').then(() => {
+            channelTracksInitialized[channelId] = true;
+        });
+
+        channelListeners[channelId] = dbRef.on('child_added', (snapshot) => {
+            if (!channelTracksInitialized[channelId]) return;
+            
+            if (currentChannel !== channelId) {
+                unreadCounts[channelId]++;
+                playSyntheticPing('drop');
+                updateGlobalTitleBanner();
+                
+                if (channelId.startsWith('dm_')) {
+                    renderFriendList();
+                } else {
+                    renderChannelsSidebarDOM();
+                }
+            }
+        });
+    }
+
+    function renderBadgeHtml(channelId) {
+        const count = unreadCounts[channelId] || 0;
+        return count > 0 ? `<span class="notif-badge">${count}</span>` : '';
+    }
+
+    function updateGlobalTitleBanner() {
+        let totalUnread = 0;
+        Object.keys(unreadCounts).forEach(key => {
+            totalUnread += unreadCounts[key] || 0;
+        });
+
+        if (totalUnread > 0) {
+            document.title = `(${totalUnread}) AeroSocial - Digital Horizon`;
+        } else {
+            document.title = `AeroSocial - Digital Horizon`;
+        }
+    }
 
     messageBox.addEventListener('input', () => {
         const length = messageBox.value.length;
@@ -745,11 +842,14 @@
     function switchChannel(channelId, layoutTitle, isGlobal) {
         currentChannel = channelId;
         isInitialLoad = true;
-        document.getElementById('active-channel-title').innerText = layoutTitle;
-        document.querySelectorAll('.channel-link').forEach(n => n.classList.remove('active'));
         
-        const currentActiveSelector = document.getElementById(`chan-${channelId}`);
-        if (currentActiveSelector) currentActiveSelector.classList.add('active');
+        unreadCounts[channelId] = 0;
+        updateGlobalTitleBanner();
+        
+        if (channelId.startsWith('dm_')) renderFriendList();
+        else renderChannelsSidebarDOM();
+
+        document.getElementById('active-channel-title').innerText = layoutTitle;
 
         chatMessages.innerHTML = '';
         if (activeListenerRef) { activeListenerRef.off(); activeListenerRef = null; }
@@ -761,7 +861,7 @@
         
         targetQuery.on('child_added', (snapshot) => {
             renderMessage(snapshot.val());
-            if (!isInitialLoad) { playSyntheticPing('drop'); }
+            if (!isInitialLoad && currentChannel === channelId) { playSyntheticPing('drop'); }
         });
             
         activeListenerRef = targetQuery;
@@ -772,7 +872,6 @@
         if (text === "" || text.length > 500) return;
 
         if (text.startsWith('/')) {
-            // UPDATED CORRELATION TO DETECT NEW UNIQUE IDENTITY STRING PATTERN
             if (myHandle === "DAMXIAFAN69") {
                 if (text === '/clear') {
                     firebase.database().ref(`channels/${currentChannel}`).remove();
@@ -1024,6 +1123,14 @@
         const u = firebase.auth().currentUser;
         if(!u) return;
         
+        const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+        if(channelListeners[`dm_${dmRoomId}`]) {
+            firebase.database().ref(`channels/dm_${dmRoomId}`).off('child_added', channelListeners[`dm_${dmRoomId}`]);
+            delete channelListeners[`dm_${dmRoomId}`];
+        }
+        delete unreadCounts[`dm_${dmRoomId}`];
+        updateGlobalTitleBanner();
+
         const newFriendsList = myFriends.filter(f => f !== target);
         firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList).then(() => {
             if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
@@ -1035,11 +1142,14 @@
         myFriends.forEach(friend => {
             const div = document.createElement('div');
             const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
-            div.className = 'channel-link';
+            div.className = `channel-link ${currentChannel === `dm_${dmRoomId}` ? 'active' : ''}`;
             div.id = `chan-${dmRoomId}`;
             div.innerHTML = `
                 <span>👤 ${friend}</span>
-                <span style="color:#d63030; font-weight:800; cursor:pointer;" title="Remove Connection" onclick="removeFriend('${friend}', event)">✕</span>
+                <div style="display:flex; align-items:center; margin-left:auto;">
+                    ${renderBadgeHtml(`dm_${dmRoomId}`)}
+                    <span style="color:#d63030; font-weight:800; cursor:pointer; margin-left:8px;" title="Remove Connection" onclick="removeFriend('${friend}', event)">✕</span>
+                </div>
             `;
             div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
             friendContainer.appendChild(div);
