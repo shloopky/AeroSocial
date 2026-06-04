@@ -134,7 +134,6 @@
         
         .identity-handle { color: var(--text-main); font-weight: 700; font-size: 0.95rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* Dynamic Sphere Bubble Styling */
         .status-bubble-tag {
             font-size: 0.75rem; color: #fff; background: linear-gradient(180deg, #62c2ff 0%, #005eb3 100%);
             padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4);
@@ -206,7 +205,6 @@
         .msg.own .username { color: rgba(255,255,255,0.9); }
         .msg .text { font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
         
-        /* Media Matrix Elements */
         .media-attachment { max-width: 100%; max-height: 300px; border-radius: 12px; margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); display: block; }
         .media-preview-audio { width: 240px; margin-top: 5px; border-radius: 8px; display: block; }
         .media-preview-video { width: 100%; max-width: 320px; border-radius: 12px; margin-top: 5px; display: block; }
@@ -411,7 +409,7 @@
     }
 
     /* =========================================================================
-       2. SKEUOMORPHIC AUDIO SYNTHESIS ENGINE (NO ASSET FILE PACK REQUIRED)
+       2. SKEUOMORPHIC AUDIO SYNTHESIS ENGINE
        ========================================================================= */
     let audioContextInstance = null;
 
@@ -429,7 +427,6 @@
             const time = audioContextInstance.currentTime;
             
             if (style === 'drop') {
-                // Water droplet pop sound
                 const osc = audioContextInstance.createOscillator();
                 const gain = audioContextInstance.createGain();
                 osc.type = 'sine';
@@ -440,7 +437,6 @@
                 osc.connect(gain); gain.connect(audioContextInstance.destination);
                 osc.start(time); osc.stop(time + 0.12);
             } else if (style === 'chime') {
-                // Glassy structural chime click
                 [523.25, 659.25, 783.99].forEach((freq, idx) => {
                     const osc = audioContextInstance.createOscillator();
                     const gain = audioContextInstance.createGain();
@@ -452,11 +448,11 @@
                     osc.start(time + (idx * 0.04)); osc.stop(time + (idx * 0.04) + 0.25);
                 });
             }
-        } catch(e) { console.log("Audio state initialization locked by client rules.", e); }
+        } catch(e) { console.log("Audio failure", e); }
     }
 
     /* =========================================================================
-       3. DYNAMIC BUBBLE CORE GENERATOR ENGINE
+       3. DYNAMIC BUBBLE ENGINE
        ========================================================================= */
     const canvasLayer = document.getElementById('canvas-layer');
     const introCenterPod = document.getElementById('intro-center-pod');
@@ -512,7 +508,7 @@
     }
 
     /* =========================================================================
-       4. ACCOUNT CONFIGURATION MATRIX & FIREBASE FRIENDS SYNC
+       4. ACCOUNT SYNCHRONIZATION MATRIX
        ========================================================================= */
     let authModeIsLogin = true; 
     let myHandle = "";
@@ -642,22 +638,59 @@
     }
 
     /* =========================================================================
-       5. CHANNEL CONFIGURATION MATRIX WIZARD (DYNAMIC FLOW)
+       5. CHANNEL CREATION PIPELINE WITH ONE-ROOM ENFORCEMENT & DELETIONS
        ========================================================================= */
     const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
     
     function triggerChannelCreationWizard() {
-        const title = prompt("Enter new channel parameters label:");
-        if (!title) return;
-        const cleanChanId = title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-        if (!cleanChanId) { alert("Invalid channel identifier structure."); return; }
+        const u = firebase.auth().currentUser;
+        if (!u) return;
 
-        firebase.database().ref('channels_list/' + cleanChanId).set({
-            id: cleanChanId,
-            name: title
-        }).then(() => {
-            playSyntheticPing('chime');
-            switchChannel(cleanChanId, title, false);
+        // QUERY MATRIX ENFORCEMENT: SCAN INDEX TO PREVENT MULTIPLE CHANNELS
+        firebase.database().ref('channels_list').once('value').then((snapshot) => {
+            const data = snapshot.val();
+            let ownedCount = 0;
+            
+            if (data) {
+                Object.values(data).forEach(chan => {
+                    if (chan.ownerId === u.uid) ownedCount++;
+                });
+            }
+
+            if (ownedCount >= 1 && myHandle !== "DAMXIAFAN69") {
+                alert("Security Protocol: Standard account architectures are restricted to 1 custom channel allocation maximum.");
+                return;
+            }
+
+            const title = prompt("Enter new channel parameters label:");
+            if (!title) return;
+            const cleanChanId = title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+            if (!cleanChanId) { alert("Invalid channel identifier structure."); return; }
+
+            firebase.database().ref('channels_list/' + cleanChanId).set({
+                id: cleanChanId,
+                name: title,
+                ownerId: u.uid
+            }).then(() => {
+                playSyntheticPing('chime');
+                switchChannel(cleanChanId, title, false);
+            });
+        });
+    }
+
+    function removeChannelNode(channelId, event) {
+        event.stopPropagation();
+        if (myHandle !== "DAMXIAFAN69") return;
+        
+        const confirmation = confirm(`Are you completely sure you want to permanently delete the channel reference "${channelId}" and all its logs?`);
+        if (!confirmation) return;
+
+        // COMPREHENSIVE FLUSH OPERATION
+        firebase.database().ref('channels_list/' + channelId).remove();
+        firebase.database().ref('channels/' + channelId).remove().then(() => {
+            if (currentChannel === channelId) {
+                switchChannel('global', 'Global Hub', true);
+            }
         });
     }
 
@@ -674,7 +707,14 @@
                     const div = document.createElement('div');
                     div.className = 'channel-link';
                     div.id = `chan-${chan.id}`;
-                    div.innerHTML = `<span>💬 ${chan.name}</span>`;
+                    
+                    // ADMIN IDENTIFIER DETECTION MATRIX FOR ACTIONABLE ELEMENT
+                    let deleteIconHtml = "";
+                    if (myHandle === "DAMXIAFAN69") {
+                        deleteIconHtml = `<span style="color:#ff5555; margin-left:auto; padding:0 5px; font-weight:bold; cursor:pointer;" title="Delete Channel Network" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
+                    }
+
+                    div.innerHTML = `<span>💬 ${chan.name}</span> ${deleteIconHtml}`;
                     div.onclick = () => switchChannel(chan.id, chan.name, false);
                     dynamicChannelsContainer.appendChild(div);
                 });
@@ -732,7 +772,8 @@
         if (text === "" || text.length > 500) return;
 
         if (text.startsWith('/')) {
-            if (myHandle.toLowerCase() === "DamaxiaFan69") {
+            // UPDATED CORRELATION TO DETECT NEW UNIQUE IDENTITY STRING PATTERN
+            if (myHandle === "DAMXIAFAN69") {
                 if (text === '/clear') {
                     firebase.database().ref(`channels/${currentChannel}`).remove();
                     chatMessages.innerHTML = ''; messageBox.value = ''; charCountDisplay.innerText = "0/500";
@@ -773,7 +814,6 @@
         if (data.text) {
             contentHtml += `<div class="text">${data.text}</div>`;
             
-            // MULTIMEDIA RICH URL PARSING VECTOR PIPELINE
             const parsedUrlMatch = data.text.match(/(https?:\/\/[^\s]+)/gi);
             if (parsedUrlMatch) {
                 const targetUrl = parsedUrlMatch[0];
@@ -876,7 +916,7 @@
     }
 
     /* =========================================================================
-       8. PROFILE INPSECTOR & IMMUTABLE SETTINGS MATRIX MODALS
+       8. PROFILE INSPECTOR & IMMUTABLE SETTINGS MATRIX MODALS
        ========================================================================= */
     const settingsModal = document.getElementById('settings-modal');
     const settingsPfpPreview = document.getElementById('settings-pfp-preview');
