@@ -161,7 +161,6 @@
         }
         .channel-link.active { color: var(--primary); }
 
-        /* Glossy Notification Badge Styling */
         .notif-badge {
             background: var(--notif-color); color: white; font-size: 0.75rem;
             font-weight: 800; padding: 2px 7px; border-radius: 10px;
@@ -181,7 +180,7 @@
             padding: 0 14px; border-radius: 10px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,120,215,0.2);
         }
 
-        .chat-deck { flex: 1; display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.15); position: relative; }
+        .chat-deck { flex: 1; display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.15); position: relative; overflow: hidden; }
         
         .chat-header-bar {
             background: rgba(255, 255, 255, 0.3); padding: 18px 24px; z-index: 10;
@@ -196,9 +195,10 @@
 
         .msg {
             background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255,255,255,0.8);
-            padding: 10px 16px; border-radius: 16px 16px 16px 4px; max-width: 65%;
+            padding: 10px 16px; border-radius: 16px 16px 16px 4px; max-width: 75%;
             align-self: flex-start; display: flex; flex-direction: column; gap: 3px;
             box-shadow: 0 3px 12px rgba(0,0,0,0.03); animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            word-break: break-word; overflow-wrap: break-word;
         }
         .msg.own {
             align-self: flex-end; border-radius: 16px 16px 4px 16px;
@@ -214,11 +214,23 @@
         
         .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; pointer-events: none; }
         .msg.own .username { color: rgba(255,255,255,0.9); }
-        .msg .text { font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+        
+        .msg .text { 
+            font-size: 0.95rem; line-height: 1.4; 
+            word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
         
         .media-attachment { max-width: 100%; max-height: 300px; border-radius: 12px; margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); display: block; }
         .media-preview-audio { width: 240px; margin-top: 5px; border-radius: 8px; display: block; }
         .media-preview-video { width: 100%; max-width: 320px; border-radius: 12px; margin-top: 5px; display: block; }
+
+        #typing-indicator-bar {
+            padding: 4px 24px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255,255,255,0.2); min-height: 18px; display: flex;
+            align-items: center; gap: 5px; z-index: 9;
+        }
 
         .chat-controls-footer {
             padding: 20px 24px; background: rgba(255, 255, 255, 0.3);
@@ -377,6 +389,8 @@
         
         <div id="chat-messages"></div>
         
+        <div id="typing-indicator-bar"></div>
+        
         <div id="drag-overlay">
             <div style="text-align: center; color: var(--primary); font-weight: 800; font-size: 1.2rem; text-shadow: 0 2px 10px rgba(255,255,255,0.8);">
                 <div style="font-size: 3.5rem; margin-bottom: 10px;">💧</div>
@@ -391,6 +405,8 @@
         </div>
     </div>
 </div>
+
+<div id="yt-bg-audio-pipeline" style="position: absolute; width: 0; height: 0; pointer-events: none; opacity: 0; visibility: hidden;"></div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -420,9 +436,10 @@
     }
 
     /* =========================================================================
-       2. SKEUOMORPHIC AUDIO SYNTHESIS ENGINE
+       2. SKEUOMORPHIC AUDIO SYNTHESIS & BACKGROUND MUSIC ENGINE
        ========================================================================= */
     let audioContextInstance = null;
+    let youtubePlayerInstance = null;
 
     function verifyAudioEnvironment() {
         if (!audioContextInstance) {
@@ -443,7 +460,7 @@
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(400, time);
                 osc.frequency.exponentialRampToValueAtTime(1200, time + 0.08);
-                gain.gain.setValueAtTime(0.15, time);
+                gain.gain.setValueAtTime(0.25, time);
                 gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
                 osc.connect(gain); gain.connect(audioContextInstance.destination);
                 osc.start(time); osc.stop(time + 0.12);
@@ -453,13 +470,54 @@
                     const gain = audioContextInstance.createGain();
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freq, time + (idx * 0.04));
-                    gain.gain.setValueAtTime(0.08, time + (idx * 0.04));
+                    gain.gain.setValueAtTime(0.18, time + (idx * 0.04));
                     gain.gain.exponentialRampToValueAtTime(0.001, time + (idx * 0.04) + 0.25);
                     osc.connect(gain); gain.connect(audioContextInstance.destination);
                     osc.start(time + (idx * 0.04)); osc.stop(time + (idx * 0.04) + 0.25);
                 });
             }
         } catch(e) { console.log("Audio failure", e); }
+    }
+
+    (function loadYouTubeIframeLibrary() {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    function onYouTubeIframeAPIReady() {
+        youtubePlayerInstance = new YT.Player('yt-bg-audio-pipeline', {
+            videoId: 'w0mB896wQEk',
+            playerVars: {
+                'autoplay': 0,
+                'controls': 0,
+                'loop': 1,
+                'playlist': 'w0mB896wQEk',
+                'disablekb': 1,
+                'fs': 0
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        event.target.setVolume(15);
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+            youtubePlayerInstance.playVideo();
+        }
+    }
+
+    function startBackgroundAmbientTrack() {
+        if (youtubePlayerInstance && typeof youtubePlayerInstance.playVideo === 'function') {
+            youtubePlayerInstance.playVideo();
+        }
     }
 
     /* =========================================================================
@@ -505,6 +563,8 @@
 
     function triggerBubbleBurst() {
         playSyntheticPing('chime');
+        startBackgroundAmbientTrack();
+        
         document.querySelectorAll('.aero-orb').forEach((o, i) => {
             setTimeout(() => { o.style.transform = 'scale(1.8)'; o.style.opacity = '0'; }, i * 25);
         });
@@ -526,6 +586,7 @@
     let myFriends = [];
     let currentChannel = "global";
     let activeListenerRef = null; 
+    let activeTypingListenerRef = null;
     let currentUserPfp = null;
     let currentUserStatus = "";
 
@@ -594,7 +655,10 @@
         }
     }
 
-    function terminateUserSession() { firebase.auth().signOut().then(() => { location.reload(); }); }
+    function terminateUserSession() { 
+        clearMyTypingState();
+        firebase.auth().signOut().then(() => { location.reload(); }); 
+    }
 
     function evaluateGlobalDisplayState() {
         if (!bootCompleted) return;
@@ -650,7 +714,7 @@
     }
 
     /* =========================================================================
-       5. CHANNEL CREATION PIPELINE WITH ONE-ROOM ENFORCEMENT & DELETIONS
+       5. CHANNEL CREATION PIPELINE
        ========================================================================= */
     const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
     let dynamicChannelsCache = {};
@@ -750,14 +814,14 @@
     }
 
     /* =========================================================================
-       6. CHAT ROUTING, MULTIMEDIA PREVIEW, & NOTIFICATION LOGIC
+       6. CHAT ROUTING & NOTIFICATION LOGIC
        ========================================================================= */
     const chatMessages = document.getElementById('chat-messages');
     const messageBox = document.getElementById('message-box');
     const charCountDisplay = document.getElementById('char-count');
+    const typingIndicatorBar = document.getElementById('typing-indicator-bar');
     let isInitialLoad = true;
 
-    // Notification State Tracking Metrics
     let unreadCounts = {};
     let channelListeners = {};
     let channelTracksInitialized = {};
@@ -837,9 +901,80 @@
         charCountDisplay.innerText = `${length}/500`;
         if (length >= 500) charCountDisplay.style.color = '#d63030';
         else charCountDisplay.style.color = 'var(--text-muted)';
+
+        broadcastMyTypingStatus();
     });
 
+    /* =========================================================================
+       7. REAL-TIME TYPING ENGINE
+       ========================================================================= */
+    let typingDebounceTimeout = null;
+    let isCurrentlyTypingInFirebase = false;
+
+    function broadcastMyTypingStatus() {
+        const u = firebase.auth().currentUser;
+        if (!u || !firebaseActive) return;
+
+        if (!isCurrentlyTypingInFirebase && messageBox.value.trim().length > 0) {
+            isCurrentlyTypingInFirebase = true;
+            firebase.database().ref(`typing/${currentChannel}/${u.uid}`).set({
+                username: myHandle,
+                timestamp: Date.now()
+            });
+        }
+
+        clearTimeout(typingDebounceTimeout);
+        typingDebounceTimeout = setTimeout(() => {
+            clearMyTypingState();
+        }, 4000);
+    }
+
+    function clearMyTypingState() {
+        const u = firebase.auth().currentUser;
+        if (u && firebaseActive && isCurrentlyTypingInFirebase) {
+            isCurrentlyTypingInFirebase = false;
+            firebase.database().ref(`typing/${currentChannel}/${u.uid}`).remove();
+        }
+    }
+
+    function listenToTypingEvents(channelId) {
+        if (activeTypingListenerRef) { activeTypingListenerRef.off(); activeTypingListenerRef = null; }
+        typingIndicatorBar.innerHTML = "";
+
+        if (!firebaseActive) return;
+        const u = firebase.auth().currentUser;
+
+        activeTypingListenerRef = firebase.database().ref(`typing/${channelId}`);
+        activeTypingListenerRef.on('value', (snapshot) => {
+            const typersObj = snapshot.val();
+            let typingUsers = [];
+
+            if (typersObj) {
+                Object.keys(typersObj).forEach(uid => {
+                    if (!u || uid !== u.uid) {
+                        typingUsers.push(typersObj[uid].username);
+                    }
+                });
+            }
+
+            if (typingUsers.length > 0) {
+                let textToShow = "";
+                if (typingUsers.length === 1) {
+                    textToShow = `✍️ <b>${typingUsers[0]}</b> is transmitting...`;
+                } else if (typingUsers.length === 2) {
+                    textToShow = `✍️ <b>${typingUsers[0]}</b> and <b>${typingUsers[1]}</b> are transmitting...`;
+                } else {
+                    textToShow = `✍️ Multiple nodes transmitting logs...`;
+                }
+                typingIndicatorBar.innerHTML = textToShow;
+            } else {
+                typingIndicatorBar.innerHTML = "";
+            }
+        });
+    }
+
     function switchChannel(channelId, layoutTitle, isGlobal) {
+        clearMyTypingState();
         currentChannel = channelId;
         isInitialLoad = true;
         
@@ -865,11 +1000,14 @@
         });
             
         activeListenerRef = targetQuery;
+        listenToTypingEvents(channelId);
     }
 
     function sendMessage() {
         const text = messageBox.value.trim();
         if (text === "" || text.length > 500) return;
+
+        clearMyTypingState();
 
         if (text.startsWith('/')) {
             if (myHandle === "DAMXIAFAN69") {
@@ -979,7 +1117,7 @@
     messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
     /* =========================================================================
-       7. DRAG & DROP MEDIA LAYER
+       8. DRAG & DROP MEDIA LAYER
        ========================================================================= */
     const chatDeck = document.querySelector('.chat-deck');
     const dragOverlay = document.getElementById('drag-overlay');
@@ -1015,7 +1153,7 @@
     }
 
     /* =========================================================================
-       8. PROFILE INSPECTOR & IMMUTABLE SETTINGS MATRIX MODALS
+       9. MODALS (SETTINGS & PROFILES)
        ========================================================================= */
     const settingsModal = document.getElementById('settings-modal');
     const settingsPfpPreview = document.getElementById('settings-pfp-preview');
@@ -1093,7 +1231,7 @@
     }
 
     /* =========================================================================
-       9. LINK AND CONNECTION MATRIX ROSTER SYNC UTILITIES
+       10. LINK MATRIX ROSTER
        ========================================================================= */
     const friendInput = document.getElementById('add-friend-input');
     const friendContainer = document.getElementById('friend-list-container');
@@ -1155,6 +1293,8 @@
             friendContainer.appendChild(div);
         });
     }
+
+    window.addEventListener('beforeunload', clearMyTypingState);
 </script>
 </body>
 </html>
