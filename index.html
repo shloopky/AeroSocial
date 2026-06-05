@@ -198,7 +198,7 @@
             padding: 10px 16px; border-radius: 16px 16px 16px 4px; max-width: 75%;
             align-self: flex-start; display: flex; flex-direction: column; gap: 3px;
             box-shadow: 0 3px 12px rgba(0,0,0,0.03); animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            word-break: break-word; overflow-wrap: break-word;
+            word-break: break-word; overflow-wrap: break-word; position: relative;
         }
         .msg.own {
             align-self: flex-end; border-radius: 16px 16px 4px 16px;
@@ -206,7 +206,7 @@
             box-shadow: 0 4px 15px rgba(0, 120, 215, 0.25);
         }
         
-        .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer; padding: 2px; border-radius: 12px; transition: background 0.2s; }
+        .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer; padding: 2px; border-radius: 12px; transition: background 0.2s; width: 100%; }
         .msg-header:hover { background: rgba(0,0,0,0.05); }
         .msg.own .msg-header:hover { background: rgba(255,255,255,0.15); }
 
@@ -215,6 +215,12 @@
         .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; pointer-events: none; }
         .msg.own .username { color: rgba(255,255,255,0.9); }
         
+        .msg-timestamp {
+            font-size: 0.65rem; color: var(--text-muted); margin-left: auto; font-weight: 500;
+            padding-left: 15px; opacity: 0.8; pointer-events: none;
+        }
+        .msg.own .msg-timestamp { color: rgba(255, 255, 255, 0.75); }
+
         .msg .text { 
             font-size: 0.95rem; line-height: 1.4; 
             word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
@@ -1077,6 +1083,17 @@
 
         const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
 
+        let timeString = "";
+        if (data.timestamp) {
+            const msgDate = new Date(data.timestamp);
+            let hours = msgDate.getHours();
+            const minutes = String(msgDate.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // Handle midnight/noon conversion
+            timeString = `${hours}:${minutes} ${ampm}`;
+        }
+
         const headerDiv = document.createElement('div');
         headerDiv.className = "msg-header";
         
@@ -1093,6 +1110,7 @@
                     ${statusTagSnippet}
                 </div>
             </div>
+            <span class="msg-timestamp">${timeString}</span>
         `;
 
         if (!isSystem && !isOwn) {
