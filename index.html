@@ -3,1316 +3,1399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroSocial - Digital Horizon</title>
+    <title>AERO - Profile & Communications Hub</title>
     <style>
-        :root {
-            --primary: #0078d7;
-            --primary-gloss: linear-gradient(180deg, #5ecfff 0%, #0078d7 100%);
-            --glass-bg: rgba(255, 255, 255, 0.35);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --text-main: #0f2a4a;
-            --text-muted: #4e6d8c;
-            --gloss-layer: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%);
-            --notif-color: linear-gradient(180deg, #ff6b6b 0%, #e60000 100%);
+        /* Global Theme Styles & Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Motiva Sans', Arial, sans-serif;
+            background: radial-gradient(circle at top, #1b2838 0%, #0f141d 100%);
+            color: #c7d5e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('https://images.unsplash.com/photo-1500622388414-8555a1042564?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover; overflow: hidden; user-select: none;
+        /* Navigation Bar */
+        nav {
+            width: 100%;
+            background-color: #171a21;
+            padding: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .glass-glare::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%;
-            background: var(--gloss-layer); pointer-events: none; z-index: 5;
+        .nav-container {
+            max-width: 950px;
+            margin: 0 auto;
+            display: flex;
+            gap: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 0 20px;
+            align-items: center;
         }
 
+        .nav-container .brand {
+            color: #66c0f4;
+            margin-right: 20px;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .nav-container a, .nav-container span.nav-btn {
+            color: #dcdedf;
+            text-decoration: none;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .nav-container a:hover, .nav-container span.nav-btn:hover {
+            color: #ffffff;
+        }
+
+        /* Preloader / Boot Screen Overlay */
         #boot-screen {
-            position: fixed; inset: 0;
-            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-            z-index: 1000; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            inset: 0;
+            background: #141f2c;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .boot-pod {
+            text-align: center;
+        }
+        .boot-title {
+            font-size: 2.5rem;
+            color: #ffffff;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
 
-        .bubble-canvas { position: absolute; inset: 0; pointer-events: none; }
-
-        .aero-orb {
-            position: absolute; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 50%, rgba(0,120,215,0.25) 100%);
-            border: 1px solid rgba(255,255,255,0.5);
-            box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 10px 25px rgba(0,0,0,0.08);
-            animation: floatUp linear infinite; pointer-events: auto; cursor: pointer;
-        }
-
-        #intro-center-pod {
-            text-align: center; z-index: 10; transform: scale(0.9); opacity: 0;
-            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        #intro-center-pod.reveal { transform: scale(1); opacity: 1; }
-
-        .title-display {
-            font-size: 4rem; font-weight: 800; color: #fff; letter-spacing: 8px;
-            text-shadow: 0 4px 15px rgba(0, 120, 215, 0.4), 0 2px 4px rgba(0,0,0,0.1); margin: 0 0 10px 0;
-        }
-
-        .subtitle-display {
-            font-size: 1.1rem; color: #fff; font-weight: 600; letter-spacing: 4px;
-            opacity: 0.85; text-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(105vh) translateX(0) scale(1); opacity: 0; }
-            10% { opacity: 1; } 90% { opacity: 1; }
-            100% { transform: translateY(-15vh) translateX(var(--drift, 20px)) scale(1.1); opacity: 0; }
-        }
-
+        /* Authentication View Layer */
         #auth-screen {
-            display: none; position: fixed; inset: 0; z-index: 900;
-            align-items: center; justify-content: center; opacity: 0; transition: opacity 0.8s ease;
+            display: none;
+            margin-top: 100px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-sizing: border-box;
         }
-
         .auth-card {
-            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); padding: 40px; width: 340px; border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 15px;
-            position: relative; overflow: hidden;
+            background: rgba(23, 26, 33, 0.9);
+            border: 1px solid #2a475e;
+            border-radius: 4px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-
-        .auth-header-title {
-            font-size: 1.6rem; font-weight: 700; color: var(--text-main); text-align: center;
-            letter-spacing: 1px; margin-bottom: 5px;
+        .auth-title {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #2a475e;
+            padding-bottom: 10px;
         }
-
-        .auth-toggle-caption { font-size: 0.85rem; color: var(--text-muted); text-align: center; cursor: pointer; margin-top: 8px; }
-        .auth-toggle-caption span { color: var(--primary); font-weight: 600; text-decoration: underline; }
-        
+        .aero-input {
+            background: #10161b;
+            border: 1px solid #2a475e;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 14px;
+            border-radius: 3px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .aero-input:focus {
+            border-color: #66c0f4;
+        }
+        .auth-toggle {
+            font-size: 12px;
+            color: #8f98a0;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .auth-toggle span {
+            color: #66c0f4;
+            text-decoration: underline;
+        }
         .error-banner {
-            background: rgba(255, 85, 85, 0.15); border: 1px solid rgba(255, 85, 85, 0.3);
-            color: #d63030; font-size: 0.85rem; padding: 10px; border-radius: 10px;
-            text-align: center; font-weight: 600; display: none; line-height: 1.3;
+            background: rgba(194, 45, 45, 0.2);
+            border: 1px solid #c22d2d;
+            color: #ff8888;
+            font-size: 13px;
+            padding: 10px;
+            border-radius: 3px;
+            display: none;
         }
 
+        /* Main Profile Interface Grid Setup */
         #app-root {
-            display: none; width: 90%; max-width: 1000px; height: 85vh;
-            background: var(--glass-bg); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-            border: 1px solid var(--glass-border); border-radius: 24px;
-            box-shadow: 0 25px 55px rgba(0,0,0,0.2); position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.95); opacity: 0;
-            transition: opacity 1s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none; /* Controlled via Firebase state */
+            max-width: 950px;
+            width: 100%;
+            margin: 40px auto;
+            background: rgba(18, 26, 37, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 30px;
+            padding: 24px;
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
         }
 
-        #app-root.active { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-
-        .sidebar-deck {
-            width: 280px; background: rgba(255, 255, 255, 0.25);
-            border-right: 1px solid rgba(255, 255, 255, 0.4); display: flex; flex-direction: column;
-            z-index: 10;
+        /* Left Column Content Layout */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
-        .sidebar-header {
-            padding: 20px; font-size: 1.3rem; font-weight: 800; color: var(--text-main);
-            border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; letter-spacing: 1.5px;
+        /* User Info Section Header */
+        .header-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
 
-        .nav-scroller { flex: 1; overflow-y: auto; padding: 15px; scrollbar-width: none; }
-        .nav-scroller::-webkit-scrollbar { display: none; }
+        .avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 4px;
+            padding: 4px;
+            background: linear-gradient(135deg, #00ccff, #3366ff);
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+            flex-shrink: 0;
+        }
 
-        .profile-badge {
-            background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(255,255,255,0.6);
-            padding: 12px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px;
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            background: #2a475e;
+            object-fit: cover;
+            border-radius: 2px;
         }
-        .profile-meta { display: flex; align-items: center; gap: 10px; position: relative; }
-        
-        .avatar-sphere {
-            width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gloss);
-            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-            box-shadow: 0 2px 8px rgba(0,120,215,0.3); overflow: hidden; flex-shrink: 0;
+
+        .user-info h1 {
+            margin: 0 0 5px 0;
+            font-size: 26px;
+            color: #ffffff;
+            font-weight: 500;
         }
-        .avatar-sphere img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        
-        .identity-handle { color: var(--text-main); font-weight: 700; font-size: 0.95rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .user-info p {
+            margin: 0;
+            color: #8f98a0;
+            font-size: 14px;
+        }
 
         .status-bubble-tag {
-            font-size: 0.75rem; color: #fff; background: linear-gradient(180deg, #62c2ff 0%, #005eb3 100%);
-            padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4);
-            max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-top: 2px; display: inline-block;
+            font-size: 11px;
+            color: #66c0f4;
+            background: rgba(102, 192, 244, 0.1);
+            padding: 2px 8px;
+            border-radius: 2px;
+            border: 1px solid rgba(102, 192, 244, 0.2);
+            margin-top: 5px;
+            display: inline-block;
         }
 
-        .deck-section-title {
-            font-size: 0.75rem; color: var(--text-muted); font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1.5px; margin: 15px 0 8px 5px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .channel-link {
-            background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.3);
-            padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; cursor: pointer;
-            font-size: 0.9rem; font-weight: 600; display: flex; justify-content: space-between;
-            align-items: center; color: var(--text-main); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        /* Panels Shared Architecture */
+        .showcase-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 15px;
             position: relative;
         }
-        .channel-link:hover, .channel-link.active {
-            background: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.8);
-            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,120,215,0.1);
-        }
-        .channel-link.active { color: var(--primary); }
 
-        .notif-badge {
-            background: var(--notif-color); color: white; font-size: 0.75rem;
-            font-weight: 800; padding: 2px 7px; border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(230, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.4);
-            border: 1px solid rgba(255,255,255,0.25); min-width: 10px; text-align: center;
-            margin-left: 8px; display: inline-block; animation: bubblePop 0.3s ease;
-        }
-
-        .friend-input-box { display: flex; gap: 6px; margin-bottom: 15px; }
-        .friend-input-box input {
-            flex: 1; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.5);
-            color: var(--text-main); padding: 8px 12px; border-radius: 10px; font-weight: 500; font-family: inherit; outline: none; font-size: 0.85rem;
-        }
-        .friend-input-box input:focus { background: #fff; border-color: var(--primary); }
-        .friend-input-box button {
-            background: var(--primary-gloss); border: none; color: white; cursor: pointer;
-            padding: 0 14px; border-radius: 10px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,120,215,0.2);
+        .panel-title {
+            font-size: 13px;
+            color: #66c0f4;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(102, 192, 244, 0.2);
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .chat-deck { flex: 1; display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.15); position: relative; overflow: hidden; }
-        
-        .chat-header-bar {
-            background: rgba(255, 255, 255, 0.3); padding: 18px 24px; z-index: 10;
-            border-bottom: 1px solid rgba(255,255,255,0.4); display: flex; justify-content: space-between; align-items: center;
+        /* Core Terminal Interface (Main Message Deck) */
+        .chat-deck {
+            display: flex;
+            flex-direction: column;
+            background: #10161b;
+            border: 1px solid #2a475e;
+            border-radius: 3px;
+            height: 480px;
+            position: relative;
         }
-        .chat-header-bar h2 { margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; }
 
         #chat-messages {
-            flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px;
-            scrollbar-width: thin; scrollbar-color: rgba(0,120,215,0.2) transparent; z-index: 10;
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
+        /* Message Bubble Rendering Engine */
         .msg {
-            background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255,255,255,0.8);
-            padding: 10px 16px; border-radius: 16px 16px 16px 4px; max-width: 75%;
-            align-self: flex-start; display: flex; flex-direction: column; gap: 3px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.03); animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            word-break: break-word; overflow-wrap: break-word; position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px;
+            background: rgba(42, 71, 94, 0.15);
+            border: 1px solid rgba(42, 71, 94, 0.3);
+            border-radius: 3px;
+            max-width: 85%;
+            align-self: flex-start;
         }
         .msg.own {
-            align-self: flex-end; border-radius: 16px 16px 4px 16px;
-            background: var(--primary-gloss); border: 1px solid rgba(255,255,255,0.2); color: #fff;
-            box-shadow: 0 4px 15px rgba(0, 120, 215, 0.25);
+            align-self: flex-end;
+            background: rgba(102, 192, 244, 0.1);
+            border-color: rgba(102, 192, 244, 0.25);
         }
-        
-        .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer; padding: 2px; border-radius: 12px; transition: background 0.2s; width: 100%; }
-        .msg-header:hover { background: rgba(0,0,0,0.05); }
-        .msg.own .msg-header:hover { background: rgba(255,255,255,0.15); }
 
-        .msg-pfp { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #eee; }
-        
-        .msg .username { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; pointer-events: none; }
-        .msg.own .username { color: rgba(255,255,255,0.9); }
-        
+        .msg-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 4px;
+        }
+        .msg-pfp {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            object-fit: cover;
+            border: 1px solid #66c0f4;
+        }
+        .msg .username {
+            font-weight: bold;
+            color: #66c0f4;
+        }
+        .msg.own .username {
+            color: #fff;
+        }
         .msg-timestamp {
-            font-size: 0.65rem; color: var(--text-muted); margin-left: auto; font-weight: 500;
-            padding-left: 15px; opacity: 0.8; pointer-events: none;
+            font-size: 11px;
+            color: #546473;
+            margin-left: auto;
         }
-        .msg.own .msg-timestamp { color: rgba(255, 255, 255, 0.75); }
 
-        .msg .text { 
-            font-size: 0.95rem; line-height: 1.4; 
-            word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
+        .msg .text {
+            font-size: 13px;
+            color: #c7d5e0;
+            line-height: 1.4;
             white-space: pre-wrap;
+            word-break: break-word;
         }
-        
-        .media-attachment { max-width: 100%; max-height: 300px; border-radius: 12px; margin-top: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); display: block; }
-        .media-preview-audio { width: 240px; margin-top: 5px; border-radius: 8px; display: block; }
-        .media-preview-video { width: 100%; max-width: 320px; border-radius: 12px; margin-top: 5px; display: block; }
 
+        /* Multimedia Embedded Previews */
+        .media-attachment {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 2px;
+            margin-top: 6px;
+            border: 1px solid #2a475e;
+        }
+        .media-preview-audio { width: 220px; margin-top: 5px; }
+        .media-preview-video { max-width: 100%; max-height: 200px; margin-top: 5px; }
+
+        /* Realtime Transmission Layer Indicators */
         #typing-indicator-bar {
-            padding: 4px 24px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);
-            border-top: 1px solid rgba(255,255,255,0.2); min-height: 18px; display: flex;
-            align-items: center; gap: 5px; z-index: 9;
+            padding: 5px 15px;
+            font-size: 11px;
+            color: #8f98a0;
+            background: rgba(0,0,0,0.2);
+            min-height: 15px;
+            font-style: italic;
         }
 
+        /* Footer Input Module Assembly */
         .chat-controls-footer {
-            padding: 20px 24px; background: rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 12px; z-index: 10; align-items: center;
+            display: flex;
+            padding: 10px;
+            background: #171a21;
+            border-top: 1px solid #2a475e;
+            gap: 10px;
+            align-items: center;
+        }
+        .chat-controls-footer .aero-input {
+            flex: 1;
         }
 
-        .aero-input {
-            background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.6);
-            padding: 12px 18px; color: var(--text-main); font-family: inherit; outline: none;
-            font-size: 0.95rem; font-weight: 500; border-radius: 18px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.3s;
+        /* Buttons Ecosystem */
+        .btn-edit, .btn-action {
+            background: linear-gradient(to right, #47bfff 0%, #1a44c2 100%);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            outline: none;
         }
-        .aero-input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,120,215,0.15); }
-        
-        .gel-btn {
-            background: var(--primary-gloss); border: 1px solid rgba(255,255,255,0.2);
-            color: #fff; padding: 10px 24px; font-weight: 700; border-radius: 18px;
-            cursor: pointer; font-size: 0.9rem; letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(0,120,215,0.2), inset 0 1px 1px rgba(255,255,255,0.4);
-            position: relative; overflow: hidden; transition: transform 0.1s, box-shadow 0.2s;
+        .btn-edit:hover, .btn-action:hover {
+            background: linear-gradient(to right, #5cc6ff 0%, #2252da 100%);
         }
-        .gel-btn:hover { box-shadow: 0 6px 16px rgba(0,120,215,0.3); transform: translateY(-1px); }
-        .gel-btn:active { transform: scale(0.98); }
+        .btn-danger {
+            background: linear-gradient(to right, #ff5555 0%, #990000 100%);
+        }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #ff7777 0%, #cc0000 100%);
+        }
 
-        .char-counter { font-size: 0.75rem; color: var(--text-muted); margin-right: 10px; font-weight: 600; min-width: 45px; text-align: right; }
+        .char-counter {
+            font-size: 11px;
+            color: #546473;
+            min-width: 45px;
+            text-align: right;
+        }
 
+        /* Navigation Matrix List Links */
+        .sidebar-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-list li {
+            font-size: 13px;
+            color: #969696;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .sidebar-list li:hover, .sidebar-list li.active {
+            color: #ffffff;
+            background: rgba(42, 71, 94, 0.3);
+        }
+        .sidebar-list li.active {
+            border-left: 2px solid #66c0f4;
+        }
+
+        .sidebar-list span.badge-num {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .notif-badge {
+            background: #cd5c5c;
+            color: white;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 2px;
+            margin-left: 5px;
+        }
+
+        /* Drag Overlay */
         #drag-overlay {
-            position: absolute; inset: 0; background: rgba(255,255,255,0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: none; align-items: center; justify-content: center; z-index: 99; border-radius: 0px 0px 24px 0px; pointer-events: none;
-            border: 2px dashed rgba(0,120,215,0.4);
+            position: absolute;
+            inset: 0;
+            background: rgba(23, 26, 33, 0.9);
+            border: 2px dashed #66c0f4;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 95;
+            color: #66c0f4;
+            font-weight: bold;
+            font-size: 14px;
         }
 
+        /* Right Column Custom Elements */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .level-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 4px;
+            border-right: 3px solid #bc43e9;
+        }
+
+        .level-circle {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #bc43e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            font-size: 15px;
+            color: #54a5d4;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        /* Dynamic Input Controls Mini-Boxes */
+        .control-row-box {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .control-row-box .aero-input {
+            padding: 6px;
+            font-size: 12px;
+            flex: 1;
+        }
+        .control-row-box .btn-action {
+            padding: 6px 12px;
+        }
+
+        /* Modal Popup System Overlay */
         .modal-overlay {
-            position: absolute; inset: 0; background: rgba(255,255,255,0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            display: none; align-items: center; justify-content: center; z-index: 200; border-radius: 24px;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+        }
+        .modal-card {
+            background: #171a21;
+            border: 1px solid #2a475e;
+            padding: 24px;
+            width: 320px;
+            border-radius: 4px;
+            box-shadow: 0 0 25px #000;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .modal-card h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 18px;
+            border-bottom: 1px solid #2a475e;
+            padding-bottom: 8px;
         }
 
-        .mini-profile-card {
-            background: var(--glass-bg); padding: 30px; border-radius: 24px;
-            text-align: center; border: 1px solid var(--glass-border);
-            box-shadow: 0 30px 70px rgba(0,0,0,0.25); width: 280px; display: flex; flex-direction: column; align-items: center;
+        .collector-stats-display {
+            display: flex;
+            gap: 20px;
         }
-
-        @keyframes bubblePop {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        .stat-box {
+            display: flex;
+            flex-direction: column;
         }
+        .stat-box .count { font-size: 22px; color: #fff; }
+        .stat-box .label { font-size: 11px; color: #8f98a0; }
     </style>
 </head>
 <body>
 
-<div id="boot-screen" class="glass-glare">
-    <div class="bubble-canvas" id="canvas-layer"></div>
-    <div id="intro-center-pod">
-        <h1 class="title-display">AEROSOCIAL</h1>
-        <p class="subtitle-display">CONNECT TO THE HORIZON</p>
-        <button class="gel-btn" style="font-size:1rem; padding:12px 36px; border-radius:24px;" onclick="triggerBubbleBurst()">ENTER CORE</button>
-    </div>
-</div>
+    <nav>
+        <div class="nav-container">
+            <div class="brand">AERO</div>
+            <span class="nav-btn" onclick="switchChannel('global', 'Global Hub', true)">Mainframe</span>
+            <span class="nav-btn" onclick="openSettings()">Customization</span>
+            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:#8f98a0;" id="nav-user-indicator">Disconnected Node</span>
+        </div>
+    </nav>
 
-<div id="auth-screen" class="glass-glare">
-    <div class="auth-card glass-glare">
-        <div class="auth-header-title" id="auth-box-title">Welcome Back</div>
-        <div class="error-banner" id="auth-error-display"></div>
-        
-        <input type="text" id="auth-username" class="aero-input" placeholder="Username Handle" autocomplete="off" maxlength="20">
-        <input type="password" id="auth-password" class="aero-input" placeholder="Security Password">
-        
-        <button class="gel-btn" id="auth-submit-btn" onclick="processAuthSubmission()">Sign In</button>
-        
-        <div class="auth-toggle-caption" id="auth-toggle-link" onclick="toggleAuthMode()">
-            New to the connection? <span>Create Account</span>
+    <div id="boot-screen">
+        <div class="boot-pod">
+            <div class="boot-title">AERO SYSTEM v2.6</div>
+            <button class="btn-action" style="padding: 10px 30px; font-size:14px;" onclick="terminateBootOverlay()">Synchronize Client Core</button>
         </div>
     </div>
-</div>
 
-<div id="app-root" class="glass-glare">
-    
-    <div id="settings-modal" class="modal-overlay">
-        <div class="auth-card glass-glare" style="width: 350px; box-shadow: 0 30px 70px rgba(0,0,0,0.25);">
-            <div class="auth-header-title" style="font-size:1.3rem;">Identity parameters</div>
+    <div id="auth-screen">
+        <div class="auth-card">
+            <div class="auth-title" id="auth-box-title">Sign In</div>
+            <div class="error-banner" id="auth-error-display"></div>
             
-            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin: 10px 0;">
-                <div class="avatar-sphere" id="settings-pfp-preview" style="width:75px; height:75px; font-size:2rem;">🌊</div>
-                <label class="gel-btn" style="padding:6px 14px; font-size:0.8rem; border-radius:12px; background: rgba(255,255,255,0.5); color: var(--text-main); border:1px solid rgba(0,0,0,0.15);">
-                    Change Avatar
-                    <input type="file" id="settings-file-input" accept="image/*" style="display:none;" onchange="previewSettingsPfp(this)">
-                </label>
+            <input type="text" id="auth-username" class="aero-input" placeholder="User Profile Handle" maxlength="20" autocomplete="off">
+            <input type="password" id="auth-password" class="aero-input" placeholder="Security Code Credentials">
+            
+            <button class="btn-action" id="auth-submit-btn" onclick="processAuthSubmission()">Enter Matrix</button>
+            
+            <div class="auth-toggle" id="auth-toggle-link" onclick="toggleAuthMode()">
+                New profile sequence? <span>Create Matrix Node</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-root">
+        
+        <div class="main-content">
+            
+            <div class="header-section">
+                <div class="avatar-container">
+                    <span id="profile-avatar-slot"><img src="https://via.placeholder.com/120" alt="Avatar"></span>
+                </div>
+                <div class="user-info">
+                    <h1 id="my-handle-display">Profile Node</h1>
+                    <div id="my-status-display"></div>
+                </div>
             </div>
 
-            <input type="text" id="settings-status-input" class="aero-input" placeholder="Broadcast current mood sphere..." maxlength="40" style="margin-bottom:10px; text-align:center;">
+            <div class="showcase-panel">
+                <div class="panel-title">
+                    <span id="active-channel-title">Global Hub</span>
+                    <span style="font-size:11px; color:#8f98a0; text-transform:none;">Enforced Secure Line</span>
+                </div>
+                
+                <div class="chat-deck">
+                    <div id="chat-messages"></div>
+                    <div id="typing-indicator-bar"></div>
+                    
+                    <div id="drag-overlay">
+                        <div>⚓ DROP IMAGE ATTACHMENT LOG HERE</div>
+                    </div>
+
+                    <div class="chat-controls-footer">
+                        <input type="text" id="message-box" class="aero-input" placeholder="Transmit logs down link channel (max 500 chars)..." maxlength="500">
+                        <span id="char-count" class="char-counter">0/500</span>
+                        <button class="btn-action" id="send-button">Broadcast</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-panel">
+                <div class="panel-title">Collector Modules</div>
+                <div class="collector-stats-display">
+                    <div class="stat-box"><div class="count" id="stat-count-items">88</div><div class="label">Items Linked</div></div>
+                    <div class="stat-box"><div class="count">24</div><div class="label">Expansions</div></div>
+                    <div class="stat-box"><div class="count">2026</div><div class="label">Client Stamp</div></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="sidebar">
             
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="gel-btn" style="flex:1; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); color: var(--text-main); border: 1px solid rgba(0,0,0,0.15);" onclick="closeSettings()">Cancel</button>
-                <button class="gel-btn" style="flex:1;" onclick="saveSettingsChanges()">Save Changes</button>
+            <div class="level-badge">
+                <div>
+                    <div style="color: #ffffff; font-size: 16px;">Node Class</div>
+                    <div style="color: #8f98a0; font-size: 11px;">Matrix Clearance level</div>
+                </div>
+                <div class="level-circle">26</div>
+            </div>
+
+            <button class="btn-edit" onclick="openSettings()">Modify Node Configuration</button>
+
+            <div>
+                <div class="status-indicator" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Secure Pipelines</span>
+                    <span style="font-size:11px; color:#66c0f4; cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Add ]</span>
+                </div>
+                <ul class="sidebar-list" id="dynamic-channels-list-container">
+                    </ul>
+            </div>
+
+            <div>
+                <div class="status-indicator">Connected Coordinates</div>
+                <div class="control-row-box" style="margin-bottom:8px;">
+                    <input type="text" id="add-friend-input" class="aero-input" placeholder="Search unique handles...">
+                    <button class="btn-action" onclick="manualAddFriend()">Link</button>
+                </div>
+                <ul class="sidebar-list" id="friend-list-container">
+                    </ul>
+            </div>
+
+            <button class="btn-edit btn-danger" style="margin-top:20px;" onclick="terminateUserSession()">Sever Connection Node</button>
+
+        </div>
+
+    </div>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Configure Node Meta</h3>
+            
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; color:#8f98a0;">Avatar Node Frame</label>
+                <input type="file" id="settings-file-input" accept="image/*" onchange="previewSettingsPfp(this)" style="font-size:11px; color:#c7d5e0;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; color:#8f98a0;">Broadcast Signature Phrase</label>
+                <input type="text" id="settings-status-input" class="aero-input" placeholder="Input broadcast vibe status context..." maxlength="40">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="btn-action btn-danger" style="flex:1;" onclick="closeSettings()">Abort</button>
+                <button class="btn-action" style="flex:1;" onclick="saveSettingsChanges()">Commit Changes</button>
             </div>
         </div>
     </div>
 
     <div id="mini-profile-modal" class="modal-overlay">
-        <div class="mini-profile-card glass-glare">
-            <button style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);" onclick="closeMiniProfile()">✕</button>
+        <div class="modal-card" style="text-align:center; align-items:center;">
+            <div class="avatar-container" id="mini-profile-avatar" style="width:80px; height:80px;"></div>
+            <h3 id="mini-profile-name" style="border:none; padding:0; margin:5px 0;">Coordinates</h3>
+            <div id="mini-profile-status-wrapper"></div>
             
-            <div class="avatar-sphere" id="mini-profile-avatar" style="width:90px; height:90px; font-size:2.5rem; margin-bottom:15px; box-shadow: 0 5px 20px rgba(0,120,215,0.3);">👤</div>
-            <h2 id="mini-profile-name" style="margin:0; color:var(--text-main); font-weight:800; font-size:1.4rem;">Username</h2>
-            <div id="mini-profile-status-wrapper" style="margin: 5px 0 15px 0;"></div>
-            
-            <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
-                <button class="gel-btn" style="width:100%; border-radius:12px;" onclick="actionAddFriend()">➕ Add to Connections</button>
-                <button class="gel-btn" style="width:100%; border-radius:12px; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); color: var(--text-main); border: 1px solid rgba(0,0,0,0.15);" onclick="actionDMUser()">💬 Direct Message</button>
+            <div style="display:flex; gap:10px; width:100%; margin-top:10px;">
+                <button class="btn-action" style="flex:1; font-size:11px;" onclick="actionAddFriend()">Link Coordinate</button>
+                <button class="btn-action" style="flex:1; font-size:11px; background:#2a475e;" onclick="actionDMUser()">Open Comms Line</button>
             </div>
+            <button class="btn-action btn-danger" style="width:100%; padding:4px; font-size:11px;" onclick="closeMiniProfile()">Close Profile</button>
         </div>
     </div>
 
-    <div class="sidebar-deck">
-        <div class="sidebar-header">AeroOS</div>
-        
-        <div class="nav-scroller">
-            <div class="deck-section-title">Identity Node</div>
-            <div class="profile-badge">
-                <div class="profile-meta" style="flex-wrap: wrap;">
-                    <div class="avatar-sphere" id="sidebar-pfp">🌊</div>
-                    <div style="display:flex; flex-direction:column; max-width:140px;">
-                        <span class="identity-name identity-handle" id="my-handle-display">Connecting...</span>
-                        <div id="my-status-display" style="display:none;"></div>
-                    </div>
-                    <span style="cursor:pointer; font-size:1.1rem; margin-left:auto; transition: transform 0.3s; user-select:none;" onclick="openSettings()" title="Settings" onmouseover="this.style.transform='rotate(45deg)'" onmouseout="this.style.transform='rotate(0deg)'">⚙️</span>
-                </div>
-                <button class="gel-btn" style="padding:6px; font-size:0.75rem; width:100%; border-radius:10px; background: linear-gradient(180deg, #ff8888 0%, #d63030 100%); box-shadow:none;" onclick="terminateUserSession()">Disconnect Node</button>
-            </div>
+    <div id="yt-bg-audio-pipeline" style="position: absolute; width:0; height:0; pointer-events:none; opacity:0; visibility:hidden;"></div>
 
-            <div class="deck-section-title">
-                <span>Network Channels</span>
-                <span style="cursor:pointer; color:var(--primary); font-size:0.8rem; text-transform:none;" onclick="triggerChannelCreationWizard()">[ + New Channel ]</span>
-            </div>
-            <div id="dynamic-channels-list-container">
-                <div class="channel-link active" id="chan-global" onclick="switchChannel('global', 'Global Hub', true)">
-                    <span class="chan-label">🌐 Global Mainframe</span>
-                </div>
-            </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-            <div class="deck-section-title">Secure Links</div>
-            <div class="friend-input-box">
-                <input type="text" id="add-friend-input" placeholder="Search handles...">
-                <button onclick="manualAddFriend()">Add</button>
-            </div>
-            <div id="friend-list-container"></div>
-        </div>
-    </div>
+    <script>
+        /* =========================================================================
+           1. NEW CORE FIREBASE v9+ RECONFIGURED MATRICES (Using v8 Compat SDK Layout)
+           ========================================================================= */
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
+            authDomain: "aero-419e0.firebaseapp.com",
+            databaseURL: "https://aero-419e0-default-rtdb.firebaseio.com",
+            projectId: "aero-419e0",
+            storageBucket: "aero-419e0.firebasestorage.app",
+            messagingSenderId: "915787528277",
+            appId: "1:915787528277:web:07d756421995531c923cdc",
+            measurementId: "G-L0FH99LT4L"
+        };
 
-    <div class="chat-deck">
-        <div class="chat-header-bar">
-            <h2 id="active-channel-title">Global Hub</h2>
-            <span style="color:var(--primary); font-size:0.8rem; font-weight:700; background:rgba(0,120,215,0.1); padding:4px 10px; border-radius:20px;">Secure Connection</span>
-        </div>
-        
-        <div id="chat-messages"></div>
-        
-        <div id="typing-indicator-bar"></div>
-        
-        <div id="drag-overlay">
-            <div style="text-align: center; color: var(--primary); font-weight: 800; font-size: 1.2rem; text-shadow: 0 2px 10px rgba(255,255,255,0.8);">
-                <div style="font-size: 3.5rem; margin-bottom: 10px;">💧</div>
-                DROP IMAGE OR GIF TO BROADCAST
-            </div>
-        </div>
-
-        <div class="chat-controls-footer">
-            <input type="text" id="message-box" class="aero-input" placeholder="Type a message (max 500 chars)..." style="flex: 1;" maxlength="500">
-            <span id="char-count" class="char-counter">0/500</span>
-            <button class="gel-btn" id="send-button">Broadcast</button>
-        </div>
-    </div>
-</div>
-
-<div id="yt-bg-audio-pipeline" style="position: absolute; width: 0; height: 0; pointer-events: none; opacity: 0; visibility: hidden;"></div>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<script>
-    /* =========================================================================
-       1. FIREBASE CONFIGURATION MATRIX
-       ========================================================================= */
-    const firebaseConfig = {
-        apiKey: "AIzaSyDe16FtXqLTNX6mJv6LEtx77sQlO5pyNiA",
-        authDomain: "aero-977a5.firebaseapp.com",
-        databaseURL: "https://aero-977a5-default-rtdb.firebaseio.com/",
-        projectId: "aero-977a5",
-        storageBucket: "aero-977a5.firebasestorage.app",
-        messagingSenderId: "800936590653",
-        appId: "1:800936590653:web:843ad8511676aa475d5954"
-    };
-
-    let firebaseActive = false;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
-        firebaseActive = true;
-    } catch (e) {
-        console.error("Initialization Vector Failure:", e);
-    }
-
-    /* =========================================================================
-       2. SKEUOMORPHIC AUDIO SYNTHESIS & BACKGROUND MUSIC ENGINE
-       ========================================================================= */
-    let audioContextInstance = null;
-    let youtubePlayerInstance = null;
-
-    function verifyAudioEnvironment() {
-        if (!audioContextInstance) {
-            audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
-        }
-    }
-
-    function playSyntheticPing(style) {
+        let firebaseActive = false;
         try {
-            verifyAudioEnvironment();
-            if (!audioContextInstance) return;
-            
-            const time = audioContextInstance.currentTime;
-            
-            if (style === 'drop') {
-                const osc = audioContextInstance.createOscillator();
-                const gain = audioContextInstance.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, time);
-                osc.frequency.exponentialRampToValueAtTime(1200, time + 0.08);
-                gain.gain.setValueAtTime(0.25, time);
-                gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
-                osc.connect(gain); gain.connect(audioContextInstance.destination);
-                osc.start(time); osc.stop(time + 0.12);
-            } else if (style === 'chime') {
-                [523.25, 659.25, 783.99].forEach((freq, idx) => {
+            firebase.initializeApp(firebaseConfig);
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+            firebaseActive = true;
+        } catch (e) {
+            console.error("Initialization Protocol Vectors Denied: ", e);
+        }
+
+        /* =========================================================================
+           2. SKEUOMORPHIC AUDIO SYNTHESIS & YT SOUNDTRACK PIPELINE
+           ========================================================================= */
+        let audioContextInstance = null;
+        let youtubePlayerInstance = null;
+
+        function verifyAudioEnvironment() {
+            if (!audioContextInstance) {
+                audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSyntheticPing(style) {
+            try {
+                verifyAudioEnvironment();
+                if (!audioContextInstance) return;
+                const time = audioContextInstance.currentTime;
+                
+                if (style === 'drop') {
                     const osc = audioContextInstance.createOscillator();
                     const gain = audioContextInstance.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, time + (idx * 0.04));
-                    gain.gain.setValueAtTime(0.18, time + (idx * 0.04));
-                    gain.gain.exponentialRampToValueAtTime(0.001, time + (idx * 0.04) + 0.25);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, time);
+                    osc.frequency.exponentialRampToValueAtTime(880, time + 0.05);
+                    gain.gain.setValueAtTime(0.15, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
                     osc.connect(gain); gain.connect(audioContextInstance.destination);
-                    osc.start(time + (idx * 0.04)); osc.stop(time + (idx * 0.04) + 0.25);
-                });
-            }
-        } catch(e) { console.log("Audio failure", e); }
-    }
-
-    (function loadYouTubeIframeLibrary() {
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    })();
-
-    function onYouTubeIframeAPIReady() {
-        youtubePlayerInstance = new YT.Player('yt-bg-audio-pipeline', {
-            videoId: 'w0mB896wQEk',
-            playerVars: {
-                'autoplay': 0,
-                'controls': 0,
-                'loop': 1,
-                'playlist': 'w0mB896wQEk',
-                'disablekb': 1,
-                'fs': 0
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
-
-    function onPlayerReady(event) {
-        event.target.setVolume(15);
-    }
-
-    function onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.ENDED) {
-            youtubePlayerInstance.playVideo();
+                    osc.start(time); osc.stop(time + 0.1);
+                } else if (style === 'chime') {
+                    [440, 554.37, 659.25].forEach((freq, idx) => {
+                        const osc = audioContextInstance.createOscillator();
+                        const gain = audioContextInstance.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, time + (idx * 0.05));
+                        gain.gain.setValueAtTime(0.1, time + (idx * 0.05));
+                        gain.gain.exponentialRampToValueAtTime(0.001, time + (idx * 0.05) + 0.2);
+                        osc.connect(gain); gain.connect(audioContextInstance.destination);
+                        osc.start(time + (idx * 0.05)); osc.stop(time + (idx * 0.05) + 0.2);
+                    });
+                }
+            } catch(e) {}
         }
-    }
 
-    function startBackgroundAmbientTrack() {
-        if (youtubePlayerInstance && typeof youtubePlayerInstance.playVideo === 'function') {
-            youtubePlayerInstance.playVideo();
+        (function loadYouTubeIframeLibrary() {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        })();
+
+        function onYouTubeIframeAPIReady() {
+            youtubePlayerInstance = new YT.Player('yt-bg-audio-pipeline', {
+                videoId: 'w0mB896wQEk',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'w0mB896wQEk', 'disablekb': 1, 'fs': 0 },
+                events: { 'onReady': (e) => e.target.setVolume(12) }
+            });
         }
-    }
 
-    /* =========================================================================
-       3. DYNAMIC BUBBLE ENGINE
-       ========================================================================= */
-    const canvasLayer = document.getElementById('canvas-layer');
-    const introCenterPod = document.getElementById('intro-center-pod');
-    const bootScreen = document.getElementById('boot-screen');
-    const authScreen = document.getElementById('auth-screen');
-    const appRoot = document.getElementById('app-root');
-    let bootCompleted = false;
+        function startBackgroundAmbientTrack() {
+            if (youtubePlayerInstance && typeof youtubePlayerInstance.playVideo === 'function') {
+                youtubePlayerInstance.playVideo();
+            }
+        }
 
-    function generateOrganicBubbles() {
-        if(bootCompleted) return;
-        for (let i = 0; i < 15; i++) createBubbleInstance();
-    }
+        /* =========================================================================
+           3. SCREEN STATE INITIALIZATION CONTROL LAYERS
+           ========================================================================= */
+        const bootScreen = document.getElementById('boot-screen');
+        const authScreen = document.getElementById('auth-screen');
+        const appRoot = document.getElementById('app-root');
+        let bootCompleted = false;
 
-    function createBubbleInstance() {
-        if(bootCompleted) return;
-        const orb = document.createElement('div');
-        orb.className = 'aero-orb';
-        
-        const size = Math.random() * 60 + 20; 
-        const duration = Math.random() * 6 + 4;
-
-        orb.style.width = size + "px"; orb.style.height = size + "px";
-        orb.style.left = (Math.random() * 100) + "%";
-        orb.style.animationDuration = duration + "s";
-        orb.style.setProperty('--drift', (Math.random() * 40 - 20) + "px");
-
-        orb.addEventListener('click', () => {
-            playSyntheticPing('drop');
-            orb.style.transform = 'scale(1.4)'; orb.style.opacity = '0';
-            setTimeout(() => orb.remove(), 200); createBubbleInstance();
-        });
-
-        canvasLayer.appendChild(orb);
-        setTimeout(() => { if(orb.parentNode) { orb.remove(); createBubbleInstance(); } }, duration * 1000);
-    }
-
-    generateOrganicBubbles();
-    setTimeout(() => { introCenterPod.classList.add('reveal'); }, 300);
-
-    function triggerBubbleBurst() {
-        playSyntheticPing('chime');
-        startBackgroundAmbientTrack();
-        
-        document.querySelectorAll('.aero-orb').forEach((o, i) => {
-            setTimeout(() => { o.style.transform = 'scale(1.8)'; o.style.opacity = '0'; }, i * 25);
-        });
-        introCenterPod.style.transform = 'scale(0.8)'; introCenterPod.style.opacity = '0';
-
-        setTimeout(() => {
+        function terminateBootOverlay() {
+            playSyntheticPing('chime');
+            startBackgroundAmbientTrack();
             bootScreen.style.opacity = '0';
             setTimeout(() => {
-                bootScreen.style.display = 'none'; bootCompleted = true; evaluateGlobalDisplayState();
-            }, 1000);
-        }, 800);
-    }
-
-    /* =========================================================================
-       4. ACCOUNT SYNCHRONIZATION MATRIX
-       ========================================================================= */
-    let authModeIsLogin = true; 
-    let myHandle = "";
-    let myFriends = [];
-    let currentChannel = "global";
-    let activeListenerRef = null; 
-    let activeTypingListenerRef = null;
-    let currentUserPfp = null;
-    let currentUserStatus = "";
-
-    const authErrorDisplay = document.getElementById('auth-error-display');
-    const myHandleDisplay = document.getElementById('my-handle-display');
-    const myStatusDisplay = document.getElementById('my-status-display');
-    const sidebarPfp = document.getElementById('sidebar-pfp');
-
-    function toggleAuthMode() {
-        authModeIsLogin = !authModeIsLogin;
-        authErrorDisplay.style.display = "none";
-        document.getElementById('auth-username').value = "";
-        document.getElementById('auth-password').value = "";
-        if (authModeIsLogin) {
-            document.getElementById('auth-box-title').innerText = "Welcome Back";
-            document.getElementById('auth-submit-btn').innerText = "Sign In";
-            document.getElementById('auth-toggle-link').innerHTML = "New to the connection? <span>Create Account</span>";
-        } else {
-            document.getElementById('auth-box-title').innerText = "Create Identity Profile";
-            document.getElementById('auth-submit-btn').innerText = "Register System Node";
-            document.getElementById('auth-toggle-link').innerHTML = "Have account profile? <span>Sign In</span>";
-        }
-    }
-
-    function processAuthSubmission() {
-        const username = document.getElementById('auth-username').value.trim();
-        const password = document.getElementById('auth-password').value;
-        const cleanName = username.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '');
-
-        if (!cleanName || password.length < 6) {
-            authErrorDisplay.innerText = "Please complete entry profile configuration. (Password min 6 characters)";
-            authErrorDisplay.style.display = "block"; return;
+                bootScreen.style.display = 'none';
+                bootCompleted = true;
+                evaluateGlobalDisplayState();
+            }, 500);
         }
 
-        authErrorDisplay.style.display = "none";
-        if (authModeIsLogin) {
-            firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
-                .catch(err => { 
-                    authErrorDisplay.innerText = "Access denied: " + err.message; 
-                    authErrorDisplay.style.display = "block"; 
-                });
-        } else {
-            const db = firebase.database();
-            db.ref('usernames/' + cleanName).once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    authErrorDisplay.innerText = "Handle claimed."; authErrorDisplay.style.display = "block";
-                } else {
-                    firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
-                        .then((cred) => {
-                            return db.ref('usernames/' + cleanName).set(cred.user.uid)
-                                .then(() => {
-                                    return db.ref('users/' + cred.user.uid).set({ 
-                                        handle: username, 
-                                        pfp: "", 
-                                        status: "",
-                                        friends: { initialized: true } 
-                                    });
-                                });
-                        })
-                        .catch(err => { 
-                            authErrorDisplay.innerText = "Registration Error: " + err.message; 
-                            authErrorDisplay.style.display = "block"; 
-                        });
-                }
-            });
-        }
-    }
+        /* =========================================================================
+           4. ACCOUNT REGISTRATION & RUNTIME SESSION MANAGEMENT MATRIX
+           ========================================================================= */
+        let authModeIsLogin = true; 
+        let myHandle = "";
+        let myFriends = [];
+        let currentChannel = "global";
+        let activeListenerRef = null; 
+        let activeTypingListenerRef = null;
+        let currentUserPfp = null;
+        let currentUserStatus = "";
 
-    function terminateUserSession() { 
-        clearMyTypingState();
-        firebase.auth().signOut().then(() => { location.reload(); }); 
-    }
+        const authErrorDisplay = document.getElementById('auth-error-display');
+        const myHandleDisplay = document.getElementById('my-handle-display');
+        const myStatusDisplay = document.getElementById('my-status-display');
+        const profileAvatarSlot = document.getElementById('profile-avatar-slot');
+        const navUserIndicator = document.getElementById('nav-user-indicator');
 
-    function evaluateGlobalDisplayState() {
-        if (!bootCompleted) return;
-        if (firebase.auth().currentUser) {
-            authScreen.style.opacity = '0';
-            setTimeout(() => { authScreen.style.display = 'none'; appRoot.style.display = 'flex'; setTimeout(() => appRoot.classList.add('active'), 50); }, 400);
-        } else {
-            appRoot.classList.remove('active');
-            setTimeout(() => { appRoot.style.display = 'none'; authScreen.style.display = 'flex'; setTimeout(() => authScreen.style.opacity = '1', 50); }, 400);
-        }
-    }
-
-    if (firebaseActive) {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                firebase.database().ref('users/' + user.uid).on('value', (snap) => {
-                    const userData = snap.val() || {};
-                    myHandle = userData.handle || "Entity_Node";
-                    currentUserPfp = userData.pfp || null;
-                    currentUserStatus = userData.status || "";
-                    
-                    myHandleDisplay.innerText = myHandle;
-                    if(currentUserPfp) sidebarPfp.innerHTML = `<img src="${currentUserPfp}">`;
-                    else sidebarPfp.innerHTML = "🌊";
-
-                    if(currentUserStatus) {
-                        myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
-                        myStatusDisplay.style.display = "block";
-                    } else {
-                        myStatusDisplay.style.display = "none";
-                    }
-
-                    const rawFriends = userData.friends;
-                    if (rawFriends && Array.isArray(rawFriends)) {
-                        myFriends = rawFriends;
-                    } else if (rawFriends && typeof rawFriends === 'object') {
-                        myFriends = Object.values(rawFriends).filter(val => typeof val === 'string');
-                    } else {
-                        myFriends = [];
-                    }
-                    
-                    renderFriendList();
-                    
-                    if (appRoot.style.display === 'none' || !appRoot.classList.contains('active')) {
-                        evaluateGlobalDisplayState();
-                        syncChannelsListListener();
-                        switchChannel('global', 'Global Hub', true);
-                        setupGlobalNotificationTrackers();
-                    }
-                });
-            } else evaluateGlobalDisplayState();
-        });
-    }
-
-    /* =========================================================================
-       5. CHANNEL CREATION PIPELINE
-       ========================================================================= */
-    const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
-    let dynamicChannelsCache = {};
-    
-    function triggerChannelCreationWizard() {
-        const u = firebase.auth().currentUser;
-        if (!u) return;
-
-        firebase.database().ref('channels_list').once('value').then((snapshot) => {
-            const data = snapshot.val();
-            let ownedCount = 0;
-            
-            if (data) {
-                Object.values(data).forEach(chan => {
-                    if (chan.ownerId === u.uid) ownedCount++;
-                });
-            }
-
-            if (ownedCount >= 1 && myHandle !== "DAMXIAFAN69") {
-                alert("Security Protocol: Standard account architectures are restricted to 1 custom channel allocation maximum.");
-                return;
-            }
-
-            const title = prompt("Enter new channel parameters label:");
-            if (!title) return;
-            const cleanChanId = title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-            if (!cleanChanId) { alert("Invalid channel identifier structure."); return; }
-
-            firebase.database().ref('channels_list/' + cleanChanId).set({
-                id: cleanChanId,
-                name: title,
-                ownerId: u.uid
-            }).then(() => {
-                playSyntheticPing('chime');
-                switchChannel(cleanChanId, title, false);
-            });
-        });
-    }
-
-    function removeChannelNode(channelId, event) {
-        event.stopPropagation();
-        if (myHandle !== "DAMXIAFAN69") return;
-        
-        const confirmation = confirm(`Are you completely sure you want to permanently delete the channel reference "${channelId}" and all its logs?`);
-        if (!confirmation) return;
-
-        if(channelListeners[channelId]) {
-            firebase.database().ref(`channels/${channelId}`).off('child_added', channelListeners[channelId]);
-            delete channelListeners[channelId];
-        }
-        delete unreadCounts[channelId];
-        updateGlobalTitleBanner();
-
-        firebase.database().ref('channels_list/' + channelId).remove();
-        firebase.database().ref('channels/' + channelId).remove().then(() => {
-            if (currentChannel === channelId) {
-                switchChannel('global', 'Global Hub', true);
-            }
-        });
-    }
-
-    function syncChannelsListListener() {
-        firebase.database().ref('channels_list').on('value', (snapshot) => {
-            dynamicChannelsCache = snapshot.val() || {};
-            renderChannelsSidebarDOM();
-        });
-    }
-
-    function renderChannelsSidebarDOM() {
-        dynamicChannelsContainer.innerHTML = `
-            <div class="channel-link ${currentChannel === 'global' ? 'active' : ''}" id="chan-global" onclick="switchChannel('global', 'Global Hub', true)">
-                <span class="chan-label">🌐 Global Mainframe</span>
-                ${renderBadgeHtml('global')}
-            </div>
-        `;
-        
-        Object.values(dynamicChannelsCache).forEach(chan => {
-            const div = document.createElement('div');
-            div.className = `channel-link ${currentChannel === chan.id ? 'active' : ''}`;
-            div.id = `chan-${chan.id}`;
-            
-            let deleteIconHtml = "";
-            if (myHandle === "DAMXIAFAN69") {
-                deleteIconHtml = `<span style="color:#ff5555; margin-left:8px; padding:0 5px; font-weight:bold; cursor:pointer; z-index:20;" title="Delete Channel Network" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
-            }
-
-            div.innerHTML = `
-                <span class="chan-label">💬 ${chan.name}</span> 
-                <div style="display:flex; align-items:center; margin-left:auto;">
-                    ${renderBadgeHtml(chan.id)}
-                    ${deleteIconHtml}
-                </div>
-            `;
-            div.onclick = () => switchChannel(chan.id, chan.name, false);
-            dynamicChannelsContainer.appendChild(div);
-        });
-    }
-
-    /* =========================================================================
-       6. CHAT ROUTING & NOTIFICATION LOGIC
-       ========================================================================= */
-    const chatMessages = document.getElementById('chat-messages');
-    const messageBox = document.getElementById('message-box');
-    const charCountDisplay = document.getElementById('char-count');
-    const typingIndicatorBar = document.getElementById('typing-indicator-bar');
-    let isInitialLoad = true;
-
-    let unreadCounts = {};
-    let channelListeners = {};
-    let channelTracksInitialized = {};
-
-    function setupGlobalNotificationTrackers() {
-        trackChannelNotifications('global');
-        
-        firebase.database().ref('channels_list').on('child_added', (snap) => {
-            const chan = snap.val();
-            if(chan && chan.id) trackChannelNotifications(chan.id);
-        });
-
-        firebase.database().ref('users/' + firebase.auth().currentUser.uid).on('value', (snap) => {
-            const userData = snap.val() || {};
-            let friendsList = [];
-            if (userData.friends && Array.isArray(userData.friends)) friendsList = userData.friends;
-            else if (userData.friends && typeof userData.friends === 'object') friendsList = Object.values(userData.friends);
-            
-            friendsList.forEach(friend => {
-                if (typeof friend === 'string') {
-                    const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
-                    trackChannelNotifications(`dm_${dmRoomId}`);
-                }
-            });
-        });
-    }
-
-    function trackChannelNotifications(channelId) {
-        if (channelListeners[channelId]) return;
-        
-        unreadCounts[channelId] = 0;
-        channelTracksInitialized[channelId] = false;
-        
-        const dbRef = firebase.database().ref(`channels/${channelId}`);
-        
-        dbRef.once('value').then(() => {
-            channelTracksInitialized[channelId] = true;
-        });
-
-        channelListeners[channelId] = dbRef.on('child_added', (snapshot) => {
-            if (!channelTracksInitialized[channelId]) return;
-            
-            if (currentChannel !== channelId) {
-                unreadCounts[channelId]++;
-                playSyntheticPing('drop');
-                updateGlobalTitleBanner();
-                
-                if (channelId.startsWith('dm_')) {
-                    renderFriendList();
-                } else {
-                    renderChannelsSidebarDOM();
-                }
-            }
-        });
-    }
-
-    function renderBadgeHtml(channelId) {
-        const count = unreadCounts[channelId] || 0;
-        return count > 0 ? `<span class="notif-badge">${count}</span>` : '';
-    }
-
-    function updateGlobalTitleBanner() {
-        let totalUnread = 0;
-        Object.keys(unreadCounts).forEach(key => {
-            totalUnread += unreadCounts[key] || 0;
-        });
-
-        if (totalUnread > 0) {
-            document.title = `(${totalUnread}) AeroSocial - Digital Horizon`;
-        } else {
-            document.title = `AeroSocial - Digital Horizon`;
-        }
-    }
-
-    messageBox.addEventListener('input', () => {
-        const length = messageBox.value.length;
-        charCountDisplay.innerText = `${length}/500`;
-        if (length >= 500) charCountDisplay.style.color = '#d63030';
-        else charCountDisplay.style.color = 'var(--text-muted)';
-
-        broadcastMyTypingStatus();
-    });
-
-    /* =========================================================================
-       7. REAL-TIME TYPING ENGINE
-       ========================================================================= */
-    let typingDebounceTimeout = null;
-    let isCurrentlyTypingInFirebase = false;
-
-    function broadcastMyTypingStatus() {
-        const u = firebase.auth().currentUser;
-        if (!u || !firebaseActive) return;
-
-        if (!isCurrentlyTypingInFirebase && messageBox.value.trim().length > 0) {
-            isCurrentlyTypingInFirebase = true;
-            firebase.database().ref(`typing/${currentChannel}/${u.uid}`).set({
-                username: myHandle,
-                timestamp: Date.now()
-            });
-        }
-
-        clearTimeout(typingDebounceTimeout);
-        typingDebounceTimeout = setTimeout(() => {
-            clearMyTypingState();
-        }, 4000);
-    }
-
-    function clearMyTypingState() {
-        const u = firebase.auth().currentUser;
-        if (u && firebaseActive && isCurrentlyTypingInFirebase) {
-            isCurrentlyTypingInFirebase = false;
-            firebase.database().ref(`typing/${currentChannel}/${u.uid}`).remove();
-        }
-    }
-
-    function listenToTypingEvents(channelId) {
-        if (activeTypingListenerRef) { activeTypingListenerRef.off(); activeTypingListenerRef = null; }
-        typingIndicatorBar.innerHTML = "";
-
-        if (!firebaseActive) return;
-        const u = firebase.auth().currentUser;
-
-        activeTypingListenerRef = firebase.database().ref(`typing/${channelId}`);
-        activeTypingListenerRef.on('value', (snapshot) => {
-            const typersObj = snapshot.val();
-            let typingUsers = [];
-
-            if (typersObj) {
-                Object.keys(typersObj).forEach(uid => {
-                    if (!u || uid !== u.uid) {
-                        typingUsers.push(typersObj[uid].username);
-                    }
-                });
-            }
-
-            if (typingUsers.length > 0) {
-                let textToShow = "";
-                if (typingUsers.length === 1) {
-                    textToShow = `✍️ <b>${typingUsers[0]}</b> is transmitting...`;
-                } else if (typingUsers.length === 2) {
-                    textToShow = `✍️ <b>${typingUsers[0]}</b> and <b>${typingUsers[1]}</b> are transmitting...`;
-                } else {
-                    textToShow = `✍️ Multiple nodes transmitting logs...`;
-                }
-                typingIndicatorBar.innerHTML = textToShow;
+        function toggleAuthMode() {
+            authModeIsLogin = !authModeIsLogin;
+            authErrorDisplay.style.display = "none";
+            document.getElementById('auth-username').value = "";
+            document.getElementById('auth-password').value = "";
+            if (authModeIsLogin) {
+                document.getElementById('auth-box-title').innerText = "Sign In";
+                document.getElementById('auth-submit-btn').innerText = "Enter Matrix";
+                document.getElementById('auth-toggle-link').innerHTML = "New profile sequence? <span>Create Matrix Node</span>";
             } else {
-                typingIndicatorBar.innerHTML = "";
+                document.getElementById('auth-box-title').innerText = "Register Identity Profile";
+                document.getElementById('auth-submit-btn').innerText = "Initialize System Node";
+                document.getElementById('auth-toggle-link').innerHTML = "Already synced profile? <span>Sign In</span>";
             }
-        });
-    }
+        }
 
-    function switchChannel(channelId, layoutTitle, isGlobal) {
-        clearMyTypingState();
-        currentChannel = channelId;
-        isInitialLoad = true;
-        
-        unreadCounts[channelId] = 0;
-        updateGlobalTitleBanner();
-        
-        if (channelId.startsWith('dm_')) renderFriendList();
-        else renderChannelsSidebarDOM();
+        function processAuthSubmission() {
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const cleanName = username.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '');
 
-        document.getElementById('active-channel-title').innerText = layoutTitle;
+            if (!cleanName || password.length < 6) {
+                authErrorDisplay.innerText = "Entry architecture invalid. (Password minimum 6 characters required)";
+                authErrorDisplay.style.display = "block"; return;
+            }
 
-        chatMessages.innerHTML = '';
-        if (activeListenerRef) { activeListenerRef.off(); activeListenerRef = null; }
+            authErrorDisplay.style.display = "none";
+            if (authModeIsLogin) {
+                firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
+                    .catch(err => { authErrorDisplay.innerText = "Access Denied: " + err.message; authErrorDisplay.style.display = "block"; });
+            } else {
+                const db = firebase.database();
+                db.ref('usernames/' + cleanName).once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        authErrorDisplay.innerText = "Identity coordinates claimed."; authErrorDisplay.style.display = "block";
+                    } else {
+                        firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
+                            .then((cred) => {
+                                return db.ref('usernames/' + cleanName).set(cred.user.uid)
+                                    .then(() => {
+                                        return db.ref('users/' + cred.user.uid).set({ 
+                                            handle: username, pfp: "", status: "", friends: { initialized: true } 
+                                        });
+                                    });
+                            })
+                            .catch(err => { authErrorDisplay.innerText = "Registration Failed: " + err.message; authErrorDisplay.style.display = "block"; });
+                    }
+                });
+            }
+        }
 
-        const db = firebase.database();
-        const targetQuery = db.ref(`channels/${channelId}`).limitToLast(50);
+        function terminateUserSession() { 
+            clearMyTypingState();
+            firebase.auth().signOut().then(() => { location.reload(); }); 
+        }
+
+        function evaluateGlobalDisplayState() {
+            if (!bootCompleted) return;
+            if (firebase.auth().currentUser) {
+                authScreen.style.display = 'none';
+                appRoot.style.display = 'grid';
+            } else {
+                appRoot.style.display = 'none';
+                authScreen.style.display = 'block';
+            }
+        }
+
+        if (firebaseActive) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    firebase.database().ref('users/' + user.uid).on('value', (snap) => {
+                        const userData = snap.val() || {};
+                        myHandle = userData.handle || "Profile_Node";
+                        currentUserPfp = userData.pfp || null;
+                        currentUserStatus = userData.status || "";
+                        
+                        myHandleDisplay.innerText = myHandle;
+                        navUserIndicator.innerText = `Node: ${myHandle}`;
+                        
+                        if(currentUserPfp) profileAvatarSlot.innerHTML = `<img src="${currentUserPfp}">`;
+                        else profileAvatarSlot.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${myHandle}">`;
+
+                        if(currentUserStatus) {
+                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
+                        } else {
+                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:#8f98a0; border-color:rgba(255,255,255,0.05); background:none;">No profile summary data broadcasted</span>`;
+                        }
+
+                        // Calculate dynamic stat counting display indicator mock
+                        document.getElementById('stat-count-items').innerText = (myHandle.length * 12);
+
+                        const rawFriends = userData.friends;
+                        if (rawFriends && Array.isArray(rawFriends)) myFriends = rawFriends;
+                        else if (rawFriends && typeof rawFriends === 'object') myFriends = Object.values(rawFriends).filter(v => typeof v === 'string');
+                        else myFriends = [];
+                        
+                        renderFriendList();
+                        
+                        if (appRoot.style.display === 'none' || appRoot.style.display === '') {
+                            evaluateGlobalDisplayState();
+                            syncChannelsListListener();
+                            switchChannel('global', 'Global Hub', true);
+                            setupGlobalNotificationTrackers();
+                        }
+                    });
+                } else evaluateGlobalDisplayState();
+            });
+        }
+
+        /* =========================================================================
+           5. PIPELINES CHANNEL WIZARD MANAGEMENT STRUCTURE
+           ========================================================================= */
+        const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
+        let dynamicChannelsCache = {};
         
-        targetQuery.once('value').then(() => { isInitialLoad = false; });
-        
-        targetQuery.on('child_added', (snapshot) => {
-            renderMessage(snapshot.val());
-            if (!isInitialLoad && currentChannel === channelId) { playSyntheticPing('drop'); }
-        });
+        function triggerChannelCreationWizard() {
+            const u = firebase.auth().currentUser;
+            if (!u) return;
+
+            firebase.database().ref('channels_list').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                let ownedCount = 0;
+                if (data) { Object.values(data).forEach(chan => { if (chan.ownerId === u.uid) ownedCount++; }); }
+
+                if (ownedCount >= 1 && myHandle !== "DAMXIAFAN69") {
+                    alert("Security Lockout: Profile node clearance structures restricted to 1 custom creation pipeline limit."); return;
+                }
+
+                const title = prompt("Specify connection identifier pipeline designation:");
+                if (!title) return;
+                const cleanChanId = title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+                if (!cleanChanId) { alert("Invalid structural notation label."); return; }
+
+                firebase.database().ref('channels_list/' + cleanChanId).set({
+                    id: cleanChanId, name: title, ownerId: u.uid
+                }).then(() => {
+                    playSyntheticPing('chime');
+                    switchChannel(cleanChanId, title, false);
+                });
+            });
+        }
+
+        function removeChannelNode(channelId, event) {
+            event.stopPropagation();
+            if (myHandle !== "DAMXIAFAN69") return;
+            if (!confirm(`Purge network route data "${channelId}" securely?`)) return;
+
+            if(channelListeners[channelId]) {
+                firebase.database().ref(`channels/${channelId}`).off('child_added', channelListeners[channelId]);
+                delete channelListeners[channelId];
+            }
+            delete unreadCounts[channelId];
+            updateGlobalTitleBanner();
+
+            firebase.database().ref('channels_list/' + channelId).remove();
+            firebase.database().ref('channels/' + channelId).remove().then(() => {
+                if (currentChannel === channelId) switchChannel('global', 'Global Hub', true);
+            });
+        }
+
+        function syncChannelsListListener() {
+            firebase.database().ref('channels_list').on('value', (snapshot) => {
+                dynamicChannelsCache = snapshot.val() || {};
+                renderChannelsSidebarDOM();
+            });
+        }
+
+        function renderChannelsSidebarDOM() {
+            dynamicChannelsContainer.innerHTML = `
+                <li class="${currentChannel === 'global' ? 'active' : ''}" onclick="switchChannel('global', 'Global Hub', true)">
+                    <span>🌐 Global Mainframe</span>
+                    ${renderBadgeHtml('global')}
+                </li>
+            `;
             
-        activeListenerRef = targetQuery;
-        listenToTypingEvents(channelId);
-    }
+            Object.values(dynamicChannelsCache).forEach(chan => {
+                const li = document.createElement('li');
+                li.className = currentChannel === chan.id ? 'active' : '';
+                
+                let deleteIconHtml = "";
+                if (myHandle === "DAMXIAFAN69") {
+                    deleteIconHtml = `<span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
+                }
 
-    function sendMessage() {
-        const text = messageBox.value.trim();
-        if (text === "" || text.length > 500) return;
+                li.innerHTML = `
+                    <span>💬 ${chan.name}</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        ${renderBadgeHtml(chan.id)}
+                        ${deleteIconHtml}
+                    </div>
+                `;
+                li.onclick = () => switchChannel(chan.id, chan.name, false);
+                dynamicChannelsContainer.appendChild(li);
+            });
+        }
 
-        clearMyTypingState();
+        /* =========================================================================
+           6. LIVE MESSAGING CORE ENGINE & LOCALIZED TIMESTAMP INTEGRATION
+           ========================================================================= */
+        const chatMessages = document.getElementById('chat-messages');
+        const messageBox = document.getElementById('message-box');
+        const charCountDisplay = document.getElementById('char-count');
+        const typingIndicatorBar = document.getElementById('typing-indicator-bar');
+        let isInitialLoad = true;
 
-        if (text.startsWith('/')) {
-            if (myHandle === "DAMXIAFAN69") {
+        let unreadCounts = {};
+        let channelListeners = {};
+        let channelTracksInitialized = {};
+
+        function setupGlobalNotificationTrackers() {
+            trackChannelNotifications('global');
+            firebase.database().ref('channels_list').on('child_added', (snap) => {
+                const chan = snap.val(); if(chan && chan.id) trackChannelNotifications(chan.id);
+            });
+
+            firebase.database().ref('users/' + firebase.auth().currentUser.uid).on('value', (snap) => {
+                const userData = snap.val() || {};
+                let friendsList = [];
+                if (userData.friends && Array.isArray(userData.friends)) friendsList = userData.friends;
+                else if (userData.friends && typeof userData.friends === 'object') friendsList = Object.values(userData.friends);
+                
+                friendsList.forEach(friend => {
+                    if (typeof friend === 'string') {
+                        const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+                        trackChannelNotifications(`dm_${dmRoomId}`);
+                    }
+                });
+            });
+        }
+
+        function trackChannelNotifications(channelId) {
+            if (channelListeners[channelId]) return;
+            unreadCounts[channelId] = 0;
+            channelTracksInitialized[channelId] = false;
+            
+            const dbRef = firebase.database().ref(`channels/${channelId}`);
+            dbRef.once('value').then(() => { channelTracksInitialized[channelId] = true; });
+
+            channelListeners[channelId] = dbRef.on('child_added', (snapshot) => {
+                if (!channelTracksInitialized[channelId]) return;
+                if (currentChannel !== channelId) {
+                    unreadCounts[channelId]++;
+                    playSyntheticPing('drop');
+                    updateGlobalTitleBanner();
+                    if (channelId.startsWith('dm_')) renderFriendList();
+                    else renderChannelsSidebarDOM();
+                }
+            });
+        }
+
+        function renderBadgeHtml(channelId) {
+            const count = unreadCounts[channelId] || 0;
+            return count > 0 ? `<span class="notif-badge">${count}</span>` : '';
+        }
+
+        function updateGlobalTitleBanner() {
+            let totalUnread = 0;
+            Object.keys(unreadCounts).forEach(key => { totalUnread += unreadCounts[key] || 0; });
+            document.title = totalUnread > 0 ? `(${totalUnread}) AERO - Profile Hub` : `AERO - Profile Hub`;
+        }
+
+        messageBox.addEventListener('input', () => {
+            charCountDisplay.innerText = `${messageBox.value.length}/500`;
+            broadcastMyTypingStatus();
+        });
+
+        /* =========================================================================
+           7. REAL-TIME TYPING TRANSMISSION ARCHITECTURE
+           ========================================================================= */
+        let typingDebounceTimeout = null;
+        let isCurrentlyTypingInFirebase = false;
+
+        function broadcastMyTypingStatus() {
+            const u = firebase.auth().currentUser;
+            if (!u || !firebaseActive) return;
+
+            if (!isCurrentlyTypingInFirebase && messageBox.value.trim().length > 0) {
+                isCurrentlyTypingInFirebase = true;
+                firebase.database().ref(`typing/${currentChannel}/${u.uid}`).set({
+                    username: myHandle, timestamp: Date.now()
+                });
+            }
+
+            clearTimeout(typingDebounceTimeout);
+            typingDebounceTimeout = setTimeout(() => { clearMyTypingState(); }, 4000);
+        }
+
+        function clearMyTypingState() {
+            const u = firebase.auth().currentUser;
+            if (u && firebaseActive && isCurrentlyTypingInFirebase) {
+                isCurrentlyTypingInFirebase = false;
+                firebase.database().ref(`typing/${currentChannel}/${u.uid}`).remove();
+            }
+        }
+
+        function listenToTypingEvents(channelId) {
+            if (activeTypingListenerRef) { activeTypingListenerRef.off(); activeTypingListenerRef = null; }
+            typingIndicatorBar.innerHTML = "";
+
+            if (!firebaseActive) return;
+            const u = firebase.auth().currentUser;
+
+            activeTypingListenerRef = firebase.database().ref(`typing/${channelId}`);
+            activeTypingListenerRef.on('value', (snapshot) => {
+                const typersObj = snapshot.val();
+                let typingUsers = [];
+                if (typersObj) {
+                    Object.keys(typersObj).forEach(uid => { if (!u || uid !== u.uid) typingUsers.push(typersObj[uid].username); });
+                }
+
+                if (typingUsers.length > 0) {
+                    typingIndicatorBar.innerHTML = typingUsers.length === 1 ? 
+                        `📝 Node <b>${typingUsers[0]}</b> is preparing log data...` : `📝 Multiple communication vectors preparing logs...`;
+                } else {
+                    typingIndicatorBar.innerHTML = "";
+                }
+            });
+        }
+
+        function switchChannel(channelId, layoutTitle, isGlobal) {
+            clearMyTypingState();
+            currentChannel = channelId;
+            isInitialLoad = true;
+            unreadCounts[channelId] = 0;
+            updateGlobalTitleBanner();
+            
+            if (channelId.startsWith('dm_')) renderFriendList();
+            else renderChannelsSidebarDOM();
+
+            document.getElementById('active-channel-title').innerText = layoutTitle;
+            chatMessages.innerHTML = '';
+            
+            if (activeListenerRef) { activeListenerRef.off(); activeListenerRef = null; }
+
+            const db = firebase.database();
+            const targetQuery = db.ref(`channels/${channelId}`).limitToLast(40);
+            
+            targetQuery.once('value').then(() => { isInitialLoad = false; });
+            targetQuery.on('child_added', (snapshot) => {
+                renderMessage(snapshot.val());
+                if (!isInitialLoad && currentChannel === channelId) playSyntheticPing('drop');
+            });
+                
+            activeListenerRef = targetQuery;
+            listenToTypingEvents(channelId);
+        }
+
+        function sendMessage() {
+            const text = messageBox.value.trim();
+            if (text === "" || text.length > 500) return;
+            clearMyTypingState();
+
+            if (text.startsWith('/') && myHandle === "DAMXIAFAN69") {
                 if (text === '/clear') {
                     firebase.database().ref(`channels/${currentChannel}`).remove();
-                    chatMessages.innerHTML = ''; messageBox.value = ''; charCountDisplay.innerText = "0/500";
-                    return;
+                    chatMessages.innerHTML = ''; messageBox.value = ''; return;
                 }
                 if (text.startsWith('/alert ')) {
                     firebase.database().ref(`channels/${currentChannel}`).push({
-                        username: "🚨 SYSTEM ALERT",
+                        username: "🚨 SYSTEM DIRECTIVE",
                         text: text.replace('/alert ', '').toUpperCase(),
                         pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
-                        status: "",
-                        timestamp: Date.now()
+                        status: "", timestamp: Date.now()
                     });
-                    messageBox.value = ''; charCountDisplay.innerText = "0/500";
-                    return;
+                    messageBox.value = ''; return;
                 }
             }
+
+            firebase.database().ref(`channels/${currentChannel}`).push({
+                username: myHandle, text: text, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
+            });
+            messageBox.value = '';
+            charCountDisplay.innerText = "0/500";
         }
 
-        firebase.database().ref(`channels/${currentChannel}`).push({
-            username: myHandle,
-            text: text,
-            pfp: currentUserPfp,
-            status: currentUserStatus,
-            timestamp: Date.now()
-        });
-        messageBox.value = '';
-        charCountDisplay.innerText = "0/500";
-    }
-
-    function renderMessage(data) {
-        if(!data) return;
-        const msgDiv = document.createElement('div');
-        const isOwn = data.username === myHandle;
-        msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
-        
-        let contentHtml = '';
-        if (data.text) {
-            contentHtml += `<div class="text">${data.text}</div>`;
+        function renderMessage(data) {
+            if(!data) return;
+            const msgDiv = document.createElement('div');
+            const isOwn = data.username === myHandle;
+            msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
             
-            const parsedUrlMatch = data.text.match(/(https?:\/\/[^\s]+)/gi);
-            if (parsedUrlMatch) {
-                const targetUrl = parsedUrlMatch[0];
-                if (targetUrl.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
-                    contentHtml += `<img src="${targetUrl}" class="media-attachment">`;
-                } else if (targetUrl.match(/\.(mp3|ogg|wav)/i)) {
-                    contentHtml += `<audio src="${targetUrl}" controls class="media-preview-audio"></audio>`;
-                } else if (targetUrl.match(/\.(mp4|webm)/i)) {
-                    contentHtml += `<video src="${targetUrl}" controls class="media-preview-video"></video>`;
+            let contentHtml = '';
+            if (data.text) {
+                contentHtml += `<div class="text">${data.text}</div>`;
+                const parsedUrlMatch = data.text.match(/(https?:\/\/[^\s]+)/gi);
+                if (parsedUrlMatch) {
+                    const targetUrl = parsedUrlMatch[0];
+                    if (targetUrl.match(/\.(jpeg|jpg|gif|png|webp)/i)) contentHtml += `<img src="${targetUrl}" class="media-attachment">`;
+                    else if (targetUrl.match(/\.(mp3|ogg|wav)/i)) contentHtml += `<audio src="${targetUrl}" controls class="media-preview-audio"></audio>`;
+                    else if (targetUrl.match(/\.(mp4|webm)/i)) contentHtml += `<video src="${targetUrl}" controls class="media-preview-video"></video>`;
                 }
             }
-        }
-        
-        if (data.mediaUrl) { contentHtml += `<img src="${data.mediaUrl}" class="media-attachment">`; }
+            if (data.mediaUrl) { contentHtml += `<img src="${data.mediaUrl}" class="media-attachment">`; }
 
-        let adminStyle = "";
-        let isSystem = false;
-        if (data.username === "🚨 SYSTEM ALERT") {
-            msgDiv.style.background = "rgba(255, 85, 85, 0.2)";
-            msgDiv.style.borderColor = "#ff5555";
-            adminStyle = "color: #d63030; font-size: 0.9rem;";
-            isSystem = true;
-        }
-
-        const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
-
-        let timeString = "";
-        if (data.timestamp) {
-            const msgDate = new Date(data.timestamp);
-            let hours = msgDate.getHours();
-            const minutes = String(msgDate.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // Handle midnight/noon conversion
-            timeString = `${hours}:${minutes} ${ampm}`;
-        }
-
-        const headerDiv = document.createElement('div');
-        headerDiv.className = "msg-header";
-        
-        let statusTagSnippet = "";
-        if (data.status) {
-            statusTagSnippet = `<div class="status-bubble-tag" style="margin-top:0; margin-left:5px; max-width:100px; font-size:0.65rem;">${data.status}</div>`;
-        }
-
-        headerDiv.innerHTML = `
-            <img src="${avatarSrc}" class="msg-pfp">
-            <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                <div style="display:flex; align-items:center;">
-                    <div class="username" style="${adminStyle}">${data.username}</div>
-                    ${statusTagSnippet}
-                </div>
-            </div>
-            <span class="msg-timestamp">${timeString}</span>
-        `;
-
-        if (!isSystem && !isOwn) {
-            headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc, data.status);
-        } else if (!isSystem && isOwn) {
-            headerDiv.onclick = () => openSettings(); 
-        }
-
-        msgDiv.appendChild(headerDiv);
-        
-        if (contentHtml !== '') {
-            const contentWrapper = document.createElement('div');
-            contentWrapper.innerHTML = contentHtml;
-            msgDiv.appendChild(contentWrapper);
-        }
-
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    document.getElementById('send-button').addEventListener('click', sendMessage);
-    messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    /* =========================================================================
-       8. DRAG & DROP MEDIA LAYER
-       ========================================================================= */
-    const chatDeck = document.querySelector('.chat-deck');
-    const dragOverlay = document.getElementById('drag-overlay');
-
-    chatDeck.addEventListener('dragenter', (e) => { e.preventDefault(); dragOverlay.style.display = 'flex'; });
-    chatDeck.addEventListener('dragover', (e) => { e.preventDefault(); });
-    dragOverlay.addEventListener('dragleave', () => { dragOverlay.style.display = 'none'; });
-
-    chatDeck.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dragOverlay.style.display = 'none';
-        const droppedFiles = e.dataTransfer.files;
-        if (droppedFiles.length > 0) {
-            const targetFile = droppedFiles[0];
-            if (targetFile.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(event) { broadcastMediaNode(event.target.result); };
-                reader.readAsDataURL(targetFile);
+            let isSystem = false;
+            if (data.username === "🚨 SYSTEM DIRECTIVE") {
+                msgDiv.style.background = "rgba(194, 45, 45, 0.15)";
+                msgDiv.style.borderColor = "#c22d2d";
+                isSystem = true;
             }
-        }
-    });
 
-    function broadcastMediaNode(base64Data) {
-        if (!firebaseActive) return;
-        firebase.database().ref(`channels/${currentChannel}`).push({
-            username: myHandle,
-            text: "",
-            mediaUrl: base64Data,
-            pfp: currentUserPfp,
-            status: currentUserStatus,
-            timestamp: Date.now()
+            const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
+            
+            let localizedTimeStr = "Coordinate Unknown";
+            if (data.timestamp) {
+                const dateObj = new Date(data.timestamp);
+                let hr = dateObj.getHours();
+                const min = String(dateObj.getMinutes()).padStart(2, '0');
+                const pfx = hr >= 12 ? 'PM' : 'AM';
+                hr = hr % 12; hr = hr ? hr : 12;
+                localizedTimeStr = `${hr}:${min} ${pfx}`;
+            }
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = "msg-header";
+            headerDiv.innerHTML = `
+                <img src="${avatarSrc}" class="msg-pfp">
+                <span class="username">${data.username}</span>
+                ${data.status ? `<span style="font-size:10px; color:#8f98a0; margin-left:3px;">(${data.status})</span>` : ''}
+                <span class="msg-timestamp">${localizedTimeStr}</span>
+            `;
+
+            if (!isSystem && !isOwn) {
+                headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc, data.status);
+            } else if (!isSystem && isOwn) {
+                headerDiv.onclick = () => openSettings(); 
+            }
+
+            msgDiv.appendChild(headerDiv);
+            if (contentHtml !== '') {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = contentHtml;
+                msgDiv.appendChild(wrapper);
+            }
+
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        /* =========================================================================
+           8. BINARY DRAG FLUID LAYER DROP INTERCEPTORS
+           ========================================================================= */
+        const chatDeck = document.querySelector('.chat-deck');
+        const dragOverlay = document.getElementById('drag-overlay');
+
+        chatDeck.addEventListener('dragenter', (e) => { e.preventDefault(); dragOverlay.style.display = 'flex'; });
+        chatDeck.addEventListener('dragover', (e) => { e.preventDefault(); });
+        dragOverlay.addEventListener('dragleave', () => { dragOverlay.style.display = 'none'; });
+
+        chatDeck.addEventListener('drop', (e) => {
+            e.preventDefault(); dragOverlay.style.display = 'none';
+            const droppedFiles = e.dataTransfer.files;
+            if (droppedFiles.length > 0 && droppedFiles[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(ev) { broadcastMediaNode(ev.target.result); };
+                reader.readAsDataURL(droppedFiles[0]);
+            }
         });
-    }
 
-    /* =========================================================================
-       9. MODALS (SETTINGS & PROFILES)
-       ========================================================================= */
-    const settingsModal = document.getElementById('settings-modal');
-    const settingsPfpPreview = document.getElementById('settings-pfp-preview');
-    const settingsStatusInput = document.getElementById('settings-status-input');
-    let holdingBase64Pfp = null;
-
-    function openSettings() {
-        if(!firebaseActive) return;
-        verifyAudioEnvironment();
-        holdingBase64Pfp = currentUserPfp;
-        settingsStatusInput.value = currentUserStatus;
-        
-        if(holdingBase64Pfp) settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
-        else settingsPfpPreview.innerHTML = "🌊";
-        
-        settingsModal.style.display = 'flex';
-    }
-
-    function closeSettings() { settingsModal.style.display = 'none'; }
-
-    function previewSettingsPfp(inputElement) {
-        if (inputElement.files && inputElement.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                holdingBase64Pfp = e.target.result;
-                settingsPfpPreview.innerHTML = `<img src="${holdingBase64Pfp}">`;
-            };
-            reader.readAsDataURL(inputElement.files[0]);
-        }
-    }
-
-    function saveSettingsChanges() {
-        const activeUser = firebase.auth().currentUser;
-        if (!activeUser) return;
-
-        firebase.database().ref('users/' + activeUser.uid).update({
-            pfp: holdingBase64Pfp || "",
-            status: settingsStatusInput.value.trim()
-        }).then(() => { 
-            playSyntheticPing('chime');
-            closeSettings(); 
-        }).catch(() => { 
-            alert("Error syncing database infrastructure changes."); 
-        });
-    }
-
-    let targetMiniProfileHandle = "";
-    const miniProfileModal = document.getElementById('mini-profile-modal');
-    
-    function openMiniProfile(username, pfpUrl, statusText) {
-        targetMiniProfileHandle = username;
-        document.getElementById('mini-profile-name').innerText = username;
-        document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-        
-        const statusWrapper = document.getElementById('mini-profile-status-wrapper');
-        if (statusText) {
-            statusWrapper.innerHTML = `<span class="status-bubble-tag">${statusText}</span>`;
-        } else {
-            statusWrapper.innerHTML = `<span class="status-bubble-tag" style="background:grey;">No status set</span>`;
-        }
-        
-        miniProfileModal.style.display = 'flex';
-    }
-
-    function closeMiniProfile() { miniProfileModal.style.display = 'none'; targetMiniProfileHandle = ""; }
-    function actionAddFriend() { if (!targetMiniProfileHandle) return; submitFriendToDatabase(targetMiniProfileHandle); closeMiniProfile(); }
-
-    function actionDMUser() {
-        if (!targetMiniProfileHandle) return;
-        const target = targetMiniProfileHandle;
-        closeMiniProfile();
-        
-        const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
-        switchChannel(`dm_${dmRoomId}`, `DM // ${target}`, false);
-    }
-
-    /* =========================================================================
-       10. LINK MATRIX ROSTER
-       ========================================================================= */
-    const friendInput = document.getElementById('add-friend-input');
-    const friendContainer = document.getElementById('friend-list-container');
-
-    function manualAddFriend() {
-        const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
-        if (!target || target.toLowerCase() === myHandle.toLowerCase()) return;
-        submitFriendToDatabase(target);
-        friendInput.value = '';
-    }
-
-    function submitFriendToDatabase(friendName) {
-        const u = firebase.auth().currentUser;
-        if (!u) return;
-        
-        const alreadyExists = myFriends.some(f => f.toLowerCase() === friendName.toLowerCase());
-        if (!alreadyExists) {
-            const newFriendsList = [...myFriends, friendName];
-            firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList).then(() => {
-                playSyntheticPing('chime');
+        function broadcastMediaNode(base64Data) {
+            if (!firebaseActive) return;
+            firebase.database().ref(`channels/${currentChannel}`).push({
+                username: myHandle, text: "", mediaUrl: base64Data, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
             });
         }
-    }
 
-    function removeFriend(target, e) {
-        e.stopPropagation();
-        const u = firebase.auth().currentUser;
-        if(!u) return;
-        
-        const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
-        if(channelListeners[`dm_${dmRoomId}`]) {
-            firebase.database().ref(`channels/dm_${dmRoomId}`).off('child_added', channelListeners[`dm_${dmRoomId}`]);
-            delete channelListeners[`dm_${dmRoomId}`];
+        /* =========================================================================
+           9. CLIENT MODIFICATION LAYER MODULE OVERLAYS
+           ========================================================================= */
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsStatusInput = document.getElementById('settings-status-input');
+        let holdingBase64Pfp = null;
+
+        function openSettings() {
+            if(!firebaseActive) return;
+            verifyAudioEnvironment();
+            holdingBase64Pfp = currentUserPfp;
+            settingsStatusInput.value = currentUserStatus;
+            settingsModal.style.display = 'flex';
         }
-        delete unreadCounts[`dm_${dmRoomId}`];
-        updateGlobalTitleBanner();
+        function closeSettings() { settingsModal.style.display = 'none'; }
 
-        const newFriendsList = myFriends.filter(f => f !== target);
-        firebase.database().ref('users/' + u.uid + '/friends').set(newFriendsList).then(() => {
-            if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
-        });
-    }
+        function previewSettingsPfp(inputElement) {
+            if (inputElement.files && inputElement.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { holdingBase64Pfp = e.target.result; };
+                reader.readAsDataURL(inputElement.files[0]);
+            }
+        }
 
-    function renderFriendList() {
-        friendContainer.innerHTML = '';
-        myFriends.forEach(friend => {
-            const div = document.createElement('div');
-            const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
-            div.className = `channel-link ${currentChannel === `dm_${dmRoomId}` ? 'active' : ''}`;
-            div.id = `chan-${dmRoomId}`;
-            div.innerHTML = `
-                <span>👤 ${friend}</span>
-                <div style="display:flex; align-items:center; margin-left:auto;">
-                    ${renderBadgeHtml(`dm_${dmRoomId}`)}
-                    <span style="color:#d63030; font-weight:800; cursor:pointer; margin-left:8px;" title="Remove Connection" onclick="removeFriend('${friend}', event)">✕</span>
-                </div>
-            `;
-            div.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM // ${friend}`, false);
-            friendContainer.appendChild(div);
-        });
-    }
+        function saveSettingsChanges() {
+            const activeUser = firebase.auth().currentUser;
+            if (!activeUser) return;
+            firebase.database().ref('users/' + activeUser.uid).update({
+                pfp: holdingBase64Pfp || "", status: settingsStatusInput.value.trim()
+            }).then(() => { playSyntheticPing('chime'); closeSettings(); });
+        }
 
-    window.addEventListener('beforeunload', clearMyTypingState);
-</script>
+        let targetMiniProfileHandle = "";
+        const miniProfileModal = document.getElementById('mini-profile-modal');
+        
+        function openMiniProfile(username, pfpUrl, statusText) {
+            targetMiniProfileHandle = username;
+            document.getElementById('mini-profile-name').innerText = username;
+            document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+            document.getElementById('mini-profile-status-wrapper').innerHTML = statusText ? 
+                `<span class="status-bubble-tag">${statusText}</span>` : `<span class="status-bubble-tag" style="color:grey; border-color:rgba(255,255,255,0.05)">Offline Record Matrix</span>`;
+            miniProfileModal.style.display = 'flex';
+        }
+
+        function closeMiniProfile() { miniProfileModal.style.display = 'none'; targetMiniProfileHandle = ""; }
+        function actionAddFriend() { if (targetMiniProfileHandle) submitFriendToDatabase(targetMiniProfileHandle); closeMiniProfile(); }
+
+        function actionDMUser() {
+            if (!targetMiniProfileHandle) return;
+            const target = targetMiniProfileHandle; closeMiniProfile();
+            const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+            switchChannel(`dm_${dmRoomId}`, `DM Connection: ${target}`, false);
+        }
+
+        /* =========================================================================
+           10. LINK ROSTER NODES PIPELINE 
+           ========================================================================= */
+        const friendInput = document.getElementById('add-friend-input');
+        const friendContainer = document.getElementById('friend-list-container');
+
+        function manualAddFriend() {
+            const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+            if (!target || target.toLowerCase() === myHandle.toLowerCase()) return;
+            submitFriendToDatabase(target); friendInput.value = '';
+        }
+
+        function submitFriendToDatabase(friendName) {
+            const u = firebase.auth().currentUser; if (!u) return;
+            if (!myFriends.some(f => f.toLowerCase() === friendName.toLowerCase())) {
+                const list = [...myFriends, friendName];
+                firebase.database().ref('users/' + u.uid + '/friends').set(list).then(() => playSyntheticPing('chime'));
+            }
+        }
+
+        function removeFriend(target, e) {
+            e.stopPropagation();
+            const u = firebase.auth().currentUser; if(!u) return;
+            const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+            
+            if(channelListeners[`dm_${dmRoomId}`]) {
+                firebase.database().ref(`channels/dm_${dmRoomId}`).off('child_added', channelListeners[`dm_${dmRoomId}`]);
+                delete channelListeners[`dm_${dmRoomId}`];
+            }
+            delete unreadCounts[`dm_${dmRoomId}`];
+            updateGlobalTitleBanner();
+
+            const list = myFriends.filter(f => f !== target);
+            firebase.database().ref('users/' + u.uid + '/friends').set(list).then(() => {
+                if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
+            });
+        }
+
+        function renderFriendList() {
+            friendContainer.innerHTML = '';
+            myFriends.forEach(friend => {
+                const li = document.createElement('li');
+                const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+                li.className = currentChannel === `dm_${dmRoomId}` ? 'active' : '';
+                li.innerHTML = `
+                    <span>👤 ${friend}</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        ${renderBadgeHtml(`dm_${dmRoomId}`)}
+                        <span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeFriend('${friend}', event)">✕</span>
+                    </div>
+                `;
+                li.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM Connection: ${friend}`, false);
+                friendContainer.appendChild(li);
+            });
+        }
+
+        window.addEventListener('beforeunload', clearMyTypingState);
+    </script>
 </body>
 </html>
