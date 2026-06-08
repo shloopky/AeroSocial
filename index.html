@@ -105,64 +105,80 @@
             color: #ffffff !important;
         }
 
-        /* --- NEW INTEGRATED COMMUNITY THEMES --- */
+        /* ==========================================
+           --- NEW THEMES UTILIZING LOCAL IMAGES ---
+           ========================================== */
         
-        /* Lain Theme */
+        /* 1. Lain Theme (171282.gif) */
         body.theme-lain {
-            --bg-gradient: radial-gradient(circle at center, #3c2d24 0%, #17110c 100%);
-            --text-main: #dfc8b3;
-            --panel-bg: rgba(35, 25, 20, 0.9);
-            --inner-panel-bg: rgba(15, 10, 8, 0.6);
-            --accent-blue: #ff7300;
-            --border-color: #5a4232;
-            --chat-bg: #130d0a;
-            --chat-border: #ff7300;
+            background-image: linear-gradient(rgba(26, 17, 12, 0.75), rgba(15, 10, 8, 0.85)), url('171282.gif');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            --text-main: #e0cfc3;
+            --panel-bg: rgba(28, 20, 16, 0.88);
+            --inner-panel-bg: rgba(12, 8, 6, 0.7);
+            --accent-blue: #ff6a00;
+            --border-color: #523c2e;
+            --chat-bg: #0f0a07;
+            --chat-border: #ff6a00;
             --level-color: #00ffd5;
-            --nav-bg: #211610;
+            --nav-bg: #241812;
             --font-family: 'Courier New', monospace;
         }
         body.theme-lain .showcase-panel {
-            box-shadow: 0 0 15px rgba(255, 115, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+            border: 1px solid #7c5843;
         }
 
-        /* Joy Theme */
+        /* 2. Joy Theme (lalalalal.webp) */
         body.theme-joy {
-            --bg-gradient: linear-gradient(135deg, #0e001a 0%, #030008 100%);
-            --text-main: #f0e6ff;
-            --panel-bg: rgba(43, 0, 86, 0.4);
-            --inner-panel-bg: rgba(18, 0, 36, 0.7);
+            background-image: linear-gradient(rgba(18, 0, 36, 0.6), rgba(8, 0, 15, 0.8)), url('lalalalal.webp');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            --text-main: #f3e8ff;
+            --panel-bg: rgba(30, 5, 55, 0.85);
+            --inner-panel-bg: rgba(15, 1, 30, 0.6);
             --accent-blue: #ff00bb;
-            --border-color: #b300ff;
-            --chat-bg: #090012;
+            --border-color: #a100ff;
+            --chat-bg: #0b0114;
             --chat-border: #ff00bb;
             --level-color: #00ffff;
-            --nav-bg: #1a0033;
+            --nav-bg: #1c0038;
             --font-family: 'Segoe UI', sans-serif;
         }
         body.theme-joy .showcase-panel {
-            box-shadow: 0 0 20px rgba(179, 0, 255, 0.3);
+            box-shadow: 0 0 25px rgba(161, 0, 255, 0.4);
+            text-shadow: 0 0 5px rgba(255, 0, 187, 0.5);
         }
 
-        /* Skibidi Theme */
+        /* 3. Skibidi Theme (Toilet.jpg) */
         body.theme-skibidi {
-            --bg-gradient: linear-gradient(45deg, #333 0%, #1a1a1a 100%);
+            background-image: linear-gradient(rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.9)), url('Toilet.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             --text-main: #ffffff;
-            --panel-bg: rgba(50, 50, 50, 0.9);
-            --inner-panel-bg: #222222;
-            --accent-blue: #ff6a00;
-            --border-color: #ff6a00;
-            --chat-bg: #111111;
-            --chat-border: #ff6a00;
+            --panel-bg: rgba(45, 45, 45, 0.92);
+            --inner-panel-bg: rgba(20, 20, 20, 0.8);
+            --accent-blue: #ff5500;
+            --border-color: #dd4400;
+            --chat-bg: #141414;
+            --chat-border: #ff5500;
             --level-color: #ff0000;
-            --nav-bg: #2b2b2b;
+            --nav-bg: #262626;
             --font-family: 'Impact', sans-serif;
             --text-transform: uppercase;
         }
         body.theme-skibidi .msg {
-            border: 2px dashed #ff6a00;
+            border: 2px dashed #ff5500;
+        }
+        body.theme-skibidi h1, body.theme-skibidi .panel-title {
+            letter-spacing: 2px;
         }
 
-        /* --- END OF NEW THEMES --- */
+        /* ========================================== */
 
         body {
             margin: 0;
@@ -851,9 +867,9 @@
                     <option value="asdfmovie">🎬 asdfmovie</option>
                     <option value="mlg">🎮 Pro MLG 360</option>
                     <option value="heman">⚔️ Masters of Eternia (He-Man)</option>
-                    <option value="lain">🌐 Lain (The Wired)</option>
-                    <option value="joy">✨ Joy (Neon Violet)</option>
-                    <option value="skibidi">🚽 Skibidi (Industrial Glitch)</option>
+                    <option value="lain">🌐 Lain (The Wired Animated Graphic)</option>
+                    <option value="joy">✨ Joy (Vibrant Neon WebP Illustration)</option>
+                    <option value="skibidi">🚽 Skibidi (Industrial Concrete Graphic)</option>
                 </select>
             </div>
 
