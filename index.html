@@ -6,23 +6,123 @@
     <title>AERO - Profile & Communications Hub</title>
     <style>
         /* Global Theme Styles & Reset */
+        :root {
+            --bg-gradient: radial-gradient(circle at top, #1b2838 0%, #0f141d 100%);
+            --text-main: #c7d5e0;
+            --panel-bg: rgba(18, 26, 37, 0.85);
+            --inner-panel-bg: rgba(0, 0, 0, 0.3);
+            --accent-blue: #66c0f4;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --chat-bg: #10161b;
+            --chat-border: #2a475e;
+            --level-color: #bc43e9;
+            --nav-bg: #171a21;
+            --font-family: 'Motiva Sans', Arial, sans-serif;
+            --text-transform: none;
+            --border-radius: 4px;
+        }
+
+        /* Rainbow Theme Classes */
+        body.theme-rainbow {
+            --bg-gradient: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0000ff, #8b00ff);
+            background-size: 400% 400%;
+            animation: rainbowBG 15s ease infinite;
+            --panel-bg: rgba(255, 255, 255, 0.15);
+            --inner-panel-bg: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --accent-blue: #ffff00;
+            --chat-bg: rgba(0, 0, 0, 0.6);
+            --level-color: #ff00ff;
+        }
+        @keyframes rainbowBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* asdfmovie Theme Classes */
+        body.theme-asdfmovie {
+            --bg-gradient: #ffffff;
+            --text-main: #000000;
+            --panel-bg: #ffffff;
+            --inner-panel-bg: #f0f0f0;
+            --accent-blue: #000000;
+            --border-color: #000000;
+            --chat-bg: #ffffff;
+            --chat-border: #000000;
+            --level-color: #000000;
+            --nav-bg: #ffffff;
+            --font-family: 'Comic Sans MS', 'Impact', sans-serif;
+            --border-radius: 0px;
+        }
+        body.theme-asdfmovie nav, 
+        body.theme-asdfmovie #app-root, 
+        body.theme-asdfmovie .showcase-panel, 
+        body.theme-asdfmovie .chat-deck,
+        body.theme-asdfmovie .level-badge,
+        body.theme-asdfmovie .aero-input,
+        body.theme-asdfmovie .btn-action,
+        body.theme-asdfmovie .btn-edit {
+            border: 4px solid #000000 !important;
+            box-shadow: none !important;
+            border-radius: 0px !important;
+        }
+
+        /* MLG Theme Classes */
+        body.theme-mlg {
+            --bg-gradient: radial-gradient(circle at center, #00ff00 0%, #000000 100%);
+            --text-main: #00ff00;
+            --panel-bg: rgba(0, 0, 0, 0.9);
+            --inner-panel-bg: rgba(0, 50, 0, 0.4);
+            --accent-blue: #ff00ff;
+            --border-color: #00ff00;
+            --chat-bg: #000000;
+            --chat-border: #ff0000;
+            --level-color: #ffff00;
+            --nav-bg: #111;
+            --font-family: 'Impact', sans-serif;
+            --text-transform: uppercase;
+        }
+        body.theme-mlg .username, body.theme-mlg h1, body.theme-mlg .count {
+            text-shadow: 3px 3px 0px #ff0000;
+        }
+
+        /* He-Man Theme Classes */
+        body.theme-heman {
+            --bg-gradient: linear-gradient(to bottom, #ff77dd 0%, #ffcc00 100%);
+            --text-main: #330066;
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --inner-panel-bg: rgba(255, 200, 255, 0.5);
+            --accent-blue: #ff0055;
+            --border-color: #ff0055;
+            --chat-bg: #ffffff;
+            --chat-border: #ffcc00;
+            --level-color: #33ccff;
+            --nav-bg: #ff0055;
+            --font-family: 'Georgia', serif;
+        }
+        body.theme-heman nav .brand, body.theme-heman nav a, body.theme-heman nav span.nav-btn {
+            color: #ffffff !important;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Motiva Sans', Arial, sans-serif;
-            background: radial-gradient(circle at top, #1b2838 0%, #0f141d 100%);
-            color: #c7d5e0;
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
         }
 
         /* Navigation Bar */
         nav {
             width: 100%;
-            background-color: #171a21;
+            background-color: var(--nav-bg);
             padding: 15px 0;
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
             position: sticky;
@@ -43,21 +143,21 @@
         }
 
         .nav-container .brand {
-            color: #66c0f4;
+            color: var(--accent-blue);
             margin-right: 20px;
             font-size: 18px;
             letter-spacing: 2px;
         }
 
         .nav-container a, .nav-container span.nav-btn {
-            color: #dcdedf;
+            color: var(--text-main);
             text-decoration: none;
             text-transform: uppercase;
             cursor: pointer;
         }
 
         .nav-container a:hover, .nav-container span.nav-btn:hover {
-            color: #ffffff;
+            filter: brightness(1.3);
         }
 
         /* Preloader / Boot Screen Overlay */
@@ -94,7 +194,7 @@
         .auth-card {
             background: rgba(23, 26, 33, 0.9);
             border: 1px solid #2a475e;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             padding: 30px;
             box-shadow: 0 0 20px rgba(0,0,0,0.6);
             display: flex;
@@ -110,16 +210,20 @@
         }
         .aero-input {
             background: #10161b;
-            border: 1px solid #2a475e;
-            color: #fff;
+            border: 1px solid var(--chat-border);
+            color: var(--text-main);
             padding: 10px 14px;
             font-size: 14px;
-            border-radius: 3px;
+            border-radius: var(--border-radius);
             outline: none;
             transition: border-color 0.2s;
         }
+        body.theme-asdfmovie .aero-input {
+            background: #ffffff;
+            color: #000000;
+        }
         .aero-input:focus {
-            border-color: #66c0f4;
+            border-color: var(--accent-blue);
         }
         .auth-toggle {
             font-size: 12px;
@@ -129,7 +233,7 @@
             margin-top: 5px;
         }
         .auth-toggle span {
-            color: #66c0f4;
+            color: var(--accent-blue);
             text-decoration: underline;
         }
         .error-banner {
@@ -138,20 +242,20 @@
             color: #ff8888;
             font-size: 13px;
             padding: 10px;
-            border-radius: 3px;
+            border-radius: var(--border-radius);
             display: none;
         }
 
         /* Main Profile Interface Grid Setup */
         #app-root {
-            display: none; /* Controlled via Firebase state */
+            display: none; 
             max-width: 950px;
             width: 100%;
             margin: 40px auto;
-            background: rgba(18, 26, 37, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
             backdrop-filter: blur(10px);
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             display: grid;
             grid-template-columns: 1fr 280px;
             gap: 30px;
@@ -178,7 +282,7 @@
             position: relative;
             width: 120px;
             height: 120px;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             padding: 4px;
             background: linear-gradient(135deg, #00ccff, #3366ff);
             box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
@@ -190,28 +294,29 @@
             height: 100%;
             background: #2a475e;
             object-fit: cover;
-            border-radius: 2px;
+            border-radius: calc(var(--border-radius) - 2px);
         }
 
         .user-info h1 {
             margin: 0 0 5px 0;
             font-size: 26px;
-            color: #ffffff;
+            color: var(--text-main);
             font-weight: 500;
+            text-transform: var(--text-transform);
         }
 
         .user-info p {
-            margin: 0;
-            color: #8f98a0;
+            color: var(--text-main);
+            filter: brightness(0.8);
             font-size: 14px;
         }
 
         .status-bubble-tag {
             font-size: 11px;
-            color: #66c0f4;
+            color: var(--accent-blue);
             background: rgba(102, 192, 244, 0.1);
             padding: 2px 8px;
-            border-radius: 2px;
+            border-radius: var(--border-radius);
             border: 1px solid rgba(102, 192, 244, 0.2);
             margin-top: 5px;
             display: inline-block;
@@ -219,20 +324,20 @@
 
         /* Panels Shared Architecture */
         .showcase-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: var(--inner-panel-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
             padding: 15px;
             position: relative;
         }
 
         .panel-title {
             font-size: 13px;
-            color: #66c0f4;
+            color: var(--accent-blue);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 12px;
-            border-bottom: 1px solid rgba(102, 192, 244, 0.2);
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 6px;
             display: flex;
             justify-content: space-between;
@@ -243,9 +348,9 @@
         .chat-deck {
             display: flex;
             flex-direction: column;
-            background: #10161b;
-            border: 1px solid #2a475e;
-            border-radius: 3px;
+            background: var(--chat-bg);
+            border: 1px solid var(--chat-border);
+            border-radius: var(--border-radius);
             height: 480px;
             position: relative;
         }
@@ -266,15 +371,22 @@
             gap: 4px;
             padding: 10px;
             background: rgba(42, 71, 94, 0.15);
-            border: 1px solid rgba(42, 71, 94, 0.3);
-            border-radius: 3px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
             max-width: 85%;
             align-self: flex-start;
+        }
+        body.theme-asdfmovie .msg {
+            border: 2px solid #000000;
+            background: #ffffff;
         }
         .msg.own {
             align-self: flex-end;
             background: rgba(102, 192, 244, 0.1);
-            border-color: rgba(102, 192, 244, 0.25);
+            border-color: var(--accent-blue);
+        }
+        body.theme-asdfmovie .msg.own {
+            background: #f0f0f0;
         }
 
         .msg-header {
@@ -283,32 +395,32 @@
             gap: 8px;
             font-size: 12px;
             cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 4px;
         }
         .msg-pfp {
             width: 20px;
             height: 20px;
-            border-radius: 2px;
+            border-radius: calc(var(--border-radius) - 2px);
             object-fit: cover;
-            border: 1px solid #66c0f4;
+            border: 1px solid var(--accent-blue);
         }
         .msg .username {
             font-weight: bold;
-            color: #66c0f4;
+            color: var(--accent-blue);
         }
         .msg.own .username {
-            color: #fff;
+            color: var(--text-main);
         }
         .msg-timestamp {
             font-size: 11px;
-            color: #546473;
+            filter: brightness(0.7);
             margin-left: auto;
         }
 
         .msg .text {
             font-size: 13px;
-            color: #c7d5e0;
+            color: var(--text-main);
             line-height: 1.4;
             white-space: pre-wrap;
             word-break: break-word;
@@ -318,9 +430,9 @@
         .media-attachment {
             max-width: 100%;
             max-height: 200px;
-            border-radius: 2px;
+            border-radius: calc(var(--border-radius) - 2px);
             margin-top: 6px;
-            border: 1px solid #2a475e;
+            border: 1px solid var(--chat-border);
         }
         .media-preview-audio { width: 220px; margin-top: 5px; }
         .media-preview-video { max-width: 100%; max-height: 200px; margin-top: 5px; }
@@ -329,7 +441,8 @@
         #typing-indicator-bar {
             padding: 5px 15px;
             font-size: 11px;
-            color: #8f98a0;
+            color: var(--text-main);
+            filter: brightness(0.8);
             background: rgba(0,0,0,0.2);
             min-height: 15px;
             font-style: italic;
@@ -339,8 +452,8 @@
         .chat-controls-footer {
             display: flex;
             padding: 10px;
-            background: #171a21;
-            border-top: 1px solid #2a475e;
+            background: var(--nav-bg);
+            border-top: 1px solid var(--chat-border);
             gap: 10px;
             align-items: center;
         }
@@ -355,28 +468,34 @@
             border: none;
             padding: 8px 16px;
             font-size: 12px;
-            border-radius: 2px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             text-align: center;
             text-decoration: none;
             font-weight: bold;
             outline: none;
         }
+        body.theme-asdfmovie .btn-edit, body.theme-asdfmovie .btn-action {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+        body.theme-mlg .btn-edit, body.theme-mlg .btn-action {
+            background: #ff00ff !important;
+            color: #00ff00 !important;
+        }
         .btn-edit:hover, .btn-action:hover {
-            background: linear-gradient(to right, #5cc6ff 0%, #2252da 100%);
+            filter: brightness(1.2);
         }
         .btn-danger {
             background: linear-gradient(to right, #ff5555 0%, #990000 100%);
         }
-        .btn-danger:hover {
-            background: linear-gradient(to right, #ff7777 0%, #cc0000 100%);
-        }
 
         .char-counter {
             font-size: 11px;
-            color: #546473;
+            filter: brightness(0.6);
             min-width: 45px;
             text-align: right;
+            color: var(--text-main);
         }
 
         /* Navigation Matrix List Links */
@@ -391,10 +510,11 @@
 
         .sidebar-list li {
             font-size: 13px;
-            color: #969696;
+            color: var(--text-main);
+            filter: brightness(0.9);
             cursor: pointer;
             padding: 6px 8px;
-            border-radius: 2px;
+            border-radius: var(--border-radius);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -402,11 +522,11 @@
         }
 
         .sidebar-list li:hover, .sidebar-list li.active {
-            color: #ffffff;
+            filter: brightness(1.3);
             background: rgba(42, 71, 94, 0.3);
         }
         .sidebar-list li.active {
-            border-left: 2px solid #66c0f4;
+            border-left: 2px solid var(--accent-blue);
         }
 
         .sidebar-list span.badge-num {
@@ -419,7 +539,7 @@
             color: white;
             font-size: 10px;
             padding: 1px 5px;
-            border-radius: 2px;
+            border-radius: var(--border-radius);
             margin-left: 5px;
         }
 
@@ -428,12 +548,12 @@
             position: absolute;
             inset: 0;
             background: rgba(23, 26, 33, 0.9);
-            border: 2px dashed #66c0f4;
+            border: 2px dashed var(--accent-blue);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 95;
-            color: #66c0f4;
+            color: var(--accent-blue);
             font-weight: bold;
             font-size: 14px;
         }
@@ -451,28 +571,29 @@
             justify-content: space-between;
             background: rgba(0,0,0,0.2);
             padding: 10px;
-            border-radius: 4px;
-            border-right: 3px solid #bc43e9;
+            border-radius: var(--border-radius);
+            border-right: 3px solid var(--level-color);
         }
 
         .level-circle {
             width: 32px;
             height: 32px;
-            border: 2px solid #bc43e9;
+            border: 2px solid var(--level-color);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            color: #ffffff;
+            color: var(--text-main);
             font-weight: bold;
         }
 
         .status-indicator {
             font-size: 15px;
-            color: #54a5d4;
+            color: var(--accent-blue);
             margin-bottom: 10px;
             font-weight: 500;
+            text-transform: var(--text-transform);
         }
 
         /* Dynamic Input Controls Mini-Boxes */
@@ -506,11 +627,16 @@
             border: 1px solid #2a475e;
             padding: 24px;
             width: 320px;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             box-shadow: 0 0 25px #000;
             display: flex;
             flex-direction: column;
             gap: 15px;
+        }
+        body.theme-asdfmovie .modal-card {
+            background: #ffffff;
+            border: 4px solid #000000;
+            color: #000000;
         }
         .modal-card h3 {
             margin: 0;
@@ -518,6 +644,10 @@
             font-size: 18px;
             border-bottom: 1px solid #2a475e;
             padding-bottom: 8px;
+        }
+        body.theme-asdfmovie .modal-card h3 {
+            color: #000000;
+            border-bottom: 4px solid #000000;
         }
 
         .collector-stats-display {
@@ -528,8 +658,8 @@
             display: flex;
             flex-direction: column;
         }
-        .stat-box .count { font-size: 22px; color: #fff; }
-        .stat-box .label { font-size: 11px; color: #8f98a0; }
+        .stat-box .count { font-size: 22px; color: var(--text-main); font-family: var(--font-family); }
+        .stat-box .label { font-size: 11px; color: var(--text-main); filter: brightness(0.7); }
     </style>
 </head>
 <body>
@@ -539,7 +669,7 @@
             <div class="brand">AERO</div>
             <span class="nav-btn" onclick="switchChannel('global', 'Global Hub', true)">Mainframe</span>
             <span class="nav-btn" onclick="openSettings()">Customization</span>
-            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:#8f98a0;" id="nav-user-indicator">Disconnected Node</span>
+            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:var(--text-main); filter:brightness(0.8);" id="nav-user-indicator">Disconnected Node</span>
         </div>
     </nav>
 
@@ -583,7 +713,7 @@
             <div class="showcase-panel">
                 <div class="panel-title">
                     <span id="active-channel-title">Global Hub</span>
-                    <span style="font-size:11px; color:#8f98a0; text-transform:none;">Enforced Secure Line</span>
+                    <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
                 </div>
                 
                 <div class="chat-deck">
@@ -605,8 +735,8 @@
             <div class="showcase-panel">
                 <div class="panel-title">Collector Modules</div>
                 <div class="collector-stats-display">
-                    <div class="stat-box"><div class="count" id="stat-count-items">96</div><div class="label">Items Linked</div></div>
-                    <div class="stat-box"><div class="count" id="stat-count-expansions">24</div><div class="label">Expansions</div></div>
+                    <div class="stat-box"><div class="count" id="stat-count-items">0</div><div class="label">Items Linked</div></div>
+                    <div class="stat-box"><div class="count" id="stat-count-expansions">0</div><div class="label">Expansions</div></div>
                     <div class="stat-box"><div class="count">2026</div><div class="label">Client Stamp</div></div>
                 </div>
             </div>
@@ -617,10 +747,10 @@
             
             <div class="level-badge">
                 <div>
-                    <div style="color: #ffffff; font-size: 16px;">Node Class</div>
-                    <div style="color: #8f98a0; font-size: 11px;">Matrix Clearance level</div>
+                    <div style="font-size: 16px;">Node Class</div>
+                    <div style="filter:brightness(0.8); font-size: 11px;">Matrix Clearance level</div>
                 </div>
-                <div class="level-circle" id="node-level-display">26</div>
+                <div class="level-circle" id="node-level-display">1</div>
             </div>
 
             <button class="btn-edit" onclick="openSettings()">Modify Node Configuration</button>
@@ -628,10 +758,10 @@
             <div>
                 <div class="status-indicator" style="display:flex; justify-content:space-between; align-items:center;">
                     <span>Secure Pipelines</span>
-                    <span style="font-size:11px; color:#66c0f4; cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Add ]</span>
+                    <span style="font-size:11px; color:var(--accent-blue); cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Add ]</span>
                 </div>
                 <ul class="sidebar-list" id="dynamic-channels-list-container">
-                    </ul>
+                </ul>
             </div>
 
             <div>
@@ -641,7 +771,7 @@
                     <button class="btn-action" onclick="manualAddFriend()">Link</button>
                 </div>
                 <ul class="sidebar-list" id="friend-list-container">
-                    </ul>
+                </ul>
             </div>
 
             <button class="btn-edit btn-danger" style="margin-top:20px;" onclick="terminateUserSession()">Sever Connection Node</button>
@@ -655,8 +785,19 @@
             <h3>Configure Node Meta</h3>
             
             <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-size:12px; color:#8f98a0;">Interface Style Matrix Theme</label>
+                <select id="settings-theme-dropdown" class="aero-input" style="width:100%; box-sizing:border-box;">
+                    <option value="default">Default Aero Dark</option>
+                    <option value="rainbow">🌈 Shifting Rainbow</option>
+                    <option value="asdfmovie">🎬 asdfmovie</option>
+                    <option value="mlg">🎮 Pro MLG 360</option>
+                    <option value="heman">⚔️ Masters of Eternia (He-Man)</option>
+                </select>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:6px;">
                 <label style="font-size:12px; color:#8f98a0;">Avatar Node Frame</label>
-                <input type="file" id="settings-file-input" accept="image/*" onchange="previewSettingsPfp(this)" style="font-size:11px; color:#c7d5e0;">
+                <input type="file" id="settings-file-input" accept="image/*" onchange="previewSettingsPfp(this)" style="font-size:11px; color:var(--text-main);">
             </div>
 
             <div style="display:flex; flex-direction:column; gap:6px;">
@@ -693,7 +834,7 @@
 
     <script>
         /* =========================================================================
-           1. NEW CORE FIREBASE v9+ RECONFIGURED MATRICES (Using v8 Compat SDK Layout)
+           1. FIREBASE CONFIGURATION RECONFIGURED MATRICES
            ========================================================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
@@ -767,12 +908,12 @@
 
         function onYouTubeIframeAPIReady() {
             youtubePlayerInstance = new YT.Player('yt-bg-audio-pipeline', {
-                videoId: 'ENXvZ9GWjls', // Say It Ain't So
+                videoId: 'ENXvZ9GWjls', 
                 playerVars: { 
                     'autoplay': 0, 
                     'controls': 0, 
                     'loop': 1, 
-                    'playlist': 'MyjTrwOMSO4,4spkVX8z-vs,ENXvZ9GWjls', // Semi-Charmed Life, Only In Dreams, Say It Ain't So
+                    'playlist': 'MyjTrwOMSO4,4spkVX8z-vs,ENXvZ9GWjls', 
                     'disablekb': 1, 
                     'fs': 0 
                 },
@@ -816,6 +957,7 @@
         let activeTypingListenerRef = null;
         let currentUserPfp = null;
         let currentUserStatus = "";
+        let currentUserTheme = "default";
 
         const authErrorDisplay = document.getElementById('auth-error-display');
         const myHandleDisplay = document.getElementById('my-handle-display');
@@ -865,7 +1007,7 @@
                                 return db.ref('usernames/' + cleanName).set(cred.user.uid)
                                     .then(() => {
                                         return db.ref('users/' + cred.user.uid).set({ 
-                                            handle: username, pfp: "", status: "", msgCount: 256, friends: { initialized: true } 
+                                            handle: username, pfp: "", status: "", msgCount: 0, theme: "default", friends: { initialized: true } 
                                         });
                                     });
                             })
@@ -892,6 +1034,13 @@
             }
         }
 
+        function runThemeAdjustmentEngine(targetTheme) {
+            document.body.className = ""; 
+            if(targetTheme && targetTheme !== 'default') {
+                document.body.classList.add(`theme-${targetTheme}`);
+            }
+        }
+
         if (firebaseActive) {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -900,22 +1049,25 @@
                         myHandle = userData.handle || "Profile_Node";
                         currentUserPfp = userData.pfp || null;
                         currentUserStatus = userData.status || "";
-                        const msgCount = userData.msgCount || 256;
+                        currentUserTheme = userData.theme || "default";
+                        const msgCount = userData.msgCount || 0;
                         
                         myHandleDisplay.innerText = myHandle;
                         navUserIndicator.innerText = `Node: ${myHandle}`;
                         
+                        runThemeAdjustmentEngine(currentUserTheme);
+
                         if(currentUserPfp) profileAvatarSlot.innerHTML = `<img src="${currentUserPfp}">`;
                         else profileAvatarSlot.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${myHandle}">`;
 
                         if(currentUserStatus) {
                             myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
                         } else {
-                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:#8f98a0; border-color:rgba(255,255,255,0.05); background:none;">No profile summary data broadcasted</span>`;
+                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:var(--text-main); opacity:0.6; border-color:var(--border-color); background:none;">No profile summary data broadcasted</span>`;
                         }
 
-                        /* DYNAMIC EXPERIENTIAL LEVEL AND SCALE MATRIX COMPILER */
-                        const calculatedLevel = Math.floor(10 + Math.sqrt(msgCount));
+                        /* DYNAMIC EXPERIENTIAL LEVEL AND SCALE MATRIX COMPILER (STARTS AT LEVEL 1) */
+                        const calculatedLevel = Math.floor(1 + Math.sqrt(msgCount));
                         const itemsLinked = Math.floor(msgCount * 0.375);
                         const expansions = Math.floor(calculatedLevel * 0.92);
 
@@ -1206,10 +1358,10 @@
                 username: myHandle, text: text, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
             });
 
-            /* TRANSACTION ENGINE TO MULTIPLY EXPERIENCE VALUE IN REAL TIME */
+            /* TRANSMISSION ENGINE TO INCREMENT CHAT COUNTERS LIVE */
             if (u) {
                 firebase.database().ref('users/' + u.uid).child('msgCount').transaction((currentCount) => {
-                    return (currentCount || 256) + 1;
+                    return (currentCount || 0) + 1;
                 });
             }
 
@@ -1260,7 +1412,7 @@
             headerDiv.innerHTML = `
                 <img src="${avatarSrc}" class="msg-pfp">
                 <span class="username">${data.username}</span>
-                ${data.status ? `<span style="font-size:10px; color:#8f98a0; margin-left:3px;">(${data.status})</span>` : ''}
+                ${data.status ? `<span style="font-size:10px; opacity:0.8; margin-left:3px;">(${data.status})</span>` : ''}
                 <span class="msg-timestamp">${localizedTimeStr}</span>
             `;
 
@@ -1316,6 +1468,7 @@
            ========================================================================= */
         const settingsModal = document.getElementById('settings-modal');
         const settingsStatusInput = document.getElementById('settings-status-input');
+        const settingsThemeDropdown = document.getElementById('settings-theme-dropdown');
         let holdingBase64Pfp = null;
 
         function openSettings() {
@@ -1323,6 +1476,7 @@
             verifyAudioEnvironment();
             holdingBase64Pfp = currentUserPfp;
             settingsStatusInput.value = currentUserStatus;
+            settingsThemeDropdown.value = currentUserTheme;
             settingsModal.style.display = 'flex';
         }
         function closeSettings() { settingsModal.style.display = 'none'; }
@@ -1339,7 +1493,9 @@
             const activeUser = firebase.auth().currentUser;
             if (!activeUser) return;
             firebase.database().ref('users/' + activeUser.uid).update({
-                pfp: holdingBase64Pfp || "", status: settingsStatusInput.value.trim()
+                pfp: holdingBase64Pfp || "", 
+                status: settingsStatusInput.value.trim(),
+                theme: settingsThemeDropdown.value
             }).then(() => { playSyntheticPing('chime'); closeSettings(); });
         }
 
@@ -1351,7 +1507,7 @@
             document.getElementById('mini-profile-name').innerText = username;
             document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; object-fit:cover;">`;
             document.getElementById('mini-profile-status-wrapper').innerHTML = statusText ? 
-                `<span class="status-bubble-tag">${statusText}</span>` : `<span class="status-bubble-tag" style="color:grey; border-color:rgba(255,255,255,0.05)">Offline Record Matrix</span>`;
+                `<span class="status-bubble-tag">${statusText}</span>` : `<span class="status-bubble-tag" style="color:grey; border-color:var(--border-color)">Offline Record Matrix</span>`;
             miniProfileModal.style.display = 'flex';
         }
 
