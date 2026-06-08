@@ -22,7 +22,7 @@
             --border-radius: 4px;
         }
 
-        /* Rainbow Theme Classes */
+        /* Rainbow Theme */
         body.theme-rainbow {
             --bg-gradient: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0000ff, #8b00ff);
             background-size: 400% 400%;
@@ -40,7 +40,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* asdfmovie Theme Classes */
+        /* asdfmovie Theme */
         body.theme-asdfmovie {
             --bg-gradient: #ffffff;
             --text-main: #000000;
@@ -68,7 +68,7 @@
             border-radius: 0px !important;
         }
 
-        /* MLG Theme Classes */
+        /* MLG Theme */
         body.theme-mlg {
             --bg-gradient: radial-gradient(circle at center, #00ff00 0%, #000000 100%);
             --text-main: #00ff00;
@@ -87,7 +87,7 @@
             text-shadow: 3px 3px 0px #ff0000;
         }
 
-        /* He-Man Theme Classes */
+        /* He-Man Theme */
         body.theme-heman {
             --bg-gradient: linear-gradient(to bottom, #ff77dd 0%, #ffcc00 100%);
             --text-main: #330066;
@@ -104,6 +104,65 @@
         body.theme-heman nav .brand, body.theme-heman nav a, body.theme-heman nav span.nav-btn {
             color: #ffffff !important;
         }
+
+        /* --- NEW INTEGRATED COMMUNITY THEMES --- */
+        
+        /* Lain Theme */
+        body.theme-lain {
+            --bg-gradient: radial-gradient(circle at center, #3c2d24 0%, #17110c 100%);
+            --text-main: #dfc8b3;
+            --panel-bg: rgba(35, 25, 20, 0.9);
+            --inner-panel-bg: rgba(15, 10, 8, 0.6);
+            --accent-blue: #ff7300;
+            --border-color: #5a4232;
+            --chat-bg: #130d0a;
+            --chat-border: #ff7300;
+            --level-color: #00ffd5;
+            --nav-bg: #211610;
+            --font-family: 'Courier New', monospace;
+        }
+        body.theme-lain .showcase-panel {
+            box-shadow: 0 0 15px rgba(255, 115, 0, 0.2);
+        }
+
+        /* Joy Theme */
+        body.theme-joy {
+            --bg-gradient: linear-gradient(135deg, #0e001a 0%, #030008 100%);
+            --text-main: #f0e6ff;
+            --panel-bg: rgba(43, 0, 86, 0.4);
+            --inner-panel-bg: rgba(18, 0, 36, 0.7);
+            --accent-blue: #ff00bb;
+            --border-color: #b300ff;
+            --chat-bg: #090012;
+            --chat-border: #ff00bb;
+            --level-color: #00ffff;
+            --nav-bg: #1a0033;
+            --font-family: 'Segoe UI', sans-serif;
+        }
+        body.theme-joy .showcase-panel {
+            box-shadow: 0 0 20px rgba(179, 0, 255, 0.3);
+        }
+
+        /* Skibidi Theme */
+        body.theme-skibidi {
+            --bg-gradient: linear-gradient(45deg, #333 0%, #1a1a1a 100%);
+            --text-main: #ffffff;
+            --panel-bg: rgba(50, 50, 50, 0.9);
+            --inner-panel-bg: #222222;
+            --accent-blue: #ff6a00;
+            --border-color: #ff6a00;
+            --chat-bg: #111111;
+            --chat-border: #ff6a00;
+            --level-color: #ff0000;
+            --nav-bg: #2b2b2b;
+            --font-family: 'Impact', sans-serif;
+            --text-transform: uppercase;
+        }
+        body.theme-skibidi .msg {
+            border: 2px dashed #ff6a00;
+        }
+
+        /* --- END OF NEW THEMES --- */
 
         body {
             margin: 0;
@@ -792,6 +851,9 @@
                     <option value="asdfmovie">🎬 asdfmovie</option>
                     <option value="mlg">🎮 Pro MLG 360</option>
                     <option value="heman">⚔️ Masters of Eternia (He-Man)</option>
+                    <option value="lain">🌐 Lain (The Wired)</option>
+                    <option value="joy">✨ Joy (Neon Violet)</option>
+                    <option value="skibidi">🚽 Skibidi (Industrial Glitch)</option>
                 </select>
             </div>
 
@@ -1066,7 +1128,6 @@
                             myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:var(--text-main); opacity:0.6; border-color:var(--border-color); background:none;">No profile summary data broadcasted</span>`;
                         }
 
-                        /* DYNAMIC EXPERIENTIAL LEVEL AND SCALE MATRIX COMPILER (STARTS AT LEVEL 1) */
                         const calculatedLevel = Math.floor(1 + Math.sqrt(msgCount));
                         const itemsLinked = Math.floor(msgCount * 0.375);
                         const expansions = Math.floor(calculatedLevel * 0.92);
@@ -1358,7 +1419,6 @@
                 username: myHandle, text: text, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
             });
 
-            /* TRANSMISSION ENGINE TO INCREMENT CHAT COUNTERS LIVE */
             if (u) {
                 firebase.database().ref('users/' + u.uid).child('msgCount').transaction((currentCount) => {
                     return (currentCount || 0) + 1;
