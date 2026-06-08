@@ -605,8 +605,8 @@
             <div class="showcase-panel">
                 <div class="panel-title">Collector Modules</div>
                 <div class="collector-stats-display">
-                    <div class="stat-box"><div class="count" id="stat-count-items">88</div><div class="label">Items Linked</div></div>
-                    <div class="stat-box"><div class="count">24</div><div class="label">Expansions</div></div>
+                    <div class="stat-box"><div class="count" id="stat-count-items">96</div><div class="label">Items Linked</div></div>
+                    <div class="stat-box"><div class="count" id="stat-count-expansions">24</div><div class="label">Expansions</div></div>
                     <div class="stat-box"><div class="count">2026</div><div class="label">Client Stamp</div></div>
                 </div>
             </div>
@@ -620,7 +620,7 @@
                     <div style="color: #ffffff; font-size: 16px;">Node Class</div>
                     <div style="color: #8f98a0; font-size: 11px;">Matrix Clearance level</div>
                 </div>
-                <div class="level-circle">26</div>
+                <div class="level-circle" id="node-level-display">26</div>
             </div>
 
             <button class="btn-edit" onclick="openSettings()">Modify Node Configuration</button>
@@ -767,9 +767,16 @@
 
         function onYouTubeIframeAPIReady() {
             youtubePlayerInstance = new YT.Player('yt-bg-audio-pipeline', {
-                videoId: 'w0mB896wQEk',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'w0mB896wQEk', 'disablekb': 1, 'fs': 0 },
-                events: { 'onReady': (e) => e.target.setVolume(12) }
+                videoId: 'ENXvZ9GWjls', // Say It Ain't So
+                playerVars: { 
+                    'autoplay': 0, 
+                    'controls': 0, 
+                    'loop': 1, 
+                    'playlist': 'MyjTrwOMSO4,4spkVX8z-vs,ENXvZ9GWjls', // Semi-Charmed Life, Only In Dreams, Say It Ain't So
+                    'disablekb': 1, 
+                    'fs': 0 
+                },
+                events: { 'onReady': (e) => e.target.setVolume(15) }
             });
         }
 
@@ -845,6 +852,7 @@
             authErrorDisplay.style.display = "none";
             if (authModeIsLogin) {
                 firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
+                    .then(() => { startBackgroundAmbientTrack(); })
                     .catch(err => { authErrorDisplay.innerText = "Access Denied: " + err.message; authErrorDisplay.style.display = "block"; });
             } else {
                 const db = firebase.database();
@@ -857,10 +865,11 @@
                                 return db.ref('usernames/' + cleanName).set(cred.user.uid)
                                     .then(() => {
                                         return db.ref('users/' + cred.user.uid).set({ 
-                                            handle: username, pfp: "", status: "", friends: { initialized: true } 
+                                            handle: username, pfp: "", status: "", msgCount: 256, friends: { initialized: true } 
                                         });
                                     });
                             })
+                            .then(() => { startBackgroundAmbientTrack(); })
                             .catch(err => { authErrorDisplay.innerText = "Registration Failed: " + err.message; authErrorDisplay.style.display = "block"; });
                     }
                 });
@@ -891,6 +900,7 @@
                         myHandle = userData.handle || "Profile_Node";
                         currentUserPfp = userData.pfp || null;
                         currentUserStatus = userData.status || "";
+                        const msgCount = userData.msgCount || 256;
                         
                         myHandleDisplay.innerText = myHandle;
                         navUserIndicator.innerText = `Node: ${myHandle}`;
@@ -904,8 +914,14 @@
                             myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:#8f98a0; border-color:rgba(255,255,255,0.05); background:none;">No profile summary data broadcasted</span>`;
                         }
 
-                        // Calculate dynamic stat counting display indicator mock
-                        document.getElementById('stat-count-items').innerText = (myHandle.length * 12);
+                        /* DYNAMIC EXPERIENTIAL LEVEL AND SCALE MATRIX COMPILER */
+                        const calculatedLevel = Math.floor(10 + Math.sqrt(msgCount));
+                        const itemsLinked = Math.floor(msgCount * 0.375);
+                        const expansions = Math.floor(calculatedLevel * 0.92);
+
+                        document.getElementById('node-level-display').innerText = calculatedLevel;
+                        document.getElementById('stat-count-items').innerText = itemsLinked;
+                        document.getElementById('stat-count-expansions').innerText = expansions;
 
                         const rawFriends = userData.friends;
                         if (rawFriends && Array.isArray(rawFriends)) myFriends = rawFriends;
@@ -1168,6 +1184,8 @@
             if (text === "" || text.length > 500) return;
             clearMyTypingState();
 
+            const u = firebase.auth().currentUser;
+
             if (text.startsWith('/') && myHandle === "DAMXIAFAN69") {
                 if (text === '/clear') {
                     firebase.database().ref(`channels/${currentChannel}`).remove();
@@ -1187,6 +1205,14 @@
             firebase.database().ref(`channels/${currentChannel}`).push({
                 username: myHandle, text: text, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
             });
+
+            /* TRANSACTION ENGINE TO MULTIPLY EXPERIENCE VALUE IN REAL TIME */
+            if (u) {
+                firebase.database().ref('users/' + u.uid).child('msgCount').transaction((currentCount) => {
+                    return (currentCount || 256) + 1;
+                });
+            }
+
             messageBox.value = '';
             charCountDisplay.innerText = "0/500";
         }
