@@ -725,6 +725,107 @@
             border-bottom: 4px solid #000000;
         }
 
+        /* ==========================================
+           --- VOICE / VIDEO CALL ENGINE STYLES ---
+           ========================================== */
+        .btn-call {
+            background: #1f7a3f;
+            color: #fff;
+            border: 1px solid #2faf5e;
+            border-radius: var(--border-radius);
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: var(--font-family);
+            transition: filter 0.15s ease;
+        }
+        .btn-call:hover { filter: brightness(1.25); }
+
+        #call-modal .modal-card {
+            width: min(720px, 92vw);
+            max-width: 92vw;
+        }
+        .call-peer-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--accent-blue);
+        }
+        #call-status-text { color: #8f98a0; font-size: 12px; }
+
+        #video-stage {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border: 1px solid #2a475e;
+            border-radius: var(--border-radius);
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+        }
+        #remote-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+        #local-video {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 28%;
+            max-width: 180px;
+            border: 2px solid var(--accent-blue);
+            border-radius: var(--border-radius);
+            object-fit: cover;
+            background: #000;
+            transform: scaleX(-1); /* mirror self-view */
+            transition: opacity 0.2s ease;
+        }
+        #voice-stage {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px 0;
+            background: var(--inner-panel-bg);
+            border: 1px solid #2a475e;
+            border-radius: var(--border-radius);
+        }
+        .voice-pulse {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+            animation: voicePulse 1.8s ease-in-out infinite;
+        }
+        @keyframes voicePulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+        .call-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .call-controls .btn-action { flex: 1; min-width: 90px; }
+        .btn-action.btn-off {
+            background: #555 !important;
+            color: #ddd;
+            opacity: 0.85;
+        }
+        #incoming-call-modal .modal-card { text-align: center; align-items: center; }
+        .incoming-ring {
+            font-size: 40px;
+            animation: incomingShake 0.9s ease-in-out infinite;
+        }
+        @keyframes incomingShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-18deg); }
+            75% { transform: rotate(18deg); }
+        }
+
         .collector-stats-display {
             display: flex;
             gap: 20px;
@@ -788,7 +889,11 @@
             <div class="showcase-panel">
                 <div class="panel-title">
                     <span id="active-channel-title">Global Hub</span>
-                    <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <button id="btn-voice-call" class="btn-call" onclick="startCall(false)" style="display:none;" title="Start a voice call">📞 Voice</button>
+                        <button id="btn-video-call" class="btn-call" onclick="startCall(true)" style="display:none;" title="Start a video call">📹 Video</button>
+                        <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
+                    </span>
                 </div>
                 
                 <div class="chat-deck">
@@ -901,6 +1006,45 @@
                 <button class="btn-action" style="flex:1; font-size:11px; background:#2a475e;" onclick="actionDMUser()">Open Comms Line</button>
             </div>
             <button class="btn-action btn-danger" style="width:100%; padding:4px; font-size:11px;" onclick="closeMiniProfile()">Close Profile</button>
+        </div>
+    </div>
+
+    <!-- ACTIVE CALL OVERLAY -->
+    <div id="call-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="call-peer-line">
+                <span id="call-peer-name">Secure Line</span>
+                <span id="call-status-text">Connecting...</span>
+            </div>
+
+            <div id="video-stage">
+                <video id="remote-video" autoplay playsinline></video>
+                <video id="local-video" autoplay playsinline muted></video>
+            </div>
+
+            <div id="voice-stage">
+                <div class="voice-pulse"></div>
+                <div style="font-size:13px; color:var(--text-main);">Voice transmission active</div>
+            </div>
+
+            <div class="call-controls">
+                <button class="btn-action" id="btn-toggle-mic" onclick="toggleMic()">🎙️ Mic On</button>
+                <button class="btn-action" id="btn-toggle-cam" onclick="toggleCam()">📹 Cam On</button>
+                <button class="btn-action btn-danger" onclick="hangUpCall()">📴 End</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INCOMING CALL OVERLAY -->
+    <div id="incoming-call-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="incoming-ring">📞</div>
+            <h3 id="incoming-caller-name" style="border:none; padding:0; margin:0;">Incoming Node</h3>
+            <div id="incoming-call-type" style="font-size:12px; color:#8f98a0;">Incoming transmission</div>
+            <div style="display:flex; gap:10px; width:100%; margin-top:5px;">
+                <button class="btn-action btn-danger" style="flex:1;" onclick="declineCall()">Decline</button>
+                <button class="btn-action" style="flex:1; background:#1f7a3f;" onclick="answerCall()">Accept</button>
+            </div>
         </div>
     </div>
 
@@ -1392,11 +1536,17 @@
 
             document.getElementById('active-channel-title').innerText = layoutTitle;
             chatMessages.innerHTML = '';
-            
+
+            // Voice/video calls are 1:1, so only expose them inside DM channels
+            const isDM = channelId.startsWith('dm_');
+            document.getElementById('btn-voice-call').style.display = isDM ? 'inline-block' : 'none';
+            document.getElementById('btn-video-call').style.display = isDM ? 'inline-block' : 'none';
+            if (isDM) setupCallListener(channelId);
+
             if (activeListenerRef) { activeListenerRef.off(); activeListenerRef = null; }
 
             const db = firebase.database();
-            const targetQuery = db.ref(`channels/${channelId}`).limitToLast(40);
+            const targetQuery = db.ref(`channels/${channelId}`).limitToLast(MAX_VISIBLE_MESSAGES);
             
             targetQuery.once('value').then(() => { isInitialLoad = false; });
             targetQuery.on('child_added', (snapshot) => {
@@ -1434,6 +1584,7 @@
             firebase.database().ref(`channels/${currentChannel}`).push({
                 username: myHandle, text: text, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
             });
+            pruneChannelHistory(currentChannel);
 
             if (u) {
                 firebase.database().ref('users/' + u.uid).child('msgCount').transaction((currentCount) => {
@@ -1537,6 +1688,7 @@
             firebase.database().ref(`channels/${currentChannel}`).push({
                 username: myHandle, text: "", mediaUrl: base64Data, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
             });
+            pruneChannelHistory(currentChannel);
         }
 
         /* =========================================================================
@@ -1650,10 +1802,290 @@
                 `;
                 li.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM Connection: ${friend}`, false);
                 friendContainer.appendChild(li);
+                setupCallListener(`dm_${dmRoomId}`);
             });
         }
 
         window.addEventListener('beforeunload', clearMyTypingState);
+
+        /* =========================================================================
+           11. STORAGE GUARD — TRIM CHANNELS TO THE LAST 50 MESSAGES
+           Once a channel grows past the visible window, the oldest records are
+           removed from the database so they don't accumulate and add storage lag.
+           ========================================================================= */
+        const MAX_VISIBLE_MESSAGES = 50;
+        let pruneInFlight = {};
+
+        function pruneChannelHistory(channelId) {
+            if (!firebaseActive || !channelId) return;
+            if (pruneInFlight[channelId]) return;          // avoid overlapping prunes
+            pruneInFlight[channelId] = true;
+
+            const ref = firebase.database().ref(`channels/${channelId}`);
+            // We only need a tiny bit more than the cap to know what to drop.
+            ref.limitToLast(MAX_VISIBLE_MESSAGES + 25).once('value').then((snap) => {
+                const total = snap.numChildren();
+                if (total <= MAX_VISIBLE_MESSAGES) { pruneInFlight[channelId] = false; return; }
+
+                const removeCount = total - MAX_VISIBLE_MESSAGES;
+                const updates = {};
+                let i = 0;
+                snap.forEach((child) => {                  // iterates oldest -> newest
+                    if (i < removeCount) { updates[child.key] = null; i++; }
+                    else { return true; }                  // returning true stops iteration
+                });
+                return ref.update(updates);
+            }).then(() => {
+                pruneInFlight[channelId] = false;
+            }).catch(() => {
+                pruneInFlight[channelId] = false;
+            });
+        }
+
+        /* =========================================================================
+           12. REAL-TIME VOICE / VIDEO CALL ENGINE (WebRTC, signalled over Firebase)
+           1:1 calls inside DM channels. Signalling lives under calls/{channelId}.
+           ========================================================================= */
+        const RTC_CONFIG = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        let peerConnection = null;
+        let localStream = null;
+        let remoteStream = null;
+        let callSignalRef = null;        // firebase ref to calls/{channelId}
+        let activeCallChannel = null;
+        let micEnabled = true;
+        let camEnabled = true;
+        let incomingCallData = null;     // pending offer awaiting accept/decline
+        const callOfferListeners = {};   // channelId -> true (listener attached)
+
+        const callModal = document.getElementById('call-modal');
+        const incomingModal = document.getElementById('incoming-call-modal');
+        const localVideoEl = document.getElementById('local-video');
+        const remoteVideoEl = document.getElementById('remote-video');
+        const callStatusEl = document.getElementById('call-status-text');
+
+        function setupCallListener(channelId) {
+            if (!firebaseActive || !channelId || callOfferListeners[channelId]) return;
+            callOfferListeners[channelId] = true;
+            firebase.database().ref(`calls/${channelId}/offer`).on('value', (snap) => {
+                const offer = snap.val();
+                if (!offer) return;
+                if (offer.from === myHandle) return;          // ignore our own offer
+                if (peerConnection || incomingCallData) return; // already busy
+                incomingCallData = { channelId, offer };
+                showIncomingCall(offer);
+            });
+        }
+
+        function showIncomingCall(offer) {
+            document.getElementById('incoming-caller-name').innerText = offer.from || 'Unknown Node';
+            document.getElementById('incoming-call-type').innerText =
+                offer.video ? '📹 Incoming video transmission' : '📞 Incoming voice transmission';
+            incomingModal.style.display = 'flex';
+            playSyntheticPing('chime');
+        }
+
+        function bindPeerConnection() {
+            remoteStream = new MediaStream();
+            remoteVideoEl.srcObject = remoteStream;
+            localVideoEl.srcObject = localStream;
+
+            peerConnection.ontrack = (event) => {
+                event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+                callStatusEl.innerText = 'Connected';
+            };
+            peerConnection.onconnectionstatechange = () => {
+                if (!peerConnection) return;
+                const st = peerConnection.connectionState;
+                if (st === 'connected') callStatusEl.innerText = 'Connected';
+                else if (st === 'failed' || st === 'disconnected') callStatusEl.innerText = 'Connection unstable...';
+            };
+        }
+
+        function openCallUI(withVideo, status) {
+            callStatusEl.innerText = status;
+            document.getElementById('call-peer-name').innerText =
+                document.getElementById('active-channel-title').innerText || 'Secure Line';
+
+            micEnabled = true; camEnabled = withVideo;
+            const micBtn = document.getElementById('btn-toggle-mic');
+            micBtn.innerText = '🎙️ Mic On';
+            micBtn.classList.remove('btn-off');
+
+            const camBtn = document.getElementById('btn-toggle-cam');
+            camBtn.innerText = withVideo ? '📹 Cam On' : '📷 Cam Off';
+            camBtn.classList.toggle('btn-off', !withVideo);
+
+            document.getElementById('video-stage').style.display = withVideo ? 'block' : 'none';
+            document.getElementById('voice-stage').style.display = withVideo ? 'none' : 'flex';
+            localVideoEl.style.opacity = '1';
+            callModal.style.display = 'flex';
+        }
+
+        async function startCall(withVideo) {
+            if (!firebaseActive) return;
+            if (peerConnection) { callStatusEl.innerText = 'Already in a call.'; return; }
+            if (!currentChannel.startsWith('dm_')) {
+                alert('Calls are available inside Direct Message connections only.');
+                return;
+            }
+
+            activeCallChannel = currentChannel;
+            callSignalRef = firebase.database().ref(`calls/${activeCallChannel}`);
+            await callSignalRef.remove().catch(() => {});   // clear any stale signalling
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
+            } catch (e) {
+                alert('Could not access microphone/camera: ' + e.message);
+                cleanupCall(); return;
+            }
+
+            openCallUI(withVideo, 'Calling...');
+            peerConnection = new RTCPeerConnection(RTC_CONFIG);
+            bindPeerConnection();
+            localStream.getTracks().forEach((t) => peerConnection.addTrack(t, localStream));
+
+            peerConnection.onicecandidate = (e) => {
+                if (e.candidate && callSignalRef) callSignalRef.child('callerCandidates').push(e.candidate.toJSON());
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await callSignalRef.child('offer').set({
+                type: offer.type, sdp: offer.sdp, from: myHandle, video: withVideo
+            });
+
+            callSignalRef.child('answer').on('value', async (snap) => {
+                const answer = snap.val();
+                if (answer && peerConnection && !peerConnection.currentRemoteDescription) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).catch(() => {});
+                    callStatusEl.innerText = 'Connected';
+                }
+            });
+            callSignalRef.child('calleeCandidates').on('child_added', (snap) => {
+                const c = snap.val();
+                if (c && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+            });
+            listenForRemoteHangup();
+        }
+
+        async function answerCall() {
+            if (!incomingCallData) return;
+            incomingModal.style.display = 'none';
+            const { channelId, offer } = incomingCallData;
+            const withVideo = !!offer.video;
+
+            activeCallChannel = channelId;
+            callSignalRef = firebase.database().ref(`calls/${channelId}`);
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
+            } catch (e) {
+                alert('Could not access microphone/camera: ' + e.message);
+                declineCall(); return;
+            }
+
+            openCallUI(withVideo, 'Connecting...');
+            peerConnection = new RTCPeerConnection(RTC_CONFIG);
+            bindPeerConnection();
+            localStream.getTracks().forEach((t) => peerConnection.addTrack(t, localStream));
+
+            peerConnection.onicecandidate = (e) => {
+                if (e.candidate && callSignalRef) callSignalRef.child('calleeCandidates').push(e.candidate.toJSON());
+            };
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: offer.type, sdp: offer.sdp }));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            await callSignalRef.child('answer').set({ type: answer.type, sdp: answer.sdp, from: myHandle });
+
+            callSignalRef.child('callerCandidates').on('child_added', (snap) => {
+                const c = snap.val();
+                if (c && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+            });
+
+            incomingCallData = null;
+            listenForRemoteHangup();
+        }
+
+        function declineCall() {
+            if (incomingCallData && incomingCallData.channelId) {
+                firebase.database().ref(`calls/${incomingCallData.channelId}/ended`).set(true).catch(() => {});
+            }
+            incomingCallData = null;
+            incomingModal.style.display = 'none';
+        }
+
+        function listenForRemoteHangup() {
+            if (!callSignalRef) return;
+            callSignalRef.child('ended').on('value', (snap) => {
+                if (snap.val() === true) endCall(true);
+            });
+        }
+
+        function hangUpCall() { endCall(false); }
+
+        function endCall(remoteInitiated) {
+            if (callSignalRef && !remoteInitiated) {
+                callSignalRef.child('ended').set(true).catch(() => {});
+            }
+            cleanupCall();
+        }
+
+        function cleanupCall() {
+            if (peerConnection) { try { peerConnection.close(); } catch (e) {} peerConnection = null; }
+            if (localStream) { localStream.getTracks().forEach((t) => t.stop()); localStream = null; }
+            remoteStream = null;
+
+            if (callSignalRef) {
+                callSignalRef.child('answer').off();
+                callSignalRef.child('callerCandidates').off();
+                callSignalRef.child('calleeCandidates').off();
+                callSignalRef.child('ended').off();
+                const refToClear = callSignalRef;
+                setTimeout(() => { refToClear.remove().catch(() => {}); }, 1500);
+            }
+
+            callSignalRef = null;
+            activeCallChannel = null;
+            incomingCallData = null;
+            callModal.style.display = 'none';
+            incomingModal.style.display = 'none';
+            localVideoEl.srcObject = null;
+            remoteVideoEl.srcObject = null;
+        }
+
+        function toggleMic() {
+            if (!localStream) return;
+            micEnabled = !micEnabled;
+            localStream.getAudioTracks().forEach((t) => { t.enabled = micEnabled; });
+            const btn = document.getElementById('btn-toggle-mic');
+            btn.innerText = micEnabled ? '🎙️ Mic On' : '🔇 Muted';
+            btn.classList.toggle('btn-off', !micEnabled);
+        }
+
+        function toggleCam() {
+            if (!localStream) return;
+            const videoTracks = localStream.getVideoTracks();
+            if (videoTracks.length === 0) {
+                callStatusEl.innerText = 'This is a voice-only call (no camera).';
+                return;
+            }
+            camEnabled = !camEnabled;
+            videoTracks.forEach((t) => { t.enabled = camEnabled; });
+            const btn = document.getElementById('btn-toggle-cam');
+            btn.innerText = camEnabled ? '📹 Cam On' : '📷 Cam Off';
+            btn.classList.toggle('btn-off', !camEnabled);
+            localVideoEl.style.opacity = camEnabled ? '1' : '0.2';
+        }
+
+        window.addEventListener('beforeunload', () => { if (peerConnection) endCall(false); });
     </script>
 </body>
 </html>
