@@ -1210,12 +1210,12 @@
                 authBoxTitle.innerText = "Create Profile Room Account";
                 authSubmitBtn.innerText = "Register New Account";
                 authToggleLink.innerHTML = "Already have an account? <span>Sign In here</span>";
-                authUsername.style.display = "block";
+                authUsername.placeholder = "New Username (No spaces or symbols)";
             } else {
                 authBoxTitle.innerText = "Sign In";
                 authSubmitBtn.innerText = "Sign In";
                 authToggleLink.innerHTML = "Don't have an account? <span>Create one here</span>";
-                authUsername.style.display = "block";
+                authUsername.placeholder = "Username";
             }
         }
 
@@ -1231,7 +1231,7 @@
             }
 
             if (isSignUpMode) {
-                // strict requirement checker validation check
+                // strict alphanumeric validation rule checking implementation
                 const alphaNumericCheck = /^[a-zA-Z0-9]+$/;
                 if (!alphaNumericCheck.test(emailOrHandle)) {
                     displayAuthFeedback("Invalid Username entry! Empty spaces, special symbols, and characters are strictly blocked. Please choose only letters and numbers.");
@@ -1493,7 +1493,6 @@
                 // If it is an isolated feed room skip painting if it's no longer focus target
                 if (cId !== currentChannel) {
                     const totalCount = snap.numChildren();
-                    // Basic tracking mechanics for highlighting new incoming notifications
                     return;
                 }
 
@@ -1754,6 +1753,7 @@
             });
         }
 
+        // Add Friend Logic Loop
         function manualAddFriend() {
             const target = document.getElementById('add-friend-input').value.trim();
             if(!target || target === myHandle) return;
@@ -1836,7 +1836,7 @@
         }
 
         function clearMyTypingState() {
-            // Typing logic placeholders inside real-time infrastructure references loops
+            // Typing infrastructure logic indicators layout
         }
 
         function escapeHtml(str) {
