@@ -1114,7 +1114,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
-        // CRITICAL INITIALIZATION PARAMETERS: INSERT FIREBASE CONF CONFIG MATRIX HERE
+        // UPDATED SECURITY INITIALIZATION PARAMETERS WITH YOUR NEW PROD TARGET COORDINATES
         const firebaseConfig = {
             apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
             authDomain: "aero-419e0.firebaseapp.com",
@@ -1122,7 +1122,8 @@
             projectId: "aero-419e0",
             storageBucket: "aero-419e0.firebasestorage.app",
             messagingSenderId: "915787528277",
-            appId: "1:915787528277:web:07d756421995531c923cdc"
+            appId: "1:915787528277:web:07d756421995531c923cdc",
+            measurementId: "G-L0FH99LT4L"
         };
 
         if (!firebase.apps.length) {
@@ -1231,7 +1232,7 @@
             }
 
             if (isSignUpMode) {
-                // strict alphanumeric validation rule checking implementation
+                // Strict alphanumeric validation rule checking implementation
                 const alphaNumericCheck = /^[a-zA-Z0-9]+$/;
                 if (!alphaNumericCheck.test(emailOrHandle)) {
                     displayAuthFeedback("Invalid Username entry! Empty spaces, special symbols, and characters are strictly blocked. Please choose only letters and numbers.");
