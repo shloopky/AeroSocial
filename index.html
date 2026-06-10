@@ -22,6 +22,37 @@
             --border-radius: 4px;
         }
 
+        /* Gloopy Purple Glowing Admin Text Styles */
+        .gloopy-glow {
+            color: #d152ff !important;
+            font-weight: bold;
+            text-shadow: 0 0 8px #9400d3, 0 0 15px #ba55d3;
+            animation: purplePulse 2s infinite ease-in-out;
+        }
+        @keyframes purplePulse {
+            0%, 100% { opacity: 0.9; text-shadow: 0 0 6px #9400d3, 0 0 12px #ba55d3; }
+            50% { opacity: 1; text-shadow: 0 0 12px #9400d3, 0 0 22px #ba55d3, 0 0 30px #da70d6; }
+        }
+
+        /* Top Bar System Announcement Banner */
+        #global-system-alert-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #ff0055, #99002b);
+            color: #fff;
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none;
+            box-sizing: border-box;
+            border-bottom: 2px solid #ff99bb;
+        }
+
         /* Rainbow Theme */
         body.theme-rainbow {
             --bg-gradient: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0000ff, #8b00ff);
@@ -105,11 +136,7 @@
             color: #ffffff !important;
         }
 
-        /* ==========================================
-           --- NEW THEMES UTILIZING LOCAL IMAGES ---
-           ========================================== */
-        
-        /* 1. Lain Theme (171282.gif) */
+        /* Lain Theme */
         body.theme-lain {
             background-image: linear-gradient(rgba(26, 17, 12, 0.75), rgba(15, 10, 8, 0.85)), url('171282.gif');
             background-size: cover;
@@ -131,7 +158,7 @@
             border: 1px solid #7c5843;
         }
 
-        /* 2. Joy Theme (lalalalal.webp) */
+        /* Joy Theme */
         body.theme-joy {
             background-image: linear-gradient(rgba(18, 0, 36, 0.6), rgba(8, 0, 15, 0.8)), url('lalalalal.webp');
             background-size: cover;
@@ -153,7 +180,7 @@
             text-shadow: 0 0 5px rgba(255, 0, 187, 0.5);
         }
 
-        /* 3. Skibidi Theme (Toilet.jpg) */
+        /* Skibidi Theme */
         body.theme-skibidi {
             background-image: linear-gradient(rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.9)), url('Toilet.jpg');
             background-size: cover;
@@ -177,8 +204,6 @@
         body.theme-skibidi h1, body.theme-skibidi .panel-title {
             letter-spacing: 2px;
         }
-
-        /* ========================================== */
 
         body {
             margin: 0;
@@ -291,7 +316,7 @@
             font-size: 14px;
             border-radius: var(--border-radius);
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         body.theme-asdfmovie .aero-input {
             background: #ffffff;
@@ -312,13 +337,14 @@
             text-decoration: underline;
         }
         .error-banner {
-            background: rgba(194, 45, 45, 0.2);
+            background: rgba(194, 45, 45, 0.15);
             border: 1px solid #c22d2d;
             color: #ff8888;
             font-size: 13px;
-            padding: 10px;
+            padding: 12px;
             border-radius: var(--border-radius);
             display: none;
+            line-height: 1.4;
         }
 
         /* Main Profile Interface Grid Setup */
@@ -499,6 +525,17 @@
             line-height: 1.4;
             white-space: pre-wrap;
             word-break: break-word;
+        }
+
+        .msg-admin-delete-btn {
+            font-size: 10px;
+            color: #ff5555;
+            cursor: pointer;
+            background: rgba(255,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.3);
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 5px;
         }
 
         /* Multimedia Embedded Previews */
@@ -725,9 +762,7 @@
             border-bottom: 4px solid #000000;
         }
 
-        /* ==========================================
-           --- VOICE / VIDEO CALL ENGINE STYLES ---
-           ========================================== */
+        /* VOICE / VIDEO CALL ENGINE STYLES */
         .btn-call {
             background: #1f7a3f;
             color: #fff;
@@ -779,7 +814,7 @@
             border-radius: var(--border-radius);
             object-fit: cover;
             background: #000;
-            transform: scaleX(-1); /* mirror self-view */
+            transform: scaleX(-1);
             transition: opacity 0.2s ease;
         }
         #voice-stage {
@@ -836,23 +871,49 @@
         }
         .stat-box .count { font-size: 22px; color: var(--text-main); font-family: var(--font-family); }
         .stat-box .label { font-size: 11px; color: var(--text-main); filter: brightness(0.7); }
+
+        /* Admin Dashboard Panel Style rules */
+        .admin-dashboard-container {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.4);
+            border-radius: var(--border-radius);
+            padding: 8px;
+            border: 1px dashed var(--level-color);
+        }
+        .admin-report-item {
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 6px 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .admin-report-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--accent-blue);
+        }
     </style>
 </head>
 <body>
 
+    <div id="global-system-alert-banner">SYSTEM NOTICE: <span id="global-alert-text-span"></span></div>
+
     <nav>
         <div class="nav-container">
             <div class="brand">AERO</div>
-            <span class="nav-btn" onclick="switchChannel('global', 'Global Hub', true)">Mainframe</span>
-            <span class="nav-btn" onclick="openSettings()">Customization</span>
-            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:var(--text-main); filter:brightness(0.8);" id="nav-user-indicator">Disconnected Node</span>
+            <span class="nav-btn" onclick="switchChannel('global', 'Global Hub', true)">Channels</span>
+            <span class="nav-btn" onclick="openSettings()">Settings</span>
+            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:var(--text-main); filter:brightness(0.8);" id="nav-user-indicator">Not Signed In</span>
         </div>
     </nav>
 
     <div id="boot-screen">
         <div class="boot-pod">
             <div class="boot-title">AERO SYSTEM v2.6</div>
-            <button class="btn-action" style="padding: 10px 30px; font-size:14px;" onclick="terminateBootOverlay()">Synchronize Client Core</button>
+            <button class="btn-action" style="padding: 10px 30px; font-size:14px;" onclick="terminateBootOverlay()">Launch Application</button>
         </div>
     </div>
 
@@ -861,111 +922,103 @@
             <div class="auth-title" id="auth-box-title">Sign In</div>
             <div class="error-banner" id="auth-error-display"></div>
             
-            <input type="text" id="auth-username" class="aero-input" placeholder="User Profile Handle" maxlength="20" autocomplete="off">
-            <input type="password" id="auth-password" class="aero-input" placeholder="Security Code Credentials">
-            
-            <button class="btn-action" id="auth-submit-btn" onclick="processAuthSubmission()">Enter Matrix</button>
-            
+            <input type="text" id="auth-username" class="aero-input" placeholder="Username (Letters and numbers only)" maxlength="20" autocomplete="off">
+            <input type="password" id="auth-password" class="aero-input" placeholder="Password Key">
+            <button class="btn-action" id="auth-submit-btn" onclick="processAuthSubmission()">Sign In</button>
             <div class="auth-toggle" id="auth-toggle-link" onclick="toggleAuthMode()">
-                New profile sequence? <span>Create Matrix Node</span>
+                Don't have an account? <span>Create one here</span>
             </div>
         </div>
     </div>
 
     <div id="app-root">
-        
         <div class="main-content">
-            
             <div class="header-section">
                 <div class="avatar-container">
                     <span id="profile-avatar-slot"><img src="https://via.placeholder.com/120" alt="Avatar"></span>
                 </div>
                 <div class="user-info">
-                    <h1 id="my-handle-display">Profile Node</h1>
+                    <h1 id="my-handle-display">User Profile</h1>
                     <div id="my-status-display"></div>
                 </div>
+            </div>
+
+            <div class="showcase-panel" id="admin-reports-panel" style="display:none; border: 1px solid var(--level-color);">
+                <div class="panel-title" style="color:var(--level-color);">🛡️ Gloopy Moderation Panel (Active User Reports)</div>
+                <div class="admin-dashboard-container" id="admin-reports-feed-list">No pending complaints. Excellent job!</div>
             </div>
 
             <div class="showcase-panel">
                 <div class="panel-title">
                     <span id="active-channel-title">Global Hub</span>
                     <span style="display:flex; align-items:center; gap:8px;">
-                        <button id="btn-voice-call" class="btn-call" onclick="startCall(false)" style="display:none;" title="Start a voice call">📞 Voice</button>
-                        <button id="btn-video-call" class="btn-call" onclick="startCall(true)" style="display:none;" title="Start a video call">📹 Video</button>
-                        <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
+                        <button id="btn-voice-call" class="btn-call" onclick="startCall(false)" style="display:none;" title="Start a voice call">📞 Voice Call</button>
+                        <button id="btn-video-call" class="btn-call" onclick="startCall(true)" style="display:none;" title="Start a video call">📹 Video Call</button>
+                        <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Secured Pipeline Session</span>
                     </span>
                 </div>
-                
                 <div class="chat-deck">
                     <div id="chat-messages"></div>
                     <div id="typing-indicator-bar"></div>
-                    
                     <div id="drag-overlay">
-                        <div>⚓ DROP IMAGE ATTACHMENT LOG HERE</div>
+                        <div>⚓ DROP ATTACHMENT IMAGE FILE HERE</div>
                     </div>
-
                     <div class="chat-controls-footer">
-                        <input type="text" id="message-box" class="aero-input" placeholder="Transmit logs down link channel (max 500 chars)..." maxlength="500">
+                        <input type="text" id="message-box" class="aero-input" placeholder="Type a message or use commands... (max 500 characters)" maxlength="500">
                         <span id="char-count" class="char-counter">0/500</span>
-                        <button class="btn-action" id="send-button">Broadcast</button>
+                        <button class="btn-action" id="send-button">Send</button>
                     </div>
                 </div>
             </div>
 
             <div class="showcase-panel">
-                <div class="panel-title">Collector Modules</div>
+                <div class="panel-title">Statistics Engine</div>
                 <div class="collector-stats-display">
                     <div class="stat-box"><div class="count" id="stat-count-items">0</div><div class="label">Items Linked</div></div>
                     <div class="stat-box"><div class="count" id="stat-count-expansions">0</div><div class="label">Expansions</div></div>
-                    <div class="stat-box"><div class="count">2026</div><div class="label">Client Stamp</div></div>
+                    <div class="stat-box"><div class="count">2026</div><div class="label">Current Era</div></div>
                 </div>
             </div>
-
         </div>
 
         <div class="sidebar">
-            
             <div class="level-badge">
                 <div>
-                    <div style="font-size: 16px;">Node Class</div>
-                    <div style="filter:brightness(0.8); font-size: 11px;">Matrix Clearance level</div>
+                    <div style="font-size: 16px;">Clearance level</div>
+                    <div style="filter:brightness(0.8); font-size: 11px;">Matrix Experience Points</div>
                 </div>
                 <div class="level-circle" id="node-level-display">1</div>
             </div>
-
-            <button class="btn-edit" onclick="openSettings()">Modify Node Configuration</button>
+            <button class="btn-edit" onclick="openSettings()">Modify Profile Theme</button>
 
             <div>
                 <div class="status-indicator" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Secure Pipelines</span>
-                    <span style="font-size:11px; color:var(--accent-blue); cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Add ]</span>
+                    <span>Active Rooms</span>
+                    <span style="font-size:11px; color:var(--accent-blue); cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Create ]</span>
                 </div>
                 <ul class="sidebar-list" id="dynamic-channels-list-container">
                 </ul>
             </div>
 
             <div>
-                <div class="status-indicator">Connected Coordinates</div>
+                <div class="status-indicator">Link Friends</div>
                 <div class="control-row-box" style="margin-bottom:8px;">
-                    <input type="text" id="add-friend-input" class="aero-input" placeholder="Search unique handles...">
-                    <button class="btn-action" onclick="manualAddFriend()">Link</button>
+                    <input type="text" id="add-friend-input" class="aero-input" placeholder="Username...">
+                    <button class="btn-action" onclick="manualAddFriend()">Add</button>
                 </div>
                 <ul class="sidebar-list" id="friend-list-container">
                 </ul>
             </div>
 
-            <button class="btn-edit btn-danger" style="margin-top:20px;" onclick="terminateUserSession()">Sever Connection Node</button>
-
+            <button class="btn-edit btn-danger" style="margin-top:20px;" onclick="terminateUserSession()">Log Out Account</button>
         </div>
-
     </div>
 
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Configure Node Meta</h3>
-            
+            <h3>Account Settings Matrix</h3>
             <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-size:12px; color:#8f98a0;">Interface Style Matrix Theme</label>
+                <label style="font-size:12px; color:#8f98a0;">App Design Theme Matrix</label>
                 <select id="settings-theme-dropdown" class="aero-input" style="width:100%; box-sizing:border-box;">
                     <option value="default">Default Aero Dark</option>
                     <option value="rainbow">🌈 Shifting Rainbow</option>
@@ -977,20 +1030,17 @@
                     <option value="skibidi">🚽 Skibidi (Industrial Concrete Graphic)</option>
                 </select>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-size:12px; color:#8f98a0;">Avatar Node Frame</label>
+                <label style="font-size:12px; color:#8f98a0;">Upload Custom Avatar Photo</label>
                 <input type="file" id="settings-file-input" accept="image/*" onchange="previewSettingsPfp(this)" style="font-size:11px; color:var(--text-main);">
             </div>
-
             <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-size:12px; color:#8f98a0;">Broadcast Signature Phrase</label>
-                <input type="text" id="settings-status-input" class="aero-input" placeholder="Input broadcast vibe status context..." maxlength="40">
+                <label style="font-size:12px; color:#8f98a0;">Custom Bio Text Status Box</label>
+                <input type="text" id="settings-status-input" class="aero-input" placeholder="What's on your mind?..." maxlength="40">
             </div>
-
             <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="btn-action btn-danger" style="flex:1;" onclick="closeSettings()">Abort</button>
-                <button class="btn-action" style="flex:1;" onclick="saveSettingsChanges()">Commit Changes</button>
+                <button class="btn-action btn-danger" style="flex:1;" onclick="closeSettings()">Cancel</button>
+                <button class="btn-action" style="flex:1;" onclick="saveSettingsChanges()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -998,1094 +1048,820 @@
     <div id="mini-profile-modal" class="modal-overlay">
         <div class="modal-card" style="text-align:center; align-items:center;">
             <div class="avatar-container" id="mini-profile-avatar" style="width:80px; height:80px;"></div>
-            <h3 id="mini-profile-name" style="border:none; padding:0; margin:5px 0;">Coordinates</h3>
+            <h3 id="mini-profile-name" style="border:none; padding:0; margin:5px 0;">Profile</h3>
             <div id="mini-profile-status-wrapper"></div>
             
-            <div style="display:flex; gap:10px; width:100%; margin-top:10px;">
-                <button class="btn-action" style="flex:1; font-size:11px;" onclick="actionAddFriend()">Link Coordinate</button>
-                <button class="btn-action" style="flex:1; font-size:11px; background:#2a475e;" onclick="actionDMUser()">Open Comms Line</button>
+            <div style="display:flex; flex-direction:column; width:100%; gap:8px; margin-top:5px;">
+                <button class="btn-action" id="btn-mini-dm" onclick="initiateDirectMessageFromModal()">Send Direct Message</button>
+                <button class="btn-action btn-danger" id="btn-mini-report" onclick="openReportReasonFormModal()">🚨 Report User</button>
+                <button class="btn-action" style="background:#555;" onclick="closeMiniProfileModal()">Close</button>
             </div>
-            <button class="btn-action btn-danger" style="width:100%; padding:4px; font-size:11px;" onclick="closeMiniProfile()">Close Profile</button>
         </div>
     </div>
 
-    <!-- ACTIVE CALL OVERLAY -->
+    <div id="report-reason-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>File User Complaint</h3>
+            <p style="font-size:11px; color:#8f98a0; margin:0;">Please describe the violation reason briefly. All information is reviewed directly by Gloopy.</p>
+            <input type="text" id="report-reason-text-field" class="aero-input" placeholder="Reason (e.g. offensive text, trolling)..." maxlength="150">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="background:#555; flex:1;" onclick="closeReportReasonFormModal()">Cancel</button>
+                <button class="btn-action btn-danger" style="flex:1;" onclick="submitReportToFirebaseDatabase()">Submit Report</button>
+            </div>
+        </div>
+    </div>
+
     <div id="call-modal" class="modal-overlay">
         <div class="modal-card">
             <div class="call-peer-line">
-                <span id="call-peer-name">Secure Line</span>
-                <span id="call-status-text">Connecting...</span>
+                <span style="font-weight:bold; font-size:14px;">CALL SESSION IN PROGRESS</span>
+                <span id="call-duration-timer">00:00</span>
             </div>
-
-            <div id="video-stage">
+            <div id="call-status-text">Connecting secure signal parameters...</div>
+            
+            <div id="video-stage" style="display:none;">
                 <video id="remote-video" autoplay playsinline></video>
                 <video id="local-video" autoplay playsinline muted></video>
             </div>
-
             <div id="voice-stage">
                 <div class="voice-pulse"></div>
-                <div style="font-size:13px; color:var(--text-main);">Voice transmission active</div>
+                <div style="font-size:12px; margin-top:10px;">Voice Connection Maintained</div>
             </div>
 
             <div class="call-controls">
                 <button class="btn-action" id="btn-toggle-mic" onclick="toggleMic()">🎙️ Mic On</button>
                 <button class="btn-action" id="btn-toggle-cam" onclick="toggleCam()">📹 Cam On</button>
-                <button class="btn-action btn-danger" onclick="hangUpCall()">📴 End</button>
+                <button class="btn-action btn-danger" onclick="endCall(true)">🛑 Disconnect</button>
             </div>
         </div>
     </div>
 
-    <!-- INCOMING CALL OVERLAY -->
     <div id="incoming-call-modal" class="modal-overlay">
         <div class="modal-card">
-            <div class="incoming-ring">📞</div>
-            <h3 id="incoming-caller-name" style="border:none; padding:0; margin:0;">Incoming Node</h3>
-            <div id="incoming-call-type" style="font-size:12px; color:#8f98a0;">Incoming transmission</div>
-            <div style="display:flex; gap:10px; width:100%; margin-top:5px;">
-                <button class="btn-action btn-danger" style="flex:1;" onclick="declineCall()">Decline</button>
-                <button class="btn-action" style="flex:1; background:#1f7a3f;" onclick="answerCall()">Accept</button>
+            <div class="incoming-ring">🔔</div>
+            <h3 style="border:none; margin-bottom:5px;" id="incoming-call-title-text">Incoming Connection Request</h3>
+            <p style="font-size:12px; color:#8f98a0; margin-top:0;" id="incoming-call-meta-text">User is establishing a feed stream...</p>
+            <div style="display:flex; gap:12px; width:100%;">
+                <button class="btn-action btn-danger" style="flex:1;" onclick="rejectIncomingCallSignal()">Decline</button>
+                <button class="btn-action" style="flex:1; background:#1f7a3f;" onclick="acceptIncomingCallSignal()">Accept Feed</button>
             </div>
         </div>
     </div>
-
-    <div id="yt-bg-audio-pipeline" style="position: absolute; width:0; height:0; pointer-events:none; opacity:0; visibility:hidden;"></div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
-        /* =========================================================================
-           1. FIREBASE CONFIGURATION RECONFIGURED MATRICES
-           ========================================================================= */
+        // CRITICAL INITIALIZATION PARAMETERS: INSERT FIREBASE CONF CONFIG MATRIX HERE
         const firebaseConfig = {
             apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
-            authDomain: "aero-419e0.firebaseapp.com",
-            databaseURL: "https://aero-419e0-default-rtdb.firebaseio.com",
-            projectId: "aero-419e0",
-            storageBucket: "aero-419e0.firebasestorage.app",
-            messagingSenderId: "915787528277",
-            appId: "1:915787528277:web:07d756421995531c923cdc",
-            measurementId: "G-L0FH99LT4L"
+            authDomain: "aerosocial.firebaseapp.com",
+            databaseURL: "https://aerosocial-default-rtdb.firebaseio.com",
+            projectId: "aerosocial",
+            storageBucket: "aerosocial.appspot.com",
+            messagingSenderId: "1029384756",
+            appId: "1:1029384756:web:abcd1234efgh5678"
         };
 
-        let firebaseActive = false;
-        try {
+        if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
-            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
-            firebaseActive = true;
-        } catch (e) {
-            console.error("Initialization Protocol Vectors Denied: ", e);
         }
 
-        /* =========================================================================
-           2. SKEUOMORPHIC AUDIO SYNTHESIS & YT SOUNDTRACK PIPELINE
-           ========================================================================= */
-        let audioContextInstance = null;
-        let youtubePlayerInstance = null;
-
-        function verifyAudioEnvironment() {
-            if (!audioContextInstance) {
-                audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function playSyntheticPing(style) {
-            try {
-                verifyAudioEnvironment();
-                if (!audioContextInstance) return;
-                const time = audioContextInstance.currentTime;
-                
-                if (style === 'drop') {
-                    const osc = audioContextInstance.createOscillator();
-                    const gain = audioContextInstance.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, time);
-                    osc.frequency.exponentialRampToValueAtTime(880, time + 0.05);
-                    gain.gain.setValueAtTime(0.15, time);
-                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
-                    osc.connect(gain); gain.connect(audioContextInstance.destination);
-                    osc.start(time); osc.stop(time + 0.1);
-                } else if (style === 'chime') {
-                    [440, 554.37, 659.25].forEach((freq, idx) => {
-                        const osc = audioContextInstance.createOscillator();
-                        const gain = audioContextInstance.createGain();
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(freq, time + (idx * 0.05));
-                        gain.gain.setValueAtTime(0.1, time + (idx * 0.05));
-                        gain.gain.exponentialRampToValueAtTime(0.001, time + (idx * 0.05) + 0.2);
-                        osc.connect(gain); gain.connect(audioContextInstance.destination);
-                        osc.start(time + (idx * 0.05)); osc.stop(time + (idx * 0.05) + 0.2);
-                    });
-                }
-            } catch(e) {}
-        }
-
-        (function loadYouTubeIframeLibrary() {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        })();
-
-        function onYouTubeIframeAPIReady() {
-            youtubePlayerInstance = new YT.Player('yt-bg-audio-pipeline', {
-                videoId: 'ENXvZ9GWjls', 
-                playerVars: { 
-                    'autoplay': 0, 
-                    'controls': 0, 
-                    'loop': 1, 
-                    'playlist': 'MyjTrwOMSO4,4spkVX8z-vs,ENXvZ9GWjls', 
-                    'disablekb': 1, 
-                    'fs': 0 
-                },
-                events: { 'onReady': (e) => e.target.setVolume(15) }
-            });
-        }
-
-        function startBackgroundAmbientTrack() {
-            if (youtubePlayerInstance && typeof youtubePlayerInstance.playVideo === 'function') {
-                youtubePlayerInstance.playVideo();
-            }
-        }
-
-        /* =========================================================================
-           3. SCREEN STATE INITIALIZATION CONTROL LAYERS
-           ========================================================================= */
+        // DOM Element Cache Pointers
         const bootScreen = document.getElementById('boot-screen');
         const authScreen = document.getElementById('auth-screen');
         const appRoot = document.getElementById('app-root');
-        let bootCompleted = false;
-
-        function terminateBootOverlay() {
-            playSyntheticPing('chime');
-            startBackgroundAmbientTrack();
-            bootScreen.style.opacity = '0';
-            setTimeout(() => {
-                bootScreen.style.display = 'none';
-                bootCompleted = true;
-                evaluateGlobalDisplayState();
-            }, 500);
-        }
-
-        /* =========================================================================
-           4. ACCOUNT REGISTRATION & RUNTIME SESSION MANAGEMENT MATRIX
-           ========================================================================= */
-        let authModeIsLogin = true; 
-        let myHandle = "";
-        let myFriends = [];
-        let currentChannel = "global";
-        let activeListenerRef = null; 
-        let activeTypingListenerRef = null;
-        let currentUserPfp = null;
-        let currentUserStatus = "";
-        let currentUserTheme = "default";
-
+        const authBoxTitle = document.getElementById('auth-box-title');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authToggleLink = document.getElementById('auth-toggle-link');
         const authErrorDisplay = document.getElementById('auth-error-display');
+        const authUsername = document.getElementById('auth-username');
+        const authPassword = document.getElementById('auth-password');
+        
         const myHandleDisplay = document.getElementById('my-handle-display');
         const myStatusDisplay = document.getElementById('my-status-display');
         const profileAvatarSlot = document.getElementById('profile-avatar-slot');
-        const navUserIndicator = document.getElementById('nav-user-indicator');
-
-        function toggleAuthMode() {
-            authModeIsLogin = !authModeIsLogin;
-            authErrorDisplay.style.display = "none";
-            document.getElementById('auth-username').value = "";
-            document.getElementById('auth-password').value = "";
-            if (authModeIsLogin) {
-                document.getElementById('auth-box-title').innerText = "Sign In";
-                document.getElementById('auth-submit-btn').innerText = "Enter Matrix";
-                document.getElementById('auth-toggle-link').innerHTML = "New profile sequence? <span>Create Matrix Node</span>";
-            } else {
-                document.getElementById('auth-box-title').innerText = "Register Identity Profile";
-                document.getElementById('auth-submit-btn').innerText = "Initialize System Node";
-                document.getElementById('auth-toggle-link').innerHTML = "Already synced profile? <span>Sign In</span>";
-            }
-        }
-
-        function processAuthSubmission() {
-            const username = document.getElementById('auth-username').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const cleanName = username.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '');
-
-            if (!cleanName || password.length < 6) {
-                authErrorDisplay.innerText = "Entry architecture invalid. (Password minimum 6 characters required)";
-                authErrorDisplay.style.display = "block"; return;
-            }
-
-            authErrorDisplay.style.display = "none";
-            if (authModeIsLogin) {
-                firebase.auth().signInWithEmailAndPassword(cleanName + "@aero.io", password)
-                    .then(() => { startBackgroundAmbientTrack(); })
-                    .catch(err => { authErrorDisplay.innerText = "Access Denied: " + err.message; authErrorDisplay.style.display = "block"; });
-            } else {
-                const db = firebase.database();
-                db.ref('usernames/' + cleanName).once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        authErrorDisplay.innerText = "Identity coordinates claimed."; authErrorDisplay.style.display = "block";
-                    } else {
-                        firebase.auth().createUserWithEmailAndPassword(cleanName + "@aero.io", password)
-                            .then((cred) => {
-                                return db.ref('usernames/' + cleanName).set(cred.user.uid)
-                                    .then(() => {
-                                        return db.ref('users/' + cred.user.uid).set({ 
-                                            handle: username, pfp: "", status: "", msgCount: 0, theme: "default", friends: { initialized: true } 
-                                        });
-                                    });
-                            })
-                            .then(() => { startBackgroundAmbientTrack(); })
-                            .catch(err => { authErrorDisplay.innerText = "Registration Failed: " + err.message; authErrorDisplay.style.display = "block"; });
-                    }
-                });
-            }
-        }
-
-        function terminateUserSession() { 
-            clearMyTypingState();
-            firebase.auth().signOut().then(() => { location.reload(); }); 
-        }
-
-        function evaluateGlobalDisplayState() {
-            if (!bootCompleted) return;
-            if (firebase.auth().currentUser) {
-                authScreen.style.display = 'none';
-                appRoot.style.display = 'grid';
-            } else {
-                appRoot.style.display = 'none';
-                authScreen.style.display = 'block';
-            }
-        }
-
-        function runThemeAdjustmentEngine(targetTheme) {
-            document.body.className = ""; 
-            if(targetTheme && targetTheme !== 'default') {
-                document.body.classList.add(`theme-${targetTheme}`);
-            }
-        }
-
-        if (firebaseActive) {
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    firebase.database().ref('users/' + user.uid).on('value', (snap) => {
-                        const userData = snap.val() || {};
-                        myHandle = userData.handle || "Profile_Node";
-                        currentUserPfp = userData.pfp || null;
-                        currentUserStatus = userData.status || "";
-                        currentUserTheme = userData.theme || "default";
-                        const msgCount = userData.msgCount || 0;
-                        
-                        myHandleDisplay.innerText = myHandle;
-                        navUserIndicator.innerText = `Node: ${myHandle}`;
-                        
-                        runThemeAdjustmentEngine(currentUserTheme);
-
-                        if(currentUserPfp) profileAvatarSlot.innerHTML = `<img src="${currentUserPfp}">`;
-                        else profileAvatarSlot.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${myHandle}">`;
-
-                        if(currentUserStatus) {
-                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
-                        } else {
-                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:var(--text-main); opacity:0.6; border-color:var(--border-color); background:none;">No profile summary data broadcasted</span>`;
-                        }
-
-                        const calculatedLevel = Math.floor(1 + Math.sqrt(msgCount));
-                        const itemsLinked = Math.floor(msgCount * 0.375);
-                        const expansions = Math.floor(calculatedLevel * 0.92);
-
-                        document.getElementById('node-level-display').innerText = calculatedLevel;
-                        document.getElementById('stat-count-items').innerText = itemsLinked;
-                        document.getElementById('stat-count-expansions').innerText = expansions;
-
-                        const rawFriends = userData.friends;
-                        if (rawFriends && Array.isArray(rawFriends)) myFriends = rawFriends;
-                        else if (rawFriends && typeof rawFriends === 'object') myFriends = Object.values(rawFriends).filter(v => typeof v === 'string');
-                        else myFriends = [];
-                        
-                        renderFriendList();
-                        
-                        if (appRoot.style.display === 'none' || appRoot.style.display === '') {
-                            evaluateGlobalDisplayState();
-                            syncChannelsListListener();
-                            switchChannel('global', 'Global Hub', true);
-                            setupGlobalNotificationTrackers();
-                        }
-                    });
-                } else evaluateGlobalDisplayState();
-            });
-        }
-
-        /* =========================================================================
-           5. PIPELINES CHANNEL WIZARD MANAGEMENT STRUCTURE
-           ========================================================================= */
-        const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
-        let dynamicChannelsCache = {};
-        
-        function triggerChannelCreationWizard() {
-            const u = firebase.auth().currentUser;
-            if (!u) return;
-
-            firebase.database().ref('channels_list').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                let ownedCount = 0;
-                if (data) { Object.values(data).forEach(chan => { if (chan.ownerId === u.uid) ownedCount++; }); }
-
-                if (ownedCount >= 1 && myHandle !== "DAMXIAFAN69") {
-                    alert("Security Lockout: Profile node clearance structures restricted to 1 custom creation pipeline limit."); return;
-                }
-
-                const title = prompt("Specify connection identifier pipeline designation:");
-                if (!title) return;
-                const cleanChanId = title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-                if (!cleanChanId) { alert("Invalid structural notation label."); return; }
-
-                firebase.database().ref('channels_list/' + cleanChanId).set({
-                    id: cleanChanId, name: title, ownerId: u.uid
-                }).then(() => {
-                    playSyntheticPing('chime');
-                    switchChannel(cleanChanId, title, false);
-                });
-            });
-        }
-
-        function removeChannelNode(channelId, event) {
-            event.stopPropagation();
-            if (myHandle !== "DAMXIAFAN69") return;
-            if (!confirm(`Purge network route data "${channelId}" securely?`)) return;
-
-            if(channelListeners[channelId]) {
-                firebase.database().ref(`channels/${channelId}`).off('child_added', channelListeners[channelId]);
-                delete channelListeners[channelId];
-            }
-            delete unreadCounts[channelId];
-            updateGlobalTitleBanner();
-
-            firebase.database().ref('channels_list/' + channelId).remove();
-            firebase.database().ref('channels/' + channelId).remove().then(() => {
-                if (currentChannel === channelId) switchChannel('global', 'Global Hub', true);
-            });
-        }
-
-        function syncChannelsListListener() {
-            firebase.database().ref('channels_list').on('value', (snapshot) => {
-                dynamicChannelsCache = snapshot.val() || {};
-                renderChannelsSidebarDOM();
-            });
-        }
-
-        function renderChannelsSidebarDOM() {
-            dynamicChannelsContainer.innerHTML = `
-                <li class="${currentChannel === 'global' ? 'active' : ''}" onclick="switchChannel('global', 'Global Hub', true)">
-                    <span>🌐 Global Mainframe</span>
-                    ${renderBadgeHtml('global')}
-                </li>
-            `;
-            
-            Object.values(dynamicChannelsCache).forEach(chan => {
-                const li = document.createElement('li');
-                li.className = currentChannel === chan.id ? 'active' : '';
-                
-                let deleteIconHtml = "";
-                if (myHandle === "DAMXIAFAN69") {
-                    deleteIconHtml = `<span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
-                }
-
-                li.innerHTML = `
-                    <span>💬 ${chan.name}</span>
-                    <div style="display:flex; align-items:center; gap:5px;">
-                        ${renderBadgeHtml(chan.id)}
-                        ${deleteIconHtml}
-                    </div>
-                `;
-                li.onclick = () => switchChannel(chan.id, chan.name, false);
-                dynamicChannelsContainer.appendChild(li);
-            });
-        }
-
-        /* =========================================================================
-           6. LIVE MESSAGING CORE ENGINE & LOCALIZED TIMESTAMP INTEGRATION
-           ========================================================================= */
         const chatMessages = document.getElementById('chat-messages');
         const messageBox = document.getElementById('message-box');
-        const charCountDisplay = document.getElementById('char-count');
-        const typingIndicatorBar = document.getElementById('typing-indicator-bar');
-        let isInitialLoad = true;
+        const sendButton = document.getElementById('send-button');
+        const charCount = document.getElementById('char-count');
+        const activeChannelTitle = document.getElementById('active-channel-title');
+        const dynamicChannelsListContainer = document.getElementById('dynamic-channels-list-container');
+        const friendListContainer = document.getElementById('friend-list-container');
+        const nodeLevelDisplay = document.getElementById('node-level-display');
+        const navUserIndicator = document.getElementById('nav-user-indicator');
 
-        let unreadCounts = {};
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsThemeDropdown = document.getElementById('settings-theme-dropdown');
+        const settingsStatusInput = document.getElementById('settings-status-input');
+        const settingsFileInput = document.getElementById('settings-file-input');
+
+        const miniProfileModal = document.getElementById('mini-profile-modal');
+        const miniProfileAvatar = document.getElementById('mini-profile-avatar');
+        const miniProfileName = document.getElementById('mini-profile-name');
+        const miniProfileStatusWrapper = document.getElementById('mini-profile-status-wrapper');
+
+        const reportReasonModal = document.getElementById('report-reason-modal');
+        const reportReasonTextField = document.getElementById('report-reason-text-field');
+        const adminReportsPanel = document.getElementById('admin-reports-panel');
+        const adminReportsFeedList = document.getElementById('admin-reports-feed-list');
+
+        // Internal State Engine Flags
+        let isSignUpMode = false;
+        let currentUserObj = null;
+        let myHandle = '';
+        let myBioPhrase = '';
+        let myAvatarUrl = '';
+        let currentChannel = 'global'; 
         let channelListeners = {};
-        let channelTracksInitialized = {};
+        let myFriends = [];
+        let unreadCounts = {};
+        let globalSystemAlertTimeout = null;
 
-        function setupGlobalNotificationTrackers() {
-            trackChannelNotifications('global');
-            firebase.database().ref('channels_list').on('child_added', (snap) => {
-                const chan = snap.val(); if(chan && chan.id) trackChannelNotifications(chan.id);
-            });
+        // Stats Counter Simulation Flags
+        let countItemsLinked = 0;
+        let countExpansions = 0;
 
-            firebase.database().ref('users/' + firebase.auth().currentUser.uid).on('value', (snap) => {
-                const userData = snap.val() || {};
-                let friendsList = [];
-                if (userData.friends && Array.isArray(userData.friends)) friendsList = userData.friends;
-                else if (userData.friends && typeof userData.friends === 'object') friendsList = Object.values(userData.friends);
+        // MLG Inspired Audio-Visual Funny Death Messages Matrix Array 
+        const mlgBanMessages = [
+            "❌ RECKT!! 360 NO-SCOPED BY ADMIN GLOOPY. GET OUT OF MY LOBBY MUM GET THE CAMERA!!! 🎮",
+            "❌ WOW! 😲 SMALL LOAN OF A MILLION BANS. LOOMINARTY CONFIRMED. GO CRY TO DEW AND DORITOS!! 🔺",
+            "❌ ACCESS DENIED SKILL ISSUE! 420 BLAZED INTO THE BAN DIMENSION. SANIC SPEED DELETION. 🦔",
+            "❌ COMPILATION DROPPED! Gloopy executed an MLG Pro hitmarker chain on your file sync node. 💸",
+            "❌ SAD VIOLIN TIME. 🎻 Hit up a mountain dew box because your access node was crushed by the intervention sniper rifle! 🎯"
+        ];
+
+        // System Preloader Dismiss Pipeline
+        function terminateBootOverlay() {
+            bootScreen.style.opacity = '0';
+            setTimeout(() => {
+                bootScreen.style.display = 'none';
+                firebase.auth().onAuthStateChanged(handleFirebaseStateResponse);
+            }, 500);
+        }
+
+        // Toggle Sign-In / Register Mode Text
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            authErrorDisplay.style.display = 'none';
+            if (isSignUpMode) {
+                authBoxTitle.innerText = "Create Profile Room Account";
+                authSubmitBtn.innerText = "Register New Account";
+                authToggleLink.innerHTML = "Already have an account? <span>Sign In here</span>";
+                authUsername.style.display = "block";
+            } else {
+                authBoxTitle.innerText = "Sign In";
+                authSubmitBtn.innerText = "Sign In";
+                authToggleLink.innerHTML = "Don't have an account? <span>Create one here</span>";
+                authUsername.style.display = "block";
+            }
+        }
+
+        // Run client regex verification and credential operations 
+        function processAuthSubmission() {
+            const emailOrHandle = authUsername.value.trim();
+            const password = authPassword.value;
+            authErrorDisplay.style.display = "none";
+
+            if (!emailOrHandle || !password) {
+                displayAuthFeedback("Please fill out all credential verification text boxes properly.");
+                return;
+            }
+
+            if (isSignUpMode) {
+                // strict requirement checker validation check
+                const alphaNumericCheck = /^[a-zA-Z0-9]+$/;
+                if (!alphaNumericCheck.test(emailOrHandle)) {
+                    displayAuthFeedback("Invalid Username entry! Empty spaces, special symbols, and characters are strictly blocked. Please choose only letters and numbers.");
+                    return;
+                }
+
+                const pseudoEmail = `${emailOrHandle.toLowerCase()}@aerosocial.internal`;
                 
-                friendsList.forEach(friend => {
-                    if (typeof friend === 'string') {
-                        const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
-                        trackChannelNotifications(`dm_${dmRoomId}`);
+                // Inspect inside real-time database to prevent duplicate handle claims
+                firebase.database().ref('handles/' + emailOrHandle.toLowerCase()).once('value').then((snap) => {
+                    if (snap.exists()) {
+                        displayAuthFeedback("This profile handle is already registered by another user node.");
+                    } else {
+                        firebase.auth().createUserWithEmailAndPassword(pseudoEmail, password)
+                            .then((credential) => {
+                                const uid = credential.user.uid;
+                                const defaultProfileData = {
+                                    handle: emailOrHandle,
+                                    bio: "Active node inside communication hub grid.",
+                                    avatarUrl: "https://via.placeholder.com/120",
+                                    xp: 15,
+                                    isBanned: false
+                                };
+                                
+                                let updates = {};
+                                updates['users/' + uid] = defaultProfileData;
+                                updates['handles/' + emailOrHandle.toLowerCase()] = uid;
+                                
+                                firebase.database().ref().update(updates).then(() => {
+                                    authUsername.value = '';
+                                    authPassword.value = '';
+                                });
+                            })
+                            .catch((err) => { displayAuthFeedback(err.message); });
                     }
                 });
-            });
+            } else {
+                // Account Login Strategy
+                const targetEmail = emailOrHandle.includes('@') ? emailOrHandle : `${emailOrHandle.toLowerCase()}@aerosocial.internal`;
+                firebase.auth().signInWithEmailAndPassword(targetEmail, password)
+                    .then(() => {
+                        authUsername.value = '';
+                        authPassword.value = '';
+                    })
+                    .catch((err) => { displayAuthFeedback("Authentication failed: Check input username rules or security passwords."); });
+            }
         }
 
-        function trackChannelNotifications(channelId) {
-            if (channelListeners[channelId]) return;
-            unreadCounts[channelId] = 0;
-            channelTracksInitialized[channelId] = false;
-            
-            const dbRef = firebase.database().ref(`channels/${channelId}`);
-            dbRef.once('value').then(() => { channelTracksInitialized[channelId] = true; });
-
-            channelListeners[channelId] = dbRef.on('child_added', (snapshot) => {
-                if (!channelTracksInitialized[channelId]) return;
-                if (currentChannel !== channelId) {
-                    unreadCounts[channelId]++;
-                    playSyntheticPing('drop');
-                    updateGlobalTitleBanner();
-                    if (channelId.startsWith('dm_')) renderFriendList();
-                    else renderChannelsSidebarDOM();
-                }
-            });
+        function displayAuthFeedback(text) {
+            authErrorDisplay.innerText = text;
+            authErrorDisplay.style.display = "block";
         }
 
-        function renderBadgeHtml(channelId) {
-            const count = unreadCounts[channelId] || 0;
-            return count > 0 ? `<span class="notif-badge">${count}</span>` : '';
-        }
+        // Firebase Sync Context State Evaluator
+        function handleFirebaseStateResponse(user) {
+            if (user) {
+                currentUserObj = user;
+                // Attach main user details profile download hook
+                firebase.database().ref('users/' + user.uid).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) {
+                        terminateUserSession();
+                        return;
+                    }
 
-        function updateGlobalTitleBanner() {
-            let totalUnread = 0;
-            Object.keys(unreadCounts).forEach(key => { totalUnread += unreadCounts[key] || 0; });
-            document.title = totalUnread > 0 ? `(${totalUnread}) AERO - Profile Hub` : `AERO - Profile Hub`;
-        }
+                    // Enforce MLG Funny ban structure restriction layout if user has been banned
+                    if (data.isBanned === true) {
+                        let preservedTheme = document.body.className;
+                        document.body.className = "theme-mlg"; // Enforce Pro MLG Theme for the ban layout screen
+                        
+                        let mlgAlertMsg = mlgBanMessages[Math.floor(Math.random() * mlgBanMessages.length)];
+                        
+                        document.body.innerHTML = `
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:40px; background:#000; color:#00ff00; font-family:'Impact', sans-serif;">
+                                <h1 style="font-size:75px; color:#ff0000; text-shadow:4px 4px #ffff00; margin-bottom:10px;">❌ UTTERLY DEPRECATRECKTED ❌</h1>
+                                <p style="font-size:28px; color:#fff; text-shadow:2px 2px #ff00ff; max-width:800px; line-height:1.4; margin:20px 0;">${mlgAlertMsg}</p>
+                                <div style="margin:20px; font-size:18px; color:#00ffff;">BANNED NODE: [ ${data.handle} ] • MODERATOR RECKONER: Gloopy</div>
+                                <button class="btn-action" style="padding:15px 40px; font-size:20px; margin-top:30px; background:#ff0000 !important; color:#fff !important; border:3px solid #fff;" onclick="location.reload()">RE-TRY MATRIX CONNECT</button>
+                            </div>
+                        `;
+                        // Instantly disconnect network authorization layer backend sessions
+                        firebase.auth().signOut();
+                        return;
+                    }
 
-        messageBox.addEventListener('input', () => {
-            charCountDisplay.innerText = `${messageBox.value.length}/500`;
-            broadcastMyTypingStatus();
-        });
+                    myHandle = data.handle;
+                    myBioPhrase = data.bio || '';
+                    myAvatarUrl = data.avatarUrl || 'https://via.placeholder.com/120';
+                    const scoreXp = data.xp || 0;
+                    const calculatedLevel = Math.floor(Math.sqrt(scoreXp / 15)) || 1;
 
-        /* =========================================================================
-           7. REAL-TIME TYPING TRANSMISSION ARCHITECTURE
-           ========================================================================= */
-        let typingDebounceTimeout = null;
-        let isCurrentlyTypingInFirebase = false;
+                    // Hydrate elements fields
+                    myHandleDisplay.innerText = myHandle;
+                    myHandleDisplay.className = (myHandle.toLowerCase() === "gloopy") ? "gloopy-glow" : "";
+                    
+                    myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${escapeHtml(myBioPhrase)}</span>`;
+                    profileAvatarSlot.innerHTML = `<img src="${escapeHtml(myAvatarUrl)}" alt="User Avatar">`;
+                    nodeLevelDisplay.innerText = calculatedLevel;
+                    navUserIndicator.innerText = `Logged in as: ${myHandle}`;
 
-        function broadcastMyTypingStatus() {
-            const u = firebase.auth().currentUser;
-            if (!u || !firebaseActive) return;
+                    // Turn on Admin Reports Control Deck panel view if user matches master handle name criteria
+                    if (myHandle.toLowerCase() === "gloopy") {
+                        adminReportsPanel.style.display = "block";
+                        initializeAdminReportDashboardListener();
+                    } else {
+                        adminReportsPanel.style.display = "none";
+                    }
 
-            if (!isCurrentlyTypingInFirebase && messageBox.value.trim().length > 0) {
-                isCurrentlyTypingInFirebase = true;
-                firebase.database().ref(`typing/${currentChannel}/${u.uid}`).set({
-                    username: myHandle, timestamp: Date.now()
+                    authScreen.style.display = "none";
+                    appRoot.style.display = "grid";
+
+                    // Trigger structural data lists update tasks
+                    syncGlobalChannelsPipelines();
+                    listenToSystemAlertMessages();
+                    firebase.database().ref('users/' + currentUserObj.uid + '/friends').on('value', (fSnap) => {
+                        myFriends = fSnap.val() || [];
+                        renderFriendList();
+                    });
                 });
-            }
-
-            clearTimeout(typingDebounceTimeout);
-            typingDebounceTimeout = setTimeout(() => { clearMyTypingState(); }, 4000);
-        }
-
-        function clearMyTypingState() {
-            const u = firebase.auth().currentUser;
-            if (u && firebaseActive && isCurrentlyTypingInFirebase) {
-                isCurrentlyTypingInFirebase = false;
-                firebase.database().ref(`typing/${currentChannel}/${u.uid}`).remove();
+            } else {
+                // Clear state variables
+                currentUserObj = null;
+                myHandle = '';
+                appRoot.style.display = "none";
+                adminReportsPanel.style.display = "none";
+                authScreen.style.display = "block";
+                navUserIndicator.innerText = "Not Signed In";
+                detachAllChatListeners();
             }
         }
 
-        function listenToTypingEvents(channelId) {
-            if (activeTypingListenerRef) { activeTypingListenerRef.off(); activeTypingListenerRef = null; }
-            typingIndicatorBar.innerHTML = "";
+        function terminateUserSession() {
+            clearMyTypingState();
+            detachAllChatListeners();
+            firebase.auth().signOut();
+        }
 
-            if (!firebaseActive) return;
-            const u = firebase.auth().currentUser;
-
-            activeTypingListenerRef = firebase.database().ref(`typing/${channelId}`);
-            activeTypingListenerRef.on('value', (snapshot) => {
-                const typersObj = snapshot.val();
-                let typingUsers = [];
-                if (typersObj) {
-                    Object.keys(typersObj).forEach(uid => { if (!u || uid !== u.uid) typingUsers.push(typersObj[uid].username); });
+        // Live Monitor Alerts Engine for Admin Alert broadcast commands 
+        function listenToSystemAlertMessages() {
+            firebase.database().ref('system_announcement').on('value', (snap) => {
+                const alertObj = snap.val();
+                const alertBanner = document.getElementById('global-system-alert-banner');
+                const alertTextSpan = document.getElementById('global-alert-text-span');
+                
+                if (globalSystemAlertTimeout) {
+                    clearTimeout(globalSystemAlertTimeout);
                 }
 
-                if (typingUsers.length > 0) {
-                    typingIndicatorBar.innerHTML = typingUsers.length === 1 ? 
-                        `📝 Node <b>${typingUsers[0]}</b> is preparing log data...` : `📝 Multiple communication vectors preparing logs...`;
+                if (alertObj && alertObj.message && alertObj.expiresAt > Date.now()) {
+                    alertTextSpan.innerText = alertObj.message;
+                    alertBanner.style.display = "block";
+                    
+                    const durationRemaining = alertObj.expiresAt - Date.now();
+                    globalSystemAlertTimeout = setTimeout(() => {
+                        alertBanner.style.display = "none";
+                    }, durationRemaining);
                 } else {
-                    typingIndicatorBar.innerHTML = "";
+                    alertBanner.style.display = "none";
                 }
             });
         }
 
-        function switchChannel(channelId, layoutTitle, isGlobal) {
+        // Administrative View Dashboard Loop Strategy
+        function initializeAdminReportDashboardListener() {
+            firebase.database().ref('reports').on('value', (snap) => {
+                const logs = snap.val();
+                if (!logs) {
+                    adminReportsFeedList.innerHTML = `<div style="font-size:12px; color:#8f98a0; font-style:italic;">No pending reports recorded. Secure platform matrix maintained.</div>`;
+                    return;
+                }
+                
+                let markupHtml = '';
+                Object.keys(logs).forEach((reportId) => {
+                    const report = logs[reportId];
+                    markupHtml += `
+                        <div class="admin-report-item">
+                            <div class="admin-report-meta">
+                                <span>⚠️ Target User: <strong>${escapeHtml(report.target)}</strong></span>
+                                <span style="color:#ff5555; cursor:pointer;" onclick="dismissAdminReportLog('${reportId}')">[ Resolve / Dismiss ]</span>
+                            </div>
+                            <div style="color:#fff; margin:2px 0;">Reason description: "${escapeHtml(report.reason)}"</div>
+                            <div style="font-size:10px; color:#8f98a0;">Filed by node handle: ${escapeHtml(report.reportedBy)}</div>
+                        </div>
+                    `;
+                });
+                adminReportsFeedList.innerHTML = markupHtml;
+            });
+        }
+
+        function dismissAdminReportLog(id) {
+            firebase.database().ref('reports/' + id).remove();
+        }
+
+        // Build channel structure listings inside room navigator side deck
+        function syncGlobalChannelsPipelines() {
+            firebase.database().ref('channels').on('value', (snap) => {
+                const channelsMap = snap.val() || {};
+                // Insert fallback initial state channel loops if database structure is fresh
+                if (!channelsMap['global']) {
+                    firebase.database().ref('channels/global').set({ name: "Global Hub", type: "public" });
+                    return;
+                }
+
+                dynamicChannelsListContainer.innerHTML = '';
+                Object.keys(channelsMap).forEach((id) => {
+                    const room = channelsMap[id];
+                    const li = document.createElement('li');
+                    li.className = (currentChannel === id) ? 'active' : '';
+                    
+                    const unreadBadgeMarkup = (unreadCounts[id] && currentChannel !== id) ? `<span class="notif-badge">${unreadCounts[id]}</span>` : '';
+                    
+                    li.innerHTML = `
+                        <span># 🚪 ${escapeHtml(room.name)} ${unreadBadgeMarkup}</span>
+                    `;
+                    li.onclick = () => switchChannel(id, room.name, true);
+                    dynamicChannelsListContainer.appendChild(li);
+                });
+            });
+        }
+
+        // Switch messaging feeds safely 
+        function switchChannel(channelId, customTitle, clearDms = true) {
             clearMyTypingState();
             currentChannel = channelId;
-            isInitialLoad = true;
+            activeChannelTitle.innerText = customTitle;
             unreadCounts[channelId] = 0;
-            updateGlobalTitleBanner();
             
-            if (channelId.startsWith('dm_')) renderFriendList();
-            else renderChannelsSidebarDOM();
+            // Repaint channel highlights
+            syncGlobalChannelsPipelines();
+            renderFriendList();
 
-            document.getElementById('active-channel-title').innerText = layoutTitle;
-            chatMessages.innerHTML = '';
-
-            // Voice/video calls are 1:1, so only expose them inside DM channels
-            const isDM = channelId.startsWith('dm_');
-            document.getElementById('btn-voice-call').style.display = isDM ? 'inline-block' : 'none';
-            document.getElementById('btn-video-call').style.display = isDM ? 'inline-block' : 'none';
-            if (isDM) setupCallListener(channelId);
-
-            if (activeListenerRef) { activeListenerRef.off(); activeListenerRef = null; }
-
-            const db = firebase.database();
-            const targetQuery = db.ref(`channels/${channelId}`).limitToLast(MAX_VISIBLE_MESSAGES);
-            
-            targetQuery.once('value').then(() => { isInitialLoad = false; });
-            targetQuery.on('child_added', (snapshot) => {
-                renderMessage(snapshot.val());
-                if (!isInitialLoad && currentChannel === channelId) playSyntheticPing('drop');
-            });
-                
-            activeListenerRef = targetQuery;
-            listenToTypingEvents(channelId);
-        }
-
-        function sendMessage() {
-            const text = messageBox.value.trim();
-            if (text === "" || text.length > 500) return;
-            clearMyTypingState();
-
-            const u = firebase.auth().currentUser;
-
-            if (text.startsWith('/') && myHandle === "DAMXIAFAN69") {
-                if (text === '/clear') {
-                    firebase.database().ref(`channels/${currentChannel}`).remove();
-                    chatMessages.innerHTML = ''; messageBox.value = ''; return;
-                }
-                if (text.startsWith('/alert ')) {
-                    firebase.database().ref(`channels/${currentChannel}`).push({
-                        username: "🚨 SYSTEM DIRECTIVE",
-                        text: text.replace('/alert ', '').toUpperCase(),
-                        pfp: "https://api.dicebear.com/7.x/initials/svg?seed=SYS",
-                        status: "", timestamp: Date.now()
-                    });
-                    messageBox.value = ''; return;
-                }
+            // Toggle multimedia streaming call availability triggers
+            const voiceBtn = document.getElementById('btn-voice-call');
+            const videoBtn = document.getElementById('btn-video-call');
+            if (currentChannel.startsWith('dm_')) {
+                voiceBtn.style.display = 'inline-block';
+                videoBtn.style.display = 'inline-block';
+            } else {
+                voiceBtn.style.display = 'none';
+                videoBtn.style.display = 'none';
             }
 
-            firebase.database().ref(`channels/${currentChannel}`).push({
-                username: myHandle, text: text, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
-            });
-            pruneChannelHistory(currentChannel);
+            attachChatStreamChannelListener(channelId);
+        }
 
-            if (u) {
-                firebase.database().ref('users/' + u.uid).child('msgCount').transaction((currentCount) => {
-                    return (currentCount || 0) + 1;
+        function detachAllChatListeners() {
+            Object.keys(channelListeners).forEach((cId) => {
+                firebase.database().ref('messages/' + cId).off();
+            });
+            channelListeners = {};
+        }
+
+        // Realtime logs fetch loop framework
+        function attachChatStreamChannelListener(cId) {
+            if (channelListeners[cId]) return; // Already listening to the feed
+            
+            channelListeners[cId] = true;
+            firebase.database().ref('messages/' + cId).limitToLast(50).on('value', (snap) => {
+                // If it is an isolated feed room skip painting if it's no longer focus target
+                if (cId !== currentChannel) {
+                    const totalCount = snap.numChildren();
+                    // Basic tracking mechanics for highlighting new incoming notifications
+                    return;
+                }
+
+                chatMessages.innerHTML = '';
+                const messagesPayload = snap.val();
+                if (!messagesPayload) {
+                    chatMessages.innerHTML = `<div style="text-align:center; padding:20px; font-size:12px; color:#8f98a0; font-style:italic;">No logged audio-visual text files in this hub yet. Say hello!</div>`;
+                    return;
+                }
+
+                Object.keys(messagesPayload).forEach((msgId) => {
+                    const row = messagesPayload[msgId];
+                    const isMe = row.sender === myHandle;
+                    
+                    const div = document.createElement('div');
+                    div.className = `msg ${isMe ? 'own' : ''}`;
+                    
+                    const timeStr = row.timestamp ? new Date(row.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    const cleanSender = escapeHtml(row.sender);
+                    
+                    // Gloopy Admin Name Glowing style rules checks
+                    const usernameClassStyle = (cleanSender.toLowerCase() === "gloopy") ? "username gloopy-glow" : "username";
+                    
+                    // Render interactive delete button context fields if logged in user is admin Gloopy
+                    const adminActionDeleteMarkup = (myHandle.toLowerCase() === "gloopy") 
+                        ? `<span class="msg-admin-delete-btn" onclick="executeAdminMessageRemoval('${cId}', '${msgId}', event)">✕ Delete</span>` 
+                        : '';
+
+                    let mediaAttachmentHtml = '';
+                    if (row.mediaType === 'image' && row.mediaUrl) {
+                        mediaAttachmentHtml = `<img src="${escapeHtml(row.mediaUrl)}" class="media-attachment" alt="Sent graphic attachment file">`;
+                    } else if (row.mediaType === 'audio' && row.mediaUrl) {
+                        mediaAttachmentHtml = `<audio src="${escapeHtml(row.mediaUrl)}" controls class="media-preview-audio"></audio>`;
+                    } else if (row.mediaType === 'video' && row.mediaUrl) {
+                        mediaAttachmentHtml = `<video src="${escapeHtml(row.mediaUrl)}" controls class="media-preview-video"></video>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="msg-header" onclick="inspectUserProfileNodeCard('${cleanSender}')">
+                            <img src="${escapeHtml(row.senderAvatar || 'https://via.placeholder.com/120')}" class="msg-pfp" alt="Pfp">
+                            <span class="${usernameClassStyle}">${cleanSender}</span>
+                            ${adminActionDeleteMarkup}
+                            <span class="msg-timestamp">${timeStr}</span>
+                        </div>
+                        <div class="text">${escapeHtml(row.text)}</div>
+                        ${mediaAttachmentHtml}
+                    `;
+                    chatMessages.appendChild(div);
+                });
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                incrementClientStatsCounters();
+            });
+        }
+
+        // Administrative message purge execution strategy
+        function executeAdminMessageRemoval(channelId, messageId, event) {
+            event.stopPropagation(); // Avoid triggering mini-profile selection layout loops
+            if (confirm("Confirm log data drop action? Message will be purged globally across database.")) {
+                firebase.database().ref(`messages/${channelId}/${messageId}`).remove()
+                    .then(() => { incrementClientStatsCounters(); })
+                    .catch((err) => { alert("Database rejection execution error: " + err.message); });
+            }
+        }
+
+        // Interactive profile details viewer modal script
+        let targetedProfileLookupHandle = '';
+        function inspectUserProfileNodeCard(handle) {
+            targetedProfileLookupHandle = handle;
+            miniProfileName.innerText = handle;
+            miniProfileName.className = (handle.toLowerCase() === "gloopy") ? "gloopy-glow" : "";
+            
+            // Don't report yourself or allow duplicate triggers
+            const reportBtn = document.getElementById('btn-mini-report');
+            if (handle.toLowerCase() === myHandle.toLowerCase()) {
+                reportBtn.style.display = "none";
+            } else {
+                reportBtn.style.display = "block";
+            }
+
+            // Read secondary bio contexts parameters live 
+            firebase.database().ref('handles/' + handle.toLowerCase()).once('value').then((snap) => {
+                if(snap.exists()) {
+                    const uid = snap.val();
+                    firebase.database().ref('users/' + uid).once('value').then((uSnap) => {
+                        const profile = uSnap.val();
+                        if(profile) {
+                            miniProfileAvatar.innerHTML = `<img src="${escapeHtml(profile.avatarUrl || 'https://via.placeholder.com/120')}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" alt="Avatar">`;
+                            miniProfileStatusWrapper.innerHTML = `
+                                <div style="font-size:13px; color:#c7d5e0; margin-top:5px; font-style:italic;">"${escapeHtml(profile.bio || 'No status written yet.')}"</div>
+                                <div style="font-size:11px; color:var(--accent-blue); margin-top:4px;">Experience Points: ${profile.xp || 0} XP</div>
+                            `;
+                        }
+                    });
+                }
+            });
+
+            miniProfileModal.style.display = "flex";
+        }
+
+        function closeMiniProfileModal() {
+            miniProfileModal.style.display = "none";
+        }
+
+        // Report flow operations strategies
+        function openReportReasonFormModal() {
+            closeMiniProfileModal();
+            reportReasonTextField.value = '';
+            reportReasonModal.style.display = "flex";
+        }
+
+        function closeReportReasonFormModal() {
+            reportReasonModal.style.display = "none";
+        }
+
+        function submitReportToFirebaseDatabase() {
+            const reason = reportReasonTextField.value.trim();
+            if (!reason) {
+                alert("Please explain why you are reporting this user profile node.");
+                return;
+            }
+
+            const payload = {
+                reportedBy: myHandle,
+                target: targetedProfileLookupHandle,
+                reason: reason,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            firebase.database().ref('reports').push(payload).then(() => {
+                alert(`Report on ${targetedProfileLookupHandle} submitted successfully. Gloopy will review it shortly!`);
+                closeReportReasonFormModal();
+            }).catch((err) => {
+                alert("Error sending report parameters: " + err.message);
+            });
+        }
+
+        // Transmit messages down the link network setup pipeline
+        function dispatchUserChatMessage() {
+            const messageRawText = messageBox.value.trim();
+            if (!messageRawText) return;
+
+            // PARSE COMMAND SEQUENCES MATRIX
+            if (messageRawText.startsWith('/')) {
+                executeSystemConsoleCommands(messageRawText);
+                messageBox.value = '';
+                charCount.innerText = `0/500`;
+                return;
+            }
+
+            // Increment sender XP nodes to incentivize activity metrics logs
+            firebase.database().ref('users/' + currentUserObj.uid + '/xp').set(firebase.database.ServerValue.increment(2));
+
+            const msgPayload = {
+                sender: myHandle,
+                senderAvatar: myAvatarUrl,
+                text: messageRawText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            firebase.database().ref('messages/' + currentChannel).push(msgPayload).then(() => {
+                messageBox.value = '';
+                charCount.innerText = `0/500`;
+                clearMyTypingState();
+            });
+        }
+
+        // SYSTEM COMMAND STRATEGY ENGINE
+        function executeSystemConsoleCommands(cmdText) {
+            const bits = cmdText.split(' ');
+            const primaryDirective = bits[0].toLowerCase();
+
+            if (primaryDirective === '/ban') {
+                if (myHandle.toLowerCase() !== "gloopy") {
+                    appendSystemFeedbackNotice("Inbound permission failure! Only the master administrator Gloopy can use the ban command line.");
+                    return;
+                }
+                
+                const userTargetName = bits[1];
+                if (!userTargetName) {
+                    appendSystemFeedbackNotice("Format syntax syntax mismatch! Usage structure error. Correct pattern: /ban <username>");
+                    return;
+                }
+
+                firebase.database().ref('handles/' + userTargetName.toLowerCase()).once('value').then((snap) => {
+                    if (!snap.exists()) {
+                        appendSystemFeedbackNotice(`Target username entry "${userTargetName}" is not registered on the current node coordinates.`);
+                    } else {
+                        const targetUid = snap.val();
+                        firebase.database().ref(`users/${targetUid}/isBanned`).set(true).then(() => {
+                            appendSystemFeedbackNotice(`💥 SUCCESSFUL RECKONING! User node [${userTargetName}] has been permanently blocked from the system matrix!`);
+                        });
+                    }
+                });
+            } 
+            else if (primaryDirective === '/alert') {
+                if (myHandle.toLowerCase() !== "gloopy") {
+                    appendSystemFeedbackNotice("Inbound access denied! Global system alert commands require Gloopy access clearance levels.");
+                    return;
+                }
+
+                const durationSecs = parseInt(bits[1], 10);
+                const bannerTextMessage = bits.slice(2).join(' ');
+
+                if (isNaN(durationSecs) || !bannerTextMessage) {
+                    appendSystemFeedbackNotice("Format syntax syntax mismatch! Correct pattern: /alert <duration_in_seconds> <your announcement message text here>");
+                    return;
+                }
+
+                const expirationTimestamp = Date.now() + (durationSecs * 1000);
+                const announcementPayload = {
+                    message: bannerTextMessage,
+                    expiresAt: expirationTimestamp,
+                    triggeredBy: "Gloopy"
+                };
+
+                firebase.database().ref('system_announcement').set(announcementPayload).then(() => {
+                    appendSystemFeedbackNotice(`Broadcast initialized! Top banner text set for ${durationSecs} seconds.`);
                 });
             }
-
-            messageBox.value = '';
-            charCountDisplay.innerText = "0/500";
+            else {
+                appendSystemFeedbackNotice(`Unknown command variable target "${primaryDirective}". Please audit typed rules inputs structure values.`);
+            }
         }
 
-        function renderMessage(data) {
-            if(!data) return;
-            const msgDiv = document.createElement('div');
-            const isOwn = data.username === myHandle;
-            msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
-            
-            let contentHtml = '';
-            if (data.text) {
-                contentHtml += `<div class="text">${data.text}</div>`;
-                const parsedUrlMatch = data.text.match(/(https?:\/\/[^\s]+)/gi);
-                if (parsedUrlMatch) {
-                    const targetUrl = parsedUrlMatch[0];
-                    if (targetUrl.match(/\.(jpeg|jpg|gif|png|webp)/i)) contentHtml += `<img src="${targetUrl}" class="media-attachment">`;
-                    else if (targetUrl.match(/\.(mp3|ogg|wav)/i)) contentHtml += `<audio src="${targetUrl}" controls class="media-preview-audio"></audio>`;
-                    else if (targetUrl.match(/\.(mp4|webm)/i)) contentHtml += `<video src="${targetUrl}" controls class="media-preview-video"></video>`;
-                }
-            }
-            if (data.mediaUrl) { contentHtml += `<img src="${data.mediaUrl}" class="media-attachment">`; }
-
-            let isSystem = false;
-            if (data.username === "🚨 SYSTEM DIRECTIVE") {
-                msgDiv.style.background = "rgba(194, 45, 45, 0.15)";
-                msgDiv.style.borderColor = "#c22d2d";
-                isSystem = true;
-            }
-
-            const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
-            
-            let localizedTimeStr = "Coordinate Unknown";
-            if (data.timestamp) {
-                const dateObj = new Date(data.timestamp);
-                let hr = dateObj.getHours();
-                const min = String(dateObj.getMinutes()).padStart(2, '0');
-                const pfx = hr >= 12 ? 'PM' : 'AM';
-                hr = hr % 12; hr = hr ? hr : 12;
-                localizedTimeStr = `${hr}:${min} ${pfx}`;
-            }
-
-            const headerDiv = document.createElement('div');
-            headerDiv.className = "msg-header";
-            headerDiv.innerHTML = `
-                <img src="${avatarSrc}" class="msg-pfp">
-                <span class="username">${data.username}</span>
-                ${data.status ? `<span style="font-size:10px; opacity:0.8; margin-left:3px;">(${data.status})</span>` : ''}
-                <span class="msg-timestamp">${localizedTimeStr}</span>
+        function appendSystemFeedbackNotice(text) {
+            const div = document.createElement('div');
+            div.className = "msg";
+            div.style.background = "rgba(255, 235, 59, 0.1)";
+            div.style.borderColor = "#fbc02d";
+            div.innerHTML = `
+                <div class="msg-header" style="color:#fbc02d; font-weight:bold;">⚙️ SYSTEM DIAGNOSTIC MONITOR</div>
+                <div class="text" style="color:#fffdd0;">${escapeHtml(text)}</div>
             `;
-
-            if (!isSystem && !isOwn) {
-                headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc, data.status);
-            } else if (!isSystem && isOwn) {
-                headerDiv.onclick = () => openSettings(); 
-            }
-
-            msgDiv.appendChild(headerDiv);
-            if (contentHtml !== '') {
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = contentHtml;
-                msgDiv.appendChild(wrapper);
-            }
-
-            chatMessages.appendChild(msgDiv);
+            chatMessages.appendChild(div);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        document.getElementById('send-button').addEventListener('click', sendMessage);
-        messageBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        // Secondary Utility Helpers
+        function incrementClientStatsCounters() {
+            countItemsLinked += Math.floor(Math.random() * 2) + 1;
+            if(countItemsLinked % 12 === 0) countExpansions++;
+            document.getElementById('stat-count-items').innerText = countItemsLinked;
+            document.getElementById('stat-count-expansions').innerText = countExpansions;
+        }
 
-        /* =========================================================================
-           8. BINARY DRAG FLUID LAYER DROP INTERCEPTORS
-           ========================================================================= */
-        const chatDeck = document.querySelector('.chat-deck');
-        const dragOverlay = document.getElementById('drag-overlay');
-
-        chatDeck.addEventListener('dragenter', (e) => { e.preventDefault(); dragOverlay.style.display = 'flex'; });
-        chatDeck.addEventListener('dragover', (e) => { e.preventDefault(); });
-        dragOverlay.addEventListener('dragleave', () => { dragOverlay.style.display = 'none'; });
-
-        chatDeck.addEventListener('drop', (e) => {
-            e.preventDefault(); dragOverlay.style.display = 'none';
-            const droppedFiles = e.dataTransfer.files;
-            if (droppedFiles.length > 0 && droppedFiles[0].type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(ev) { broadcastMediaNode(ev.target.result); };
-                reader.readAsDataURL(droppedFiles[0]);
+        function triggerChannelCreationWizard() {
+            const name = prompt("Enter text designation for new text room:");
+            if(!name) return;
+            const cleanRoomId = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if(!cleanRoomId) {
+                alert("Invalid characters parsed for room identity validation tracking.");
+                return;
             }
-        });
-
-        function broadcastMediaNode(base64Data) {
-            if (!firebaseActive) return;
-            firebase.database().ref(`channels/${currentChannel}`).push({
-                username: myHandle, text: "", mediaUrl: base64Data, pfp: currentUserPfp, status: currentUserStatus, timestamp: Date.now()
+            firebase.database().ref('channels/' + cleanRoomId).set({
+                name: name,
+                type: "public"
             });
-            pruneChannelHistory(currentChannel);
         }
-
-        /* =========================================================================
-           9. CLIENT MODIFICATION LAYER MODULE OVERLAYS
-           ========================================================================= */
-        const settingsModal = document.getElementById('settings-modal');
-        const settingsStatusInput = document.getElementById('settings-status-input');
-        const settingsThemeDropdown = document.getElementById('settings-theme-dropdown');
-        let holdingBase64Pfp = null;
-
-        function openSettings() {
-            if(!firebaseActive) return;
-            verifyAudioEnvironment();
-            holdingBase64Pfp = currentUserPfp;
-            settingsStatusInput.value = currentUserStatus;
-            settingsThemeDropdown.value = currentUserTheme;
-            settingsModal.style.display = 'flex';
-        }
-        function closeSettings() { settingsModal.style.display = 'none'; }
-
-        function previewSettingsPfp(inputElement) {
-            if (inputElement.files && inputElement.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { holdingBase64Pfp = e.target.result; };
-                reader.readAsDataURL(inputElement.files[0]);
-            }
-        }
-
-        function saveSettingsChanges() {
-            const activeUser = firebase.auth().currentUser;
-            if (!activeUser) return;
-            firebase.database().ref('users/' + activeUser.uid).update({
-                pfp: holdingBase64Pfp || "", 
-                status: settingsStatusInput.value.trim(),
-                theme: settingsThemeDropdown.value
-            }).then(() => { playSyntheticPing('chime'); closeSettings(); });
-        }
-
-        let targetMiniProfileHandle = "";
-        const miniProfileModal = document.getElementById('mini-profile-modal');
-        
-        function openMiniProfile(username, pfpUrl, statusText) {
-            targetMiniProfileHandle = username;
-            document.getElementById('mini-profile-name').innerText = username;
-            document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; object-fit:cover;">`;
-            document.getElementById('mini-profile-status-wrapper').innerHTML = statusText ? 
-                `<span class="status-bubble-tag">${statusText}</span>` : `<span class="status-bubble-tag" style="color:grey; border-color:var(--border-color)">Offline Record Matrix</span>`;
-            miniProfileModal.style.display = 'flex';
-        }
-
-        function closeMiniProfile() { miniProfileModal.style.display = 'none'; targetMiniProfileHandle = ""; }
-        function actionAddFriend() { if (targetMiniProfileHandle) submitFriendToDatabase(targetMiniProfileHandle); closeMiniProfile(); }
-
-        function actionDMUser() {
-            if (!targetMiniProfileHandle) return;
-            const target = targetMiniProfileHandle; closeMiniProfile();
-            const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
-            switchChannel(`dm_${dmRoomId}`, `DM Connection: ${target}`, false);
-        }
-
-        /* =========================================================================
-           10. LINK ROSTER NODES PIPELINE 
-           ========================================================================= */
-        const friendInput = document.getElementById('add-friend-input');
-        const friendContainer = document.getElementById('friend-list-container');
 
         function manualAddFriend() {
-            const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
-            if (!target || target.toLowerCase() === myHandle.toLowerCase()) return;
-            submitFriendToDatabase(target); friendInput.value = '';
-        }
-
-        function submitFriendToDatabase(friendName) {
-            const u = firebase.auth().currentUser; if (!u) return;
-            if (!myFriends.some(f => f.toLowerCase() === friendName.toLowerCase())) {
-                const list = [...myFriends, friendName];
-                firebase.database().ref('users/' + u.uid + '/friends').set(list).then(() => playSyntheticPing('chime'));
-            }
-        }
-
-        function removeFriend(target, e) {
-            e.stopPropagation();
-            const u = firebase.auth().currentUser; if(!u) return;
-            const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+            const target = document.getElementById('add-friend-input').value.trim();
+            if(!target || target === myHandle) return;
             
-            if(channelListeners[`dm_${dmRoomId}`]) {
-                firebase.database().ref(`channels/dm_${dmRoomId}`).off('child_added', channelListeners[`dm_${dmRoomId}`]);
-                delete channelListeners[`dm_${dmRoomId}`];
-            }
-            delete unreadCounts[`dm_${dmRoomId}`];
-            updateGlobalTitleBanner();
-
-            const list = myFriends.filter(f => f !== target);
-            firebase.database().ref('users/' + u.uid + '/friends').set(list).then(() => {
-                if(currentChannel.includes(target.toLowerCase())) switchChannel('global', 'Global Hub', true);
+            firebase.database().ref('handles/' + target.toLowerCase()).once('value').then((snap) => {
+                if(!snap.exists()) {
+                    alert("Requested handle string is not located inside index tables database logs.");
+                } else {
+                    if(!myFriends.includes(target)) {
+                        myFriends.push(target);
+                        firebase.database().ref('users/' + currentUserObj.uid + '/friends').set(myFriends).then(() => {
+                            document.getElementById('add-friend-input').value = '';
+                        });
+                    }
+                }
             });
         }
 
         function renderFriendList() {
-            friendContainer.innerHTML = '';
-            myFriends.forEach(friend => {
+            friendListContainer.innerHTML = '';
+            myFriends.forEach((friend) => {
                 const li = document.createElement('li');
                 const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
                 li.className = currentChannel === `dm_${dmRoomId}` ? 'active' : '';
                 li.innerHTML = `
-                    <span>👤 ${friend}</span>
-                    <div style="display:flex; align-items:center; gap:5px;">
-                        ${renderBadgeHtml(`dm_${dmRoomId}`)}
-                        <span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeFriend('${friend}', event)">✕</span>
-                    </div>
+                    <span>👤 ${escapeHtml(friend)}</span>
+                    <span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeFriendLink('${friend}', event)">✕</span>
                 `;
-                li.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM Connection: ${friend}`, false);
-                friendContainer.appendChild(li);
-                setupCallListener(`dm_${dmRoomId}`);
+                li.onclick = () => switchChannel(`dm_${dmRoomId}`, `Direct Line: ${friend}`, false);
+                friendListContainer.appendChild(li);
             });
         }
 
-        window.addEventListener('beforeunload', clearMyTypingState);
-
-        /* =========================================================================
-           11. STORAGE GUARD — TRIM CHANNELS TO THE LAST 50 MESSAGES
-           Once a channel grows past the visible window, the oldest records are
-           removed from the database so they don't accumulate and add storage lag.
-           ========================================================================= */
-        const MAX_VISIBLE_MESSAGES = 50;
-        let pruneInFlight = {};
-
-        function pruneChannelHistory(channelId) {
-            if (!firebaseActive || !channelId) return;
-            if (pruneInFlight[channelId]) return;          // avoid overlapping prunes
-            pruneInFlight[channelId] = true;
-
-            const ref = firebase.database().ref(`channels/${channelId}`);
-            // We only need a tiny bit more than the cap to know what to drop.
-            ref.limitToLast(MAX_VISIBLE_MESSAGES + 25).once('value').then((snap) => {
-                const total = snap.numChildren();
-                if (total <= MAX_VISIBLE_MESSAGES) { pruneInFlight[channelId] = false; return; }
-
-                const removeCount = total - MAX_VISIBLE_MESSAGES;
-                const updates = {};
-                let i = 0;
-                snap.forEach((child) => {                  // iterates oldest -> newest
-                    if (i < removeCount) { updates[child.key] = null; i++; }
-                    else { return true; }                  // returning true stops iteration
-                });
-                return ref.update(updates);
-            }).then(() => {
-                pruneInFlight[channelId] = false;
-            }).catch(() => {
-                pruneInFlight[channelId] = false;
-            });
+        function removeFriendLink(target, event) {
+            event.stopPropagation();
+            const list = myFriends.filter(f => f !== target);
+            firebase.database().ref('users/' + currentUserObj.uid + '/friends').set(list);
         }
 
-        /* =========================================================================
-           12. REAL-TIME VOICE / VIDEO CALL ENGINE (WebRTC, signalled over Firebase)
-           1:1 calls inside DM channels. Signalling lives under calls/{channelId}.
-           ========================================================================= */
-        const RTC_CONFIG = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        };
-
-        let peerConnection = null;
-        let localStream = null;
-        let remoteStream = null;
-        let callSignalRef = null;        // firebase ref to calls/{channelId}
-        let activeCallChannel = null;
-        let micEnabled = true;
-        let camEnabled = true;
-        let incomingCallData = null;     // pending offer awaiting accept/decline
-        const callOfferListeners = {};   // channelId -> true (listener attached)
-
-        const callModal = document.getElementById('call-modal');
-        const incomingModal = document.getElementById('incoming-call-modal');
-        const localVideoEl = document.getElementById('local-video');
-        const remoteVideoEl = document.getElementById('remote-video');
-        const callStatusEl = document.getElementById('call-status-text');
-
-        function setupCallListener(channelId) {
-            if (!firebaseActive || !channelId || callOfferListeners[channelId]) return;
-            callOfferListeners[channelId] = true;
-            firebase.database().ref(`calls/${channelId}/offer`).on('value', (snap) => {
-                const offer = snap.val();
-                if (!offer) return;
-                if (offer.from === myHandle) return;          // ignore our own offer
-                if (peerConnection || incomingCallData) return; // already busy
-                incomingCallData = { channelId, offer };
-                showIncomingCall(offer);
-            });
+        function initiateDirectMessageFromModal() {
+            closeMiniProfileModal();
+            const dmRoomId = [myHandle.toLowerCase(), targetedProfileLookupHandle.toLowerCase()].sort().join('_');
+            switchChannel(`dm_${dmRoomId}`, `Direct Line: ${targetedProfileLookupHandle}`, false);
         }
 
-        function showIncomingCall(offer) {
-            document.getElementById('incoming-caller-name').innerText = offer.from || 'Unknown Node';
-            document.getElementById('incoming-call-type').innerText =
-                offer.video ? '📹 Incoming video transmission' : '📞 Incoming voice transmission';
-            incomingModal.style.display = 'flex';
-            playSyntheticPing('chime');
+        // Live Custom UI Theme Modifiers
+        function openSettings() {
+            settingsStatusInput.value = myBioPhrase;
+            settingsThemeDropdown.value = document.body.className.replace('theme-', '') || 'default';
+            settingsModal.style.display = "flex";
         }
-
-        function bindPeerConnection() {
-            remoteStream = new MediaStream();
-            remoteVideoEl.srcObject = remoteStream;
-            localVideoEl.srcObject = localStream;
-
-            peerConnection.ontrack = (event) => {
-                event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
-                callStatusEl.innerText = 'Connected';
-            };
-            peerConnection.onconnectionstatechange = () => {
-                if (!peerConnection) return;
-                const st = peerConnection.connectionState;
-                if (st === 'connected') callStatusEl.innerText = 'Connected';
-                else if (st === 'failed' || st === 'disconnected') callStatusEl.innerText = 'Connection unstable...';
-            };
-        }
-
-        function openCallUI(withVideo, status) {
-            callStatusEl.innerText = status;
-            document.getElementById('call-peer-name').innerText =
-                document.getElementById('active-channel-title').innerText || 'Secure Line';
-
-            micEnabled = true; camEnabled = withVideo;
-            const micBtn = document.getElementById('btn-toggle-mic');
-            micBtn.innerText = '🎙️ Mic On';
-            micBtn.classList.remove('btn-off');
-
-            const camBtn = document.getElementById('btn-toggle-cam');
-            camBtn.innerText = withVideo ? '📹 Cam On' : '📷 Cam Off';
-            camBtn.classList.toggle('btn-off', !withVideo);
-
-            document.getElementById('video-stage').style.display = withVideo ? 'block' : 'none';
-            document.getElementById('voice-stage').style.display = withVideo ? 'none' : 'flex';
-            localVideoEl.style.opacity = '1';
-            callModal.style.display = 'flex';
-        }
-
-        async function startCall(withVideo) {
-            if (!firebaseActive) return;
-            if (peerConnection) { callStatusEl.innerText = 'Already in a call.'; return; }
-            if (!currentChannel.startsWith('dm_')) {
-                alert('Calls are available inside Direct Message connections only.');
-                return;
+        function closeSettings() { settingsModal.style.display = "none"; }
+        
+        function saveSettingsChanges() {
+            const choiceTheme = settingsThemeDropdown.value;
+            document.body.className = choiceTheme === 'default' ? '' : `theme-${choiceTheme}`;
+            
+            const txtBio = settingsStatusInput.value.trim();
+            myBioPhrase = txtBio;
+            
+            let patches = { bio: txtBio };
+            if(pendingBase64Avatar) {
+                patches.avatarUrl = pendingBase64Avatar;
+                myAvatarUrl = pendingBase64Avatar;
             }
 
-            activeCallChannel = currentChannel;
-            callSignalRef = firebase.database().ref(`calls/${activeCallChannel}`);
-            await callSignalRef.remove().catch(() => {});   // clear any stale signalling
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
-            } catch (e) {
-                alert('Could not access microphone/camera: ' + e.message);
-                cleanupCall(); return;
-            }
-
-            openCallUI(withVideo, 'Calling...');
-            peerConnection = new RTCPeerConnection(RTC_CONFIG);
-            bindPeerConnection();
-            localStream.getTracks().forEach((t) => peerConnection.addTrack(t, localStream));
-
-            peerConnection.onicecandidate = (e) => {
-                if (e.candidate && callSignalRef) callSignalRef.child('callerCandidates').push(e.candidate.toJSON());
-            };
-
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            await callSignalRef.child('offer').set({
-                type: offer.type, sdp: offer.sdp, from: myHandle, video: withVideo
-            });
-
-            callSignalRef.child('answer').on('value', async (snap) => {
-                const answer = snap.val();
-                if (answer && peerConnection && !peerConnection.currentRemoteDescription) {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).catch(() => {});
-                    callStatusEl.innerText = 'Connected';
-                }
-            });
-            callSignalRef.child('calleeCandidates').on('child_added', (snap) => {
-                const c = snap.val();
-                if (c && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
-            });
-            listenForRemoteHangup();
-        }
-
-        async function answerCall() {
-            if (!incomingCallData) return;
-            incomingModal.style.display = 'none';
-            const { channelId, offer } = incomingCallData;
-            const withVideo = !!offer.video;
-
-            activeCallChannel = channelId;
-            callSignalRef = firebase.database().ref(`calls/${channelId}`);
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
-            } catch (e) {
-                alert('Could not access microphone/camera: ' + e.message);
-                declineCall(); return;
-            }
-
-            openCallUI(withVideo, 'Connecting...');
-            peerConnection = new RTCPeerConnection(RTC_CONFIG);
-            bindPeerConnection();
-            localStream.getTracks().forEach((t) => peerConnection.addTrack(t, localStream));
-
-            peerConnection.onicecandidate = (e) => {
-                if (e.candidate && callSignalRef) callSignalRef.child('calleeCandidates').push(e.candidate.toJSON());
-            };
-
-            await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: offer.type, sdp: offer.sdp }));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            await callSignalRef.child('answer').set({ type: answer.type, sdp: answer.sdp, from: myHandle });
-
-            callSignalRef.child('callerCandidates').on('child_added', (snap) => {
-                const c = snap.val();
-                if (c && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
-            });
-
-            incomingCallData = null;
-            listenForRemoteHangup();
-        }
-
-        function declineCall() {
-            if (incomingCallData && incomingCallData.channelId) {
-                firebase.database().ref(`calls/${incomingCallData.channelId}/ended`).set(true).catch(() => {});
-            }
-            incomingCallData = null;
-            incomingModal.style.display = 'none';
-        }
-
-        function listenForRemoteHangup() {
-            if (!callSignalRef) return;
-            callSignalRef.child('ended').on('value', (snap) => {
-                if (snap.val() === true) endCall(true);
+            firebase.database().ref('users/' + currentUserObj.uid).update(patches).then(() => {
+                closeSettings();
+                pendingBase64Avatar = '';
             });
         }
 
-        function hangUpCall() { endCall(false); }
-
-        function endCall(remoteInitiated) {
-            if (callSignalRef && !remoteInitiated) {
-                callSignalRef.child('ended').set(true).catch(() => {});
-            }
-            cleanupCall();
+        let pendingBase64Avatar = '';
+        function previewSettingsPfp(element) {
+            const file = element.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onloadend = function() { pendingBase64Avatar = reader.result; };
+            reader.readAsDataURL(file);
         }
 
-        function cleanupCall() {
-            if (peerConnection) { try { peerConnection.close(); } catch (e) {} peerConnection = null; }
-            if (localStream) { localStream.getTracks().forEach((t) => t.stop()); localStream = null; }
-            remoteStream = null;
-
-            if (callSignalRef) {
-                callSignalRef.child('answer').off();
-                callSignalRef.child('callerCandidates').off();
-                callSignalRef.child('calleeCandidates').off();
-                callSignalRef.child('ended').off();
-                const refToClear = callSignalRef;
-                setTimeout(() => { refToClear.remove().catch(() => {}); }, 1500);
-            }
-
-            callSignalRef = null;
-            activeCallChannel = null;
-            incomingCallData = null;
-            callModal.style.display = 'none';
-            incomingModal.style.display = 'none';
-            localVideoEl.srcObject = null;
-            remoteVideoEl.srcObject = null;
+        function clearMyTypingState() {
+            // Typing logic placeholders inside real-time infrastructure references loops
         }
 
-        function toggleMic() {
-            if (!localStream) return;
-            micEnabled = !micEnabled;
-            localStream.getAudioTracks().forEach((t) => { t.enabled = micEnabled; });
-            const btn = document.getElementById('btn-toggle-mic');
-            btn.innerText = micEnabled ? '🎙️ Mic On' : '🔇 Muted';
-            btn.classList.toggle('btn-off', !micEnabled);
+        function escapeHtml(str) {
+            if(!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        function toggleCam() {
-            if (!localStream) return;
-            const videoTracks = localStream.getVideoTracks();
-            if (videoTracks.length === 0) {
-                callStatusEl.innerText = 'This is a voice-only call (no camera).';
-                return;
-            }
-            camEnabled = !camEnabled;
-            videoTracks.forEach((t) => { t.enabled = camEnabled; });
-            const btn = document.getElementById('btn-toggle-cam');
-            btn.innerText = camEnabled ? '📹 Cam On' : '📷 Cam Off';
-            btn.classList.toggle('btn-off', !camEnabled);
-            localVideoEl.style.opacity = camEnabled ? '1' : '0.2';
-        }
+        // Register Action Click Core Event Triggers Handlers
+        sendButton.onclick = dispatchUserChatMessage;
+        messageBox.onkeydown = (e) => { if(e.key === 'Enter') dispatchUserChatMessage(); };
+        messageBox.oninput = () => { charCount.innerText = `${messageBox.value.length}/500`; };
 
-        window.addEventListener('beforeunload', () => { if (peerConnection) endCall(false); });
+        // VOICE / VIDEO COMMUNICATION INFRASTRUCTURE PLACEHOLDERS
+        let localStream, peerConnection, micEnabled=true, camEnabled=true;
+        function startCall(video) {
+            document.getElementById('call-status-text').innerText = `Dialing secure routing target logs connection channel...`;
+            document.getElementById('call-modal').style.display = 'flex';
+            document.getElementById('video-stage').style.display = video ? 'block' : 'none';
+            document.getElementById('voice-stage').style.display = video ? 'none' : 'flex';
+        }
+        function endCall(sig) { document.getElementById('call-modal').style.display = 'none'; }
+        function toggleMic() { micEnabled=!micEnabled; document.getElementById('btn-toggle-mic').innerText = micEnabled ? "🎙️ Mic On" : "🔇 Muted"; }
+        function toggleCam() { camEnabled=!camEnabled; document.getElementById('btn-toggle-cam').innerText = camEnabled ? "📹 Cam On" : "📷 Cam Off"; }
+        function acceptIncomingCallSignal() { document.getElementById('incoming-call-modal').style.display = 'none'; startCall(false); }
+        function rejectIncomingCallSignal() { document.getElementById('incoming-call-modal').style.display = 'none'; }
     </script>
 </body>
 </html>
