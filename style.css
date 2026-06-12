@@ -832,5 +832,161 @@
         }
         .stat-box .count { font-size: 22px; color: var(--text-main); font-family: var(--font-family); }
         .stat-box .label { font-size: 11px; color: var(--text-main); filter: brightness(0.7); }
+
+/* ==========================================
+           --- ADDITIONAL THEME CONFIGURATION MATRIX ---
+           ========================================== */
+
+        /* 4. Synthwave / Outrun Theme */
+        body.theme-synthwave {
+            --bg-gradient: linear-gradient(180deg, #200b3b 0%, #07020d 100%);
+            background-image: radial-gradient(circle at center, rgba(255, 0, 128, 0.1) 0%, transparent 80%);
+            --text-main: #00f0ff;
+            --panel-bg: rgba(22, 10, 45, 0.85);
+            --inner-panel-bg: rgba(10, 3, 24, 0.6);
+            --accent-blue: #ff007f;
+            --border-color: #ff007f;
+            --chat-bg: #090214;
+            --chat-border: #00f0ff;
+            --level-color: #ffff00;
+            --nav-bg: #11052c;
+            --font-family: 'Segoe UI', -apple-system, sans-serif;
+        }
+        body.theme-synthwave .showcase-panel,
+        body.theme-synthwave nav,
+        body.theme-synthwave .avatar-container {
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4), inset 0 0 10px rgba(0, 240, 255, 0.2) !important;
+            border: 1px solid #ff007f !important;
+        }
+        body.theme-synthwave .msg.own {
+            background: rgba(255, 0, 127, 0.15);
+            border-color: #ff007f;
+            box-shadow: 0 0 8px rgba(255, 0, 127, 0.3);
+        }
+        body.theme-synthwave .btn-edit, 
+        body.theme-synthwave .btn-action {
+            background: linear-gradient(90deg, #ff007f 0%, #bf00ff 100%) !important;
+            text-shadow: 0 0 5px #fff;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        /* 5. Matrix / Terminal Hack Theme */
+        body.theme-matrix {
+            --bg-gradient: #000000;
+            --text-main: #00ff00;
+            --panel-bg: rgba(0, 5, 0, 0.95);
+            --inner-panel-bg: rgba(0, 15, 0, 0.4);
+            --accent-blue: #33ff33;
+            --border-color: #006600;
+            --chat-bg: #000000;
+            --chat-border: #00ff00;
+            --level-color: #00ff00;
+            --nav-bg: #000a00;
+            --font-family: 'Courier New', Courier, monospace;
+            --text-transform: uppercase;
+        }
+        body.theme-matrix * {
+            text-shadow: 0 0 4px rgba(0, 255, 0, 0.6);
+        }
+        body.theme-matrix .aero-input {
+            background: #000000 !important;
+            border: 1px solid #00ff00 !important;
+            color: #00ff00 !important;
+        }
+        body.theme-matrix .msg {
+            border: 1px dashed #00ff00;
+            background: rgba(0, 20, 0, 0.3);
+        }
+        body.theme-matrix .avatar-container {
+            background: #00ff00 !important;
+            box-shadow: 0 0 12px #00ff00 !important;
+        }
+        body.theme-matrix .btn-edit, 
+        body.theme-matrix .btn-action {
+            background: #000000 !important;
+            color: #00ff00 !important;
+            border: 1px solid #00ff00 !important;
+            border-radius: 0px !important;
+        }
+        body.theme-matrix .btn-edit:hover, 
+        body.theme-matrix .btn-action:hover {
+            background: #00ff00 !important;
+            color: #000000 !important;
+        }
+
+        /* 6. Vaporwave Desktop Theme */
+        body.theme-vaporwave {
+            --bg-gradient: linear-gradient(135deg, #ffb7b2 0%, #b5e2fa 100%);
+            --text-main: #4a0e4e;
+            --panel-bg: rgba(255, 255, 255, 0.75);
+            --inner-panel-bg: rgba(240, 230, 245, 0.6);
+            --accent-blue: #00f5d4;
+            --border-color: #ff70a6;
+            --chat-bg: #ffffff;
+            --chat-border: #ff70a6;
+            --level-color: #70d6ff;
+            --nav-bg: #ff70a6;
+            --font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+        }
+        body.theme-vaporwave nav .brand, 
+        body.theme-vaporwave nav a, 
+        body.theme-vaporwave nav span.nav-btn {
+            color: #ffffff !important;
+        }
+        body.theme-vaporwave .showcase-panel {
+            border-radius: 12px !important;
+            border: 2px solid #ff70a6 !important;
+            box-shadow: 5px 5px 0px #70d6ff;
+        }
+        body.theme-vaporwave .aero-input {
+            background: #fff;
+            color: #4a0e4e;
+            border: 2px solid #ff70a6;
+        }
+        body.theme-vaporwave .btn-edit, 
+        body.theme-vaporwave .btn-action {
+            background: linear-gradient(45deg, #ff70a6 0%, #fee440 100%) !important;
+            color: #4a0e4e !important;
+            border-radius: 20px !important;
+            box-shadow: 2px 2px 0px #70d6ff;
+        }
+
+        /* 7. Cyberpunk Neon Theme */
+        body.theme-cyberpunk {
+            --bg-gradient: linear-gradient(45deg, #f72585 0%, #7209b7 50%, #3a0ca3 100%);
+            --text-main: #f72585;
+            --panel-bg: rgba(11, 9, 20, 0.95);
+            --inner-panel-bg: rgba(26, 20, 46, 0.6);
+            --accent-blue: #4cc9f0;
+            --border-color: #4cc9f0;
+            --chat-bg: #0b0914;
+            --chat-border: #f72585;
+            --level-color: #4cc9f0;
+            --nav-bg: #000000;
+            --font-family: 'Impact', 'Arial Black', sans-serif;
+            --text-transform: uppercase;
+        }
+        body.theme-cyberpunk .showcase-panel {
+            border-left: 5px solid #f72585 !important;
+            border-right: 2px solid #4cc9f0 !important;
+            clip-path: polygon(0 0, 95% 0, 100% 20px, 100% 100%, 5% 100%, 0 calc(100% - 20px));
+        }
+        body.theme-cyberpunk .msg {
+            background: rgba(76, 201, 240, 0.1);
+            border: 1px solid #4cc9f0;
+        }
+        body.theme-cyberpunk .msg.own {
+            background: rgba(247, 37, 133, 0.15);
+            border-color: #f72585;
+        }
+        body.theme-cyberpunk .btn-edit, 
+        body.theme-cyberpunk .btn-action {
+            background: #f72585 !important;
+            color: #fff !important;
+            border: 1px solid #4cc9f0 !important;
+            box-shadow: -3px 3px 0px #4cc9f0;
+        }
     </style>
 </head>
+
+
