@@ -1111,7 +1111,14 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
-        // Insert Firebase Configurations Configured by User
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        /* =========================================================================
+           1. FIREBASE CONFIGURATION RECONFIGURED MATRICES
+           ========================================================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
             authDomain: "aero-419e0.firebaseapp.com",
@@ -1123,13 +1130,22 @@
             measurementId: "G-L0FH99LT4L"
         };
 
-        let firebaseActive = false;
+        // The pre-existing tracking flags in your application code
+        let firebaseActive = false; 
+        let isCurrentlyTypingInFirebase = false;
+
         try {
-            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE")) {
+            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU")) {
                 firebase.initializeApp(firebaseConfig);
                 firebaseActive = true;
             }
         } catch(e) { console.error("Firebase initializing anomaly:", e); }
+
+        /* =========================================================================
+           3. SCREEN STATE INITIALIZATION CONTROL LAYERS (Where terminateBootOverlay lives)
+           ========================================================================= */
+        const bootScreen = document.getElementById('boot-screen');
+        // ... rest of your original code continues perfectly from here
 
         let firebaseActive = false;
         try {
