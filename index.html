@@ -1144,9 +1144,17 @@
         function processAuthSubmission() {
             authErrorDisplay.style.display = 'none';
             
-            // Isolate references immediately to protect against thread bleeding
-            const cleanHandle = authUsernameInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
-            const cleanPass = authPasswordInput.value;
+            // Safe manual fallback extraction directly from the DOM nodes
+            const rawFieldUser = document.getElementById('auth-username');
+            const rawFieldPass = document.getElementById('auth-password');
+            
+            if (!rawFieldUser || !rawFieldPass) {
+                displayAuthAnomaly("DOM interface parsing fault. Nodes altered.");
+                return;
+            }
+
+            const cleanHandle = rawFieldUser.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+            const cleanPass = rawFieldPass.value;
             
             if (cleanHandle.length < 3) {
                 displayAuthAnomaly("Handle criteria mismatch. Minimum 3 characters structural format.");
