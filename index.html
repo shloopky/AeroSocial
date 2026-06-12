@@ -719,9 +719,6 @@
             border-bottom: 4px solid #000000;
         }
 
-        /* ==========================================
-           --- UPGRADED DYNAMIC GRID ENGINE STYLES ---
-           ========================================== */
         .btn-call {
             background: #1f7a3f;
             color: #fff;
@@ -748,7 +745,7 @@
         }
         #call-status-text { color: #8f98a0; font-size: 12px; }
 
-        /* Dynamic Grid Structure accommodating multi-peer boxes */
+        /* Dynamic Grid Stage Layout */
         #video-stage {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1044,7 +1041,7 @@
 
     <script>
         /* =========================================================================
-           1. FIREBASE CONFIGURATION RECONFIGURED MATRICES
+           1. FIREBASE INITIALIZATION CORE
            ========================================================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
@@ -1074,7 +1071,7 @@
         }
 
         /* =========================================================================
-           3. SCREEN STATE INITIALIZATION CONTROL LAYERS
+           2. VIEW ROUTER MANAGEMENT
            ========================================================================= */
         const bootScreen = document.getElementById('boot-screen');
         const authScreen = document.getElementById('auth-screen');
@@ -1115,7 +1112,7 @@
         }
 
         /* =========================================================================
-           4. AUTHENTICATION TRANSACTION INTERFACE INTERPRETATION METADATA
+           3. ISOLATED LOGIC TRANSACTION AUTHENTICATION
            ========================================================================= */
         let isSignUpModeActive = false;
         const authBoxTitle = document.getElementById('auth-box-title');
@@ -1146,32 +1143,35 @@
 
         function processAuthSubmission() {
             authErrorDisplay.style.display = 'none';
-            const handleText = authUsernameInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
-            const passText = authPasswordInput.value;
-            if (handleText.length < 3) {
+            
+            // Isolate references immediately to protect against thread bleeding
+            const cleanHandle = authUsernameInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+            const cleanPass = authPasswordInput.value;
+            
+            if (cleanHandle.length < 3) {
                 displayAuthAnomaly("Handle criteria mismatch. Minimum 3 characters structural format.");
                 return;
             }
-            if (passText.length < 6) {
+            if (cleanPass.length < 6) {
                 displayAuthAnomaly("Security context payload density flaw. Core parameters mandate 6 characters minimum threshold.");
                 return;
             }
 
-            const virtualEmail = `${handleText.toLowerCase()}@aero.mesh.network`;
+            const virtualEmail = `${cleanHandle.toLowerCase()}@aero.mesh.network`;
 
             if (isSignUpModeActive) {
-                const usernameRef = firebase.database().ref('usernames/' + handleText.toLowerCase());
+                const usernameRef = firebase.database().ref('usernames/' + cleanHandle.toLowerCase());
                 usernameRef.once('value').then((snap) => {
                     if (snap.exists()) {
                         displayAuthAnomaly("Coordinate alias vector collision. Requested path handles locked by operational system node.");
                     } else {
-                        firebase.auth().createUserWithEmailAndPassword(virtualEmail, passText)
+                        firebase.auth().createUserWithEmailAndPassword(virtualEmail, cleanPass)
                             .then((credential) => {
                                 const uid = credential.user.uid;
                                 const updates = {};
-                                updates['usernames/' + handleText.toLowerCase()] = uid;
+                                updates['usernames/' + cleanHandle.toLowerCase()] = uid;
                                 updates['users/' + uid] = {
-                                    handle: handleText,
+                                    handle: cleanHandle,
                                     status: "",
                                     theme: "default",
                                     pfp: "",
@@ -1180,12 +1180,15 @@
                                 };
                                 return firebase.database().ref().update(updates);
                             })
-                            .catch((err) => { displayAuthAnomaly(err.message); });
+                            .catch((err) => { displayAuthAnomaly(err ? err.message : "Registration Fault."); });
                     }
-                }).catch((err) => { displayAuthAnomaly(err.message); });
+                }).catch((err) => { displayAuthAnomaly(err ? err.message : "Data link exception"); });
             } else {
-                firebase.auth().signInWithEmailAndPassword(virtualEmail, passText)
-                    .catch((err) => { displayAuthAnomaly(err.message); });
+                firebase.auth().signInWithEmailAndPassword(virtualEmail, cleanPass)
+                    .catch((err) => { 
+                        console.error("Firebase Internal Identity Trap:", err);
+                        displayAuthAnomaly(err ? err.message : "Parameters rejected by configuration layout."); 
+                    });
             }
         }
 
@@ -1199,7 +1202,7 @@
         }
 
         /* =========================================================================
-           5. ACTIVE CONTEXT RUNTIME USER STATES DATA PROFILE SYNCHRONIZATION
+           4. DATA SYNCHRONIZATION RUNTIME HOOKS
            ========================================================================= */
         let myHandle = "Profile_Node";
         let currentUserPfp = null;
@@ -1272,7 +1275,6 @@
             });
         }
 
-        /* SIDEBAR PIPELINE MANAGEMENT ROUTINES */
         function syncChannelsListListener() {
             if (!firebaseActive) return;
             firebase.database().ref('channels_list').on('value', (snap) => {
@@ -1308,7 +1310,7 @@
         }
 
         /* =========================================================================
-           6. LIVE MESSAGING CORE ENGINE & LOCALIZED TIMESTAMP INTEGRATION
+           5. STREAMING CONTEXT METRICS AND CORE TEXT TRANSLATION
            ========================================================================= */
         const chatMessages = document.getElementById('chat-messages');
         const messageBox = document.getElementById('message-box');
@@ -1317,7 +1319,6 @@
 
         let isInitialLoad = true;
         let unreadCounts = {};
-        let channelListeners = {};
         let channelTracksInitialized = {};
 
         function setupGlobalNotificationTrackers() {
@@ -1379,7 +1380,6 @@
             }
         }
 
-        /* Typing Events Mechanics */
         let typingTimeoutRef = null;
         let activeTypingListenerRef = null;
 
@@ -1563,7 +1563,7 @@
             });
         }
 
-        /* Drag-And-Drop Storage Pipeline */
+        /* Drag-And-Drop Context Loader */
         const chatDeckElement = document.querySelector('.chat-deck');
         const dragOverlay = document.getElementById('drag-overlay');
 
@@ -1596,7 +1596,7 @@
             }
         };
 
-        /* Settings Mechanics */
+        /* Custom UI Management Settings */
         const settingsModal = document.getElementById('settings-modal');
         const settingsThemeDropdown = document.getElementById('settings-theme-dropdown');
         const settingsStatusInput = document.getElementById('settings-status-input');
@@ -1663,7 +1663,7 @@
         }
 
         /* =========================================================================
-           10. LINK ROSTER NODES PIPELINE
+           6. PIPELINE PEER MATRIX MANAGEMENT
            ========================================================================= */
         const friendInput = document.getElementById('add-friend-input');
         const friendContainer = document.getElementById('friend-list-container');
@@ -1703,7 +1703,7 @@
         }
 
         /* =========================================================================
-           11. REALTIME RECURSIVE ARCHIVE PRUNING UTILITY
+           7. AUTOMATED BUFFER DECK COMPACTION ENGINE
            ========================================================================= */
         let pruneInFlight = {};
         function triggerChannelCleanupPruning(channelId) {
@@ -1737,7 +1737,7 @@
         }
 
         /* =========================================================================
-           12. MULTI-USER GROUP VOICE & VIDEO MESH ENGINE (WebRTC Mesh Topology)
+           8. MULTI-USER GROUP WEBRTC MESH NETWORK PIPELINE
            ========================================================================= */
         let localStream = null;
         let activeCallRoomId = null;
@@ -1746,8 +1746,7 @@
         let groupCamEnabled = true;
         let groupCallClockTimer = null;
         
-        // Track collections of peer connections and signaling channels
-        let peerConnections = {}; // Keyed by: remoteParticipantHandle
+        let peerConnections = {}; 
         let roomSignalingRef = null;
 
         const callModal = document.getElementById('call-modal');
@@ -1772,7 +1771,7 @@
             
             videoStage.style.display = wantsVideo ? 'grid' : 'none';
             voiceStage.style.display = wantsVideo ? 'none' : 'flex';
-            videoStage.innerHTML = ''; // clear stage
+            videoStage.innerHTML = ''; 
             callModal.style.display = 'flex';
 
             groupMicEnabled = true;
@@ -1787,12 +1786,10 @@
                     localStream = stream;
                     callStatusEl.innerText = 'Local stream bound. Mounting interface wrapper...';
                     
-                    // Create and add local self-view block inside stage if video call
                     if(wantsVideo) {
                         appendVideoContainerDOM('local-self-stream', `${myHandle} (Self)`, stream, true);
                     }
                     
-                    // Connect and attach live listeners to the room's dynamic signaling path
                     initializeMeshSignalingPipeline();
                     startGroupCallTimerClock();
                 })
@@ -1807,32 +1804,28 @@
             const selfKey = myHandle.toLowerCase();
             roomSignalingRef = firebase.database().ref(`calls/${activeCallRoomId}`);
             
-            // Announce presence in call room pool list
             roomSignalingRef.child(selfKey).child('presence').set({
                 handle: myHandle,
                 joinedAt: firebase.database.ServerValue.TIMESTAMP,
                 isVideo: isVideoCallMode
             });
             
-            // Listen to any changes in the signaling pool path
             roomSignalingRef.on('value', (snap) => {
                 const roomData = snap.val() || {};
                 callStatusEl.innerText = `Connected mesh node nodes: ${Object.keys(roomData).length}`;
                 
                 Object.keys(roomData).forEach(peerKey => {
-                    if (peerKey === selfKey) return; // skip self
+                    if (peerKey === selfKey) return; 
                     
                     const peerPresence = roomData[peerKey].presence;
                     if (!peerPresence) return;
                     
                     const remoteHandle = peerPresence.handle;
                     
-                    // If a peer joined before us, we send them an SDP Offer
                     if (!peerConnections[peerKey] && peerPresence.joinedAt < Date.now()) {
                         initiatePeerMeshConnection(peerKey, remoteHandle, true);
                     }
                     
-                    // Process incoming transactions/signals from this specific peer
                     const incomingSignals = roomData[peerKey].signals;
                     if (incomingSignals && incomingSignals[selfKey]) {
                         handleIncomingMeshSignal(peerKey, remoteHandle, incomingSignals[selfKey]);
@@ -1840,7 +1833,6 @@
                 });
             });
 
-            // Monitor node departures to clean up elements
             roomSignalingRef.on('child_removed', (oldChildSnap) => {
                 const disconnectedPeerKey = oldChildSnap.key;
                 if (peerConnections[disconnectedPeerKey]) {
@@ -1855,12 +1847,10 @@
             const pc = new RTCPeerConnection(rtcIceServersConfiguration);
             peerConnections[peerKey] = pc;
 
-            // Push tracks from our local media source down the pipe
             if (localStream) {
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
             }
 
-            // Stream ICE candidates immediately up to Firebase node matching this target peer
             pc.onicecandidate = (event) => {
                 if (event.candidate) {
                     firebase.database().ref(`calls/${activeCallRoomId}/${myHandle.toLowerCase()}/signals/${peerKey}`).set({
@@ -1870,13 +1860,11 @@
                 }
             };
 
-            // Catch the incoming incoming multi-media streams sent by the remote client
             pc.ontrack = (event) => {
                 if (event.streams && event.streams[0]) {
                     if (isVideoCallMode) {
                         appendVideoContainerDOM(`video-peer-${peerKey}`, remoteHandle, event.streams[0], false);
                     } else {
-                        // For audio calls, attach hidden audio elements dynamically to preserve sound routing
                         let audioNode = document.getElementById(`audio-peer-${peerKey}`);
                         if(!audioNode) {
                             audioNode = document.createElement('audio');
@@ -1902,7 +1890,6 @@
         }
 
         function handleIncomingMeshSignal(peerKey, remoteHandle, signalData) {
-            // Ensure connection instance layers exist before ingestion processing runs
             if (!peerConnections[peerKey]) {
                 initiatePeerMeshConnection(peerKey, remoteHandle, false);
             }
@@ -1942,7 +1929,7 @@
                 videoEl.playsInline = true;
                 if(isMuted) {
                     videoEl.muted = true;
-                    videoEl.style.transform = "scaleX(-1)"; // mirror effect for user self view
+                    videoEl.style.transform = "scaleX(-1)"; 
                 }
                 
                 const label = document.createElement('div');
@@ -1981,7 +1968,6 @@
                 roomSignalingRef = null;
             }
             
-            // Kill all separate peer connections
             Object.keys(peerConnections).forEach(k => {
                 peerConnections[k].close();
             });
@@ -2036,7 +2022,7 @@
         }
 
         /* =========================================================================
-           13. HELPER FUNCTIONS & SYNTHETIC AUDIO ENGINE
+           9. HELPERS MATRIX DATA UTILITIES
            ========================================================================= */
         function escapeHtml(str) {
             if(!str) return '';
