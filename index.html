@@ -1082,9 +1082,14 @@
         let firebaseActive = false;
         let isCurrentlyTypingInFirebase = false;
 
-        try {
+try {
             if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE")) {
-                firebase.initializeApp(firebaseConfig);
+                // Check if there are any initialized apps already. If not, initialize.
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                } else {
+                    firebase.app(); // Use the already initialized instance
+                }
                 firebaseActive = true;
             }
         } catch(e) { 
