@@ -105,7 +105,11 @@
             color: #ffffff !important;
         }
 
-        /* Lain Theme (171282.gif) */
+        /* ==========================================
+           --- NEW THEMES UTILIZING LOCAL IMAGES ---
+           ========================================== */
+        
+        /* 1. Lain Theme (171282.gif) */
         body.theme-lain {
             background-image: linear-gradient(rgba(26, 17, 12, 0.75), rgba(15, 10, 8, 0.85)), url('171282.gif');
             background-size: cover;
@@ -127,7 +131,7 @@
             border: 1px solid #7c5843;
         }
 
-        /* Joy Theme (lalalalal.webp) */
+        /* 2. Joy Theme (lalalalal.webp) */
         body.theme-joy {
             background-image: linear-gradient(rgba(18, 0, 36, 0.6), rgba(8, 0, 15, 0.8)), url('lalalalal.webp');
             background-size: cover;
@@ -149,7 +153,7 @@
             text-shadow: 0 0 5px rgba(255, 0, 187, 0.5);
         }
 
-        /* Skibidi Theme (Toilet.jpg) */
+        /* 3. Skibidi Theme (Toilet.jpg) */
         body.theme-skibidi {
             background-image: linear-gradient(rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.9)), url('Toilet.jpg');
             background-size: cover;
@@ -174,50 +178,7 @@
             letter-spacing: 2px;
         }
 
-        /* Tribe Theme (Neon Green & White with Falling Eyes) */
-        body.theme-tribe {
-            --bg-gradient: linear-gradient(135deg, #050f05 0%, #000000 100%);
-            --text-main: #ffffff;
-            --panel-bg: rgba(10, 25, 10, 0.88);
-            --inner-panel-bg: rgba(0, 0, 0, 0.6);
-            --accent-blue: #39ff14; /* Neon Green */
-            --border-color: rgba(57, 255, 20, 0.3);
-            --chat-bg: #030a03;
-            --chat-border: #39ff14;
-            --level-color: #ffffff;
-            --nav-bg: #010501;
-            --font-family: 'Courier New', monospace;
-        }
-        body.theme-tribe .showcase-panel {
-            box-shadow: 0 0 15px rgba(57, 255, 20, 0.25);
-            border: 1px solid rgba(57, 255, 20, 0.4);
-        }
-
-        /* Falling Eyes System Styling */
-        #tribe-eyes-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 9999;
-            overflow: hidden;
-            display: none;
-        }
-        body.theme-tribe #tribe-eyes-container {
-            display: block;
-        }
-        @keyframes eyeFallAnimation {
-            0% { transform: translateY(-5vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
-        }
-        .falling-eye-item {
-            position: absolute;
-            font-size: 22px;
-            animation: eyeFallAnimation linear infinite;
-            pointer-events: none;
-        }
+        /* ========================================== */
 
         body {
             margin: 0;
@@ -793,54 +754,34 @@
         }
         #call-status-text { color: #8f98a0; font-size: 12px; }
 
-        /* Multi-user Group Call Video Grid */
-        #video-stage-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
+        #video-stage {
+            position: relative;
             width: 100%;
             background: #000;
             border: 1px solid #2a475e;
             border-radius: var(--border-radius);
-            min-height: 250px;
-            max-height: 55vh;
-            overflow-y: auto;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .video-wrapper {
-            position: relative;
-            background: #111;
-            border: 1px solid var(--chat-border);
-            border-radius: var(--border-radius);
-            aspect-ratio: 4 / 3;
+            aspect-ratio: 16 / 9;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
         }
-        .video-wrapper video {
+        #remote-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             background: #000;
         }
-        .video-wrapper.local-video-wrap video {
-            transform: scaleX(-1);
-        }
-        .video-label-tag {
+        #local-video {
             position: absolute;
-            bottom: 5px;
-            left: 5px;
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 2px;
-            z-index: 2;
-            pointer-events: none;
+            bottom: 10px;
+            right: 10px;
+            width: 28%;
+            max-width: 180px;
+            border: 2px solid var(--accent-blue);
+            border-radius: var(--border-radius);
+            object-fit: cover;
+            background: #000;
+            transform: scaleX(-1); /* mirror self-view */
+            transition: opacity 0.2s ease;
         }
-
         #voice-stage {
             display: none;
             flex-direction: column;
@@ -899,8 +840,6 @@
 </head>
 <body>
 
-    <div id="tribe-eyes-container"></div>
-
     <nav>
         <div class="nav-container">
             <div class="brand">AERO</div>
@@ -951,8 +890,8 @@
                 <div class="panel-title">
                     <span id="active-channel-title">Global Hub</span>
                     <span style="display:flex; align-items:center; gap:8px;">
-                        <button id="btn-group-voice-call" class="btn-call" onclick="startGroupCall(false)" style="display:none;" title="Start a group voice call">🔊 Group Voice</button>
-                        <button id="btn-group-video-call" class="btn-call" onclick="startGroupCall(true)" style="display:none;" title="Start a group video call">🎥 Group Video</button>
+                        <button id="btn-voice-call" class="btn-call" onclick="startCall(false)" style="display:none;" title="Start a voice call">📞 Voice</button>
+                        <button id="btn-video-call" class="btn-call" onclick="startCall(true)" style="display:none;" title="Start a video call">📹 Video</button>
                         <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
                     </span>
                 </div>
@@ -1036,7 +975,6 @@
                     <option value="lain">🌐 Lain (The Wired Animated Graphic)</option>
                     <option value="joy">✨ Joy (Vibrant Neon WebP Illustration)</option>
                     <option value="skibidi">🚽 Skibidi (Industrial Concrete Graphic)</option>
-                    <option value="tribe">👁️ Tribe Theme (Neon Green/White Falling Eyes)</option>
                 </select>
             </div>
 
@@ -1064,8 +1002,20 @@
             <div id="mini-profile-status-wrapper"></div>
             
             <div style="display:flex; gap:10px; width:100%; margin-top:10px;">
-                <button class="btn-action" style="flex:1; font-size:11px;" onclick="actionAddFriend()">Link Coordinate</button>
-                <button class="btn-action btn-danger" style="flex:1; font-size:11px;" onclick="closeMiniProfile()">Close</button>
+                <button class="btn-action" style="flex:1; font-size:11px;" onclick="actionAddFriend()">Link Node</button>
+                <button class="btn-action" style="flex:1; font-size:11px;" onclick="actionDMUser()">Open Pipe</button>
+            </div>
+            <button class="btn-action btn-danger" style="width:100%; margin-top:8px; font-size:11px;" onclick="closeMiniProfile()">Dismiss</button>
+        </div>
+    </div>
+
+    <div id="create-channel-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Establish Secure Pipe</h3>
+            <input type="text" id="new-channel-name-input" class="aero-input" placeholder="Enter channel tag handle..." maxlength="25">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action btn-danger" style="flex:1;" onclick="closeChannelCreationWizard()">Abort</button>
+                <button class="btn-action" style="flex:1;" onclick="commitChannelCreationToDatabase()">Open Pipeline</button>
             </div>
         </div>
     </div>
@@ -1073,45 +1023,44 @@
     <div id="call-modal" class="modal-overlay">
         <div class="modal-card">
             <div class="call-peer-line">
-                <span id="call-peer-title">Pipeline Group Session</span>
-                <span id="call-status-text">Synchronizing feeds...</span>
+                <span id="call-modal-title" style="font-weight:bold; font-size:14px;">Secure WebRTC Initialization Pipeline</span>
+                <span id="call-duration-clock">00:00</span>
             </div>
-
-            <div id="video-stage-grid"></div>
+            <div id="call-status-text">Synchronizing parameters with target interface coordinate...</div>
+            
+            <div id="video-stage">
+                <video id="remote-video" autoplay playsinline></video>
+                <video id="local-video" autoplay playsinline muted></video>
+            </div>
 
             <div id="voice-stage">
                 <div class="voice-pulse"></div>
-                <div style="font-size:13px; color:#8f98a0;">Mesh Audio Line Active</div>
+                <div style="font-size:13px; color:var(--accent-blue); margin-top:10px;">Enforced Audio Matrix Stream Engaged</div>
             </div>
 
             <div class="call-controls">
                 <button id="btn-toggle-mic" class="btn-action" onclick="toggleMic()">🎙️ Mic On</button>
                 <button id="btn-toggle-cam" class="btn-action" onclick="toggleCam()">📹 Cam On</button>
-                <button class="btn-action btn-danger" onclick="endGroupCall(true)">Disconnect</button>
+                <button class="btn-action btn-danger" onclick="endCall(true)">🛑 Sever Connection</button>
             </div>
         </div>
     </div>
 
     <div id="incoming-call-modal" class="modal-overlay">
         <div class="modal-card">
-            <div class="incoming-ring">🔊</div>
-            <h3 style="border:none; margin:5px 0 0 0;" id="incoming-call-title">Group Call Broadcast</h3>
-            <p style="font-size:12px; color:#8f98a0; margin:5px 0 15px 0;">Pipeline session incoming on current channel...</p>
-            
-            <div style="display:flex; gap:15px; width:100%;">
-                <button class="btn-action btn-danger" style="flex:1;" onclick="rejectGroupCall()">Ignore</button>
-                <button class="btn-action" style="flex:1;" onclick="acceptGroupCall()">Connect</button>
+            <div class="incoming-ring">🔔</div>
+            <h3 style="border:none; margin:10px 0 5px 0;">Incoming Pipeline Sync Request</h3>
+            <div id="incoming-call-text" style="font-size:13px; color:#8f98a0; margin-bottom:15px;">Remote coordinate offering signaling path...</div>
+            <div style="display:flex; gap:12px; width:100%;">
+                <button class="btn-action btn-danger" style="flex:1;" onclick="rejectIncomingCallSignal()">Decline</button>
+                <button class="btn-action" style="flex:1; background:linear-gradient(to right, #2faf5e 0%, #1f7a3f 100%);" onclick="acceptIncomingCallSignal()">Synchronize</button>
             </div>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <audio id="audio-synth-ping" style="display:none;"></audio>
 
-    <script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -1130,120 +1079,28 @@
             measurementId: "G-L0FH99LT4L"
         };
 
-        // The pre-existing tracking flags in your application code
-        let firebaseActive = false; 
+        let firebaseActive = false;
         let isCurrentlyTypingInFirebase = false;
 
-        try {
-            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU")) {
-                firebase.initializeApp(firebaseConfig);
-                firebaseActive = true;
-            }
-        } catch(e) { console.error("Firebase initializing anomaly:", e); }
-
-        /* =========================================================================
-           3. SCREEN STATE INITIALIZATION CONTROL LAYERS (Where terminateBootOverlay lives)
-           ========================================================================= */
-        const bootScreen = document.getElementById('boot-screen');
-        // ... rest of your original code continues perfectly from here
-
-        let firebaseActive = false;
         try {
             if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE")) {
                 firebase.initializeApp(firebaseConfig);
                 firebaseActive = true;
             }
-        } catch(e) { console.error("Firebase initializing anomaly:", e); }
+        } catch(e) { 
+            console.error("Firebase initializing anomaly:", e); 
+        }
 
-        // Localized Memory Variables
-        let myHandle = "Profile_Node";
-        let currentUserPfp = null;
-        let currentUserStatus = "";
-        let currentUserTheme = "default";
-        let currentChannel = "global";
-        let isAuthLoginMode = true;
-        let selectedSettingsPfpData = null;
-        let activeSelectedUserHandle = null;
-
-        // Group Call Mesh Engine States
-        let localStream = null;
-        let peerConnections = {}; // Track multiple connections: userId -> RTCPeerConnection
-        let activeCallChannel = null;
-        let micEnabled = true;
-        let camEnabled = true;
-        let isVideoCallType = false;
-        let callGroupRef = null;
-
-        // Dynamic System DOM Connectors
+        /* =========================================================================
+           3. SCREEN STATE INITIALIZATION CONTROL LAYERS
+           ========================================================================= */
         const bootScreen = document.getElementById('boot-screen');
         const authScreen = document.getElementById('auth-screen');
         const appRoot = document.getElementById('app-root');
-        const authErrorDisplay = document.getElementById('auth-error-display');
-        const myHandleDisplay = document.getElementById('my-handle-display');
-        const navUserIndicator = document.getElementById('nav-user-indicator');
-        const myStatusDisplay = document.getElementById('my-status-display');
-        const profileAvatarSlot = document.getElementById('profile-avatar-slot');
-        const activeChannelTitle = document.getElementById('active-channel-title');
-        const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
-        const friendListContainer = document.getElementById('friend-list-container');
-        const chatMessagesPanel = document.getElementById('chat-messages');
-        const messageBoxInput = document.getElementById('message-box');
-        const charCounterEl = document.getElementById('char-count');
-        const sendButtonEl = document.getElementById('send-button');
-
-        // Modal Elements
-        const settingsModal = document.getElementById('settings-modal');
-        const miniProfileModal = document.getElementById('mini-profile-modal');
-        const callModal = document.getElementById('call-modal');
-        const incomingCallModal = document.getElementById('incoming-call-modal');
-        const videoStageGrid = document.getElementById('video-stage-grid');
-        const voiceStageEl = document.getElementById('voice-stage');
-        const callStatusText = document.getElementById('call-status-text');
-
-        // WebRTC Infrastructure Constants
-        const rtcIceConfig = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        };
-
-        // Falling Eyes Theme Engine
-        let eyeLoopInterval = null;
-        function runThemeAdjustmentEngine(targetTheme) {
-            document.body.className = "";
-            if(targetTheme && targetTheme !== 'default') {
-                document.body.classList.add(`theme-${targetTheme}`);
-            }
-            if (targetTheme === 'tribe') {
-                initializeFallingEyes();
-            } else {
-                terminateFallingEyes();
-            }
-        }
-
-        function initializeFallingEyes() {
-            terminateFallingEyes();
-            const container = document.getElementById('tribe-eyes-container');
-            eyeLoopInterval = setInterval(() => {
-                if (!document.body.classList.contains('theme-tribe')) return;
-                const eyeItem = document.createElement('div');
-                eyeItem.className = 'falling-eye-item';
-                eyeItem.innerText = '👁️';
-                eyeItem.style.left = Math.random() * 100 + 'vw';
-                eyeItem.style.animationDuration = (Math.random() * 3 + 2.5) + 's';
-                eyeItem.style.fontSize = (Math.random() * 18 + 16) + 'px';
-                container.appendChild(eyeItem);
-                setTimeout(() => eyeItem.remove(), 5500);
-            }, 350);
-        }
-
-        function terminateFallingEyes() {
-            if (eyeLoopInterval) clearInterval(eyeLoopInterval);
-            document.getElementById('tribe-eyes-container').innerHTML = '';
-        }
+        let bootCompleted = false;
 
         function terminateBootOverlay() {
+            bootCompleted = true;
             bootScreen.style.opacity = '0';
             setTimeout(() => {
                 bootScreen.style.display = 'none';
@@ -1252,81 +1109,138 @@
         }
 
         function evaluateGlobalDisplayState() {
+            if (!bootCompleted) return;
             if (!firebaseActive) {
-                appRoot.style.display = 'grid';
                 authScreen.style.display = 'none';
+                appRoot.style.display = 'grid';
+                myHandle = "Local_Demo_User";
+                myHandleDisplay.innerText = myHandle;
+                navUserIndicator.innerText = "Local Simulation Engine Active";
+                document.getElementById('node-level-display').innerText = "99";
+                document.getElementById('stat-count-items').innerText = "777";
+                document.getElementById('stat-count-expansions').innerText = "88";
                 switchChannel('global', 'Local Demo Mode Hub', true);
-                renderFriendList();
                 return;
             }
-            const user = firebase.auth().currentUser;
-            if (user) {
-                appRoot.style.display = 'grid';
+            const activeUser = firebase.auth().currentUser;
+            if (activeUser) {
                 authScreen.style.display = 'none';
+                appRoot.style.display = 'grid';
             } else {
                 appRoot.style.display = 'none';
                 authScreen.style.display = 'block';
             }
         }
 
-        // Authentication Framework Handlers
+        /* =========================================================================
+           4. AUTHENTICATION TRANSACTION INTERFACE INTERPRETATION METADATA
+           ========================================================================= */
+        let isSignUpModeActive = false;
+        const authBoxTitle = document.getElementById('auth-box-title');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authToggleLink = document.getElementById('auth-toggle-link');
+        const authErrorDisplay = document.getElementById('auth-error-display');
+        const authUsernameInput = document.getElementById('auth-username');
+        const authPasswordInput = document.getElementById('auth-password');
+
         function toggleAuthMode() {
-            isAuthLoginMode = !isAuthLoginMode;
-            document.getElementById('auth-box-title').innerText = isAuthLoginMode ? 'Sign In' : 'Create Node Profile';
-            document.getElementById('auth-submit-btn').innerText = isAuthLoginMode ? 'Enter Matrix' : 'Initialize Profile Matrix';
-            document.getElementById('auth-toggle-link').innerHTML = isAuthLoginMode ? 
-                'New profile sequence? <span>Create Matrix Node</span>' : 'Existing parameters? <span>Sign In Here</span>';
-        }
-
-        function processAuthSubmission() {
-            const handleText = document.getElementById('auth-username').value.trim();
-            const passwordText = document.getElementById('auth-password').value;
+            isSignUpModeActive = !isSignUpModeActive;
             authErrorDisplay.style.display = 'none';
-
-            if (!handleText || !passwordText) {
-                displayAuthError("Credentials block parameters incomplete.");
-                return;
-            }
-
-            if (isAuthLoginMode) {
-                const syntheticEmail = `${handleText.toLowerCase()}@aero.local`;
-                firebase.auth().signInWithEmailAndPassword(syntheticEmail, passwordText)
-                .catch(err => displayAuthError(err.message));
+            if (isSignUpModeActive) {
+                authBoxTitle.innerText = "Create Matrix Node";
+                authSubmitBtn.innerText = "Provision Workspace";
+                authToggleLink.innerHTML = "Already parsed credentials? <span>Sign In Here</span>";
             } else {
-                // Ensure unique handle constraint checked first
-                firebase.database().ref('users').orderByChild('handle').equalTo(handleText).once('value', (snap) => {
-                    if (snap.exists()) {
-                        displayAuthError("Handle identity already locked into network.");
-                    } else {
-                        const syntheticEmail = `${handleText.toLowerCase()}@aero.local`;
-                        firebase.auth().createUserWithEmailAndPassword(syntheticEmail, passwordText)
-                        .then((cred) => {
-                            firebase.database().ref('users/' + cred.user.uid).set({
-                                handle: handleText,
-                                theme: 'default',
-                                status: '',
-                                msgCount: 0,
-                                friends: []
-                            });
-                        })
-                        .catch(err => displayAuthError(err.message));
-                    }
-                });
+                authBoxTitle.innerText = "Sign In";
+                authSubmitBtn.innerText = "Enter Matrix";
+                authToggleLink.innerHTML = "New profile sequence? <span>Create Matrix Node</span>";
             }
         }
 
-        function displayAuthError(msg) {
-            authErrorDisplay.innerText = msg;
+        function displayAuthAnomaly(text) {
+            authErrorDisplay.innerText = `⚠️ CORE AUTH EXCEPTION: ${text}`;
             authErrorDisplay.style.display = 'block';
         }
 
-        function terminateUserSession() {
-            endGroupCall(false);
-            if (firebaseActive) firebase.auth().signOut();
-            else location.reload();
+        function processAuthSubmission() {
+            authErrorDisplay.style.display = 'none';
+            const handleText = authUsernameInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+            const passText = authPasswordInput.value;
+            if (handleText.length < 3) {
+                displayAuthAnomaly("Handle criteria mismatch. Minimum 3 characters structural format.");
+                return;
+            }
+            if (passText.length < 6) {
+                displayAuthAnomaly("Security context payload density flaw. Core parameters mandate 6 characters minimum threshold.");
+                return;
+            }
+
+            const virtualEmail = `${handleText.toLowerCase()}@aero.mesh.network`;
+
+            if (isSignUpModeActive) {
+                const usernameRef = firebase.database().ref('usernames/' + handleText.toLowerCase());
+                usernameRef.once('value').then((snap) => {
+                    if (snap.exists()) {
+                        displayAuthAnomaly("Coordinate alias vector collision. Requested path handles locked by operational system node.");
+                    } else {
+                        firebase.auth().createUserWithEmailAndPassword(virtualEmail, passText)
+                            .then((credential) => {
+                                const uid = credential.user.uid;
+                                const updates = {};
+                                updates['usernames/' + handleText.toLowerCase()] = uid;
+                                updates['users/' + uid] = {
+                                    handle: handleText,
+                                    status: "",
+                                    theme: "default",
+                                    pfp: "",
+                                    msgCount: 0,
+                                    friends: []
+                                };
+                                return firebase.database().ref().update(updates);
+                            })
+                            .catch((err) => { displayAuthAnomaly(err.message); });
+                    }
+                }).catch((err) => { displayAuthAnomaly(err.message); });
+            } else {
+                firebase.auth().signInWithEmailAndPassword(virtualEmail, passText)
+                    .catch((err) => { displayAuthAnomaly("Access verification breakdown. Parameter values rejected by node encryption algorithm."); });
+            }
         }
 
-        // System Initialization Monitors
+        function terminateUserSession() {
+            clearMyTypingState();
+            if (firebaseActive) {
+                firebase.auth().signOut().then(() => { location.reload(); });
+            } else {
+                location.reload();
+            }
+        }
+
+        /* =========================================================================
+           5. ACTIVE CONTEXT RUNTIME USER STATES DATA PROFILE SYNCHRONIZATION
+           ========================================================================= */
+        let myHandle = "Profile_Node";
+        let currentUserPfp = null;
+        let currentUserStatus = "";
+        let currentUserTheme = "default";
+        let currentChannel = "global";
+        const MAX_VISIBLE_MESSAGES = 100;
+
+        const myHandleDisplay = document.getElementById('my-handle-display');
+        const myStatusDisplay = document.getElementById('my-status-display');
+        const profileAvatarSlot = document.getElementById('profile-avatar-slot');
+        const navUserIndicator = document.getElementById('nav-user-indicator');
+        const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
+
+        let dynamicChannelsCache = {};
+
+        function runThemeAdjustmentEngine(targetTheme) {
+            document.body.className = "";
+            if(targetTheme && targetTheme !== 'default') {
+                document.body.classList.add(`theme-${targetTheme}`);
+            }
+        }
+
         if (firebaseActive) {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -1363,7 +1277,6 @@
                         if (rawFriends && Array.isArray(rawFriends)) myFriends = rawFriends;
                         else if (rawFriends && typeof rawFriends === 'object') myFriends = Object.values(rawFriends).filter(v => typeof v === 'string');
                         else myFriends = [];
-
                         renderFriendList();
 
                         if (appRoot.style.display === 'none' || appRoot.style.display === '') {
@@ -1377,14 +1290,12 @@
             });
         }
 
-        // Pipeline Channel Topology Subsystems
-        let dynamicChannelsCache = {};
-        let activeMessagesListenerRef = null;
-        let activeGroupCallSignalRef = null;
-
+        /* =========================================================================
+           SIDEBAR PIPELINE MANAGEMENT ROUTINES
+           ========================================================================= */
         function syncChannelsListListener() {
             if (!firebaseActive) return;
-            firebase.database().ref('channels').on('value', (snap) => {
+            firebase.database().ref('channels_list').on('value', (snap) => {
                 dynamicChannelsCache = snap.val() || {};
                 renderChannelsSidebarDOM();
             });
@@ -1416,590 +1327,735 @@
             });
         }
 
-        function triggerChannelCreationWizard() {
-            const label = prompt("Input new pipeline descriptor channel title:");
-            if(!label || !label.trim()) return;
-            if(!firebaseActive) { alert("Matrix offline. Operation canceled."); return; }
-            
-            const generatedId = 'chan_' + Date.now();
-            firebase.database().ref('channels/' + generatedId).set({
-                id: generatedId,
-                name: label.trim(),
-                creator: myHandle
-            }).then(() => switchChannel(generatedId, label.trim(), false));
-        }
+        /* =========================================================================
+           6. LIVE MESSAGING CORE ENGINE & LOCALIZED TIMESTAMP INTEGRATION
+           ========================================================================= */
+        const chatMessages = document.getElementById('chat-messages');
+        const messageBox = document.getElementById('message-box');
+        const charCountDisplay = document.getElementById('char-count');
+        const typingIndicatorBar = document.getElementById('typing-indicator-bar');
 
-        function removeChannelNode(chanId, event) {
-            if (event) event.stopPropagation();
-            if (confirm("Sever this specific logic pipeline container permanently?")) {
-                firebase.database().ref('channels/' + chanId).remove();
-                firebase.database().ref('messages/' + chanId).remove();
-                firebase.database().ref('groupCalls/' + chanId).remove();
-                if(currentChannel === chanId) switchChannel('global', 'Global Hub', true);
-            }
-        }
+        let isInitialLoad = true;
+        let unreadCounts = {};
+        let channelListeners = {};
+        let channelTracksInitialized = {};
 
-        // Live Channel Messaging Engine Execution
-        function switchChannel(channelId, channelTitle, isGlobalHub) {
-            currentChannel = channelId;
-            activeChannelTitle.innerText = channelTitle;
-            renderChannelsSidebarDOM();
-            clearNotificationTrack(channelId);
+        function setupGlobalNotificationTrackers() {
+            trackChannelNotifications('global');
+            firebase.database().ref('channels_list').on('child_added', (snap) => {
+                const chan = snap.val();
+                if(chan && chan.id) trackChannelNotifications(chan.id);
+            });
 
-            document.getElementById('btn-group-voice-call').style.display = 'inline-block';
-            document.getElementById('btn-group-video-call').style.display = 'inline-block';
-
-            if (activeMessagesListenerRef) {
-                activeMessagesListenerRef.off();
-            }
-
-            // Sync Group Call Signaling state for this active pipeline channel
-            synchronizeGroupCallSignalingForChannel();
-
-            if (!firebaseActive) {
-                chatMessagesPanel.innerHTML = `<div style="text-align:center; padding:20px; filter:brightness(0.6);">Local isolation sandbox. Messaging pipelines unlinked.</div>`;
-                return;
-            }
-
-            activeMessagesListenerRef = firebase.database().ref('messages/' + channelId).limitToLast(40);
-            activeMessagesListenerRef.on('value', (snap) => {
-                chatMessagesPanel.innerHTML = "";
-                const data = snap.val() || {};
-                Object.keys(data).sort((a,b) => data[a].timestamp - data[b].timestamp).forEach(mId => {
-                    renderMessageBubble(data[mId]);
+            firebase.database().ref('users/' + firebase.auth().currentUser.uid).on('value', (snap) => {
+                const userData = snap.val() || {};
+                let friendsList = [];
+                if (userData.friends && Array.isArray(userData.friends)) friendsList = userData.friends;
+                else if (userData.friends && typeof userData.friends === 'object') friendsList = Object.values(userData.friends);
+                friendsList.forEach(friend => {
+                    if (typeof friend === 'string') {
+                        const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+                        trackChannelNotifications(`dm_${dmRoomId}`);
+                    }
                 });
-                chatMessagesPanel.scrollTop = chatMessagesPanel.scrollHeight;
             });
         }
 
-        function renderMessageBubble(msg) {
-            const isMe = msg.sender === myHandle;
-            const item = document.createElement('div');
-            item.className = `msg ${isMe ? 'own' : ''}`;
+        function trackChannelNotifications(channelId) {
+            if (channelTracksInitialized[channelId]) return;
+            channelTracksInitialized[channelId] = true;
+            unreadCounts[channelId] = 0;
 
-            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const pfpSrc = msg.pfp ? msg.pfp : `https://api.dicebear.com/7.x/identicon/svg?seed=${msg.sender}`;
+            let isInitialAdd = true;
+            const ref = firebase.database().ref(`channels/${channelId}`);
+            ref.limitToLast(1).once('value', () => { isInitialAdd = false; });
 
-            let attachedMediaHtml = "";
-            if (msg.mediaUrl) {
-                if(msg.mediaType && msg.mediaType.startsWith('audio/')) {
-                    attachedMediaHtml = `<audio src="${msg.mediaUrl}" controls class="media-preview-audio"></audio>`;
-                } else if(msg.mediaType && msg.mediaType.startsWith('video/')) {
-                    attachedMediaHtml = `<video src="${msg.mediaUrl}" controls class="media-preview-video"></video>`;
-                } else {
-                    attachedMediaHtml = `<img src="${msg.mediaUrl}" class="media-attachment" onclick="window.open('${msg.mediaUrl}', '_blank')" style="cursor:pointer;" alt="Attached log element">`;
+            ref.on('child_added', (snap) => {
+                if (isInitialAdd) return;
+                if (currentChannel === channelId) return;
+                const data = snap.val();
+                if (data && data.username !== myHandle) {
+                    unreadCounts[channelId] = (unreadCounts[channelId] || 0) + 1;
+                    playSyntheticPing('ping');
+                    if (channelId.startsWith('dm_')) renderFriendList();
+                    else renderChannelsSidebarDOM();
+                    updateGlobalTitleBanner();
                 }
-            }
-
-            item.innerHTML = `
-                <div class="msg-header" onclick="inspectPeerProfile('${msg.sender}')">
-                    <img src="${pfpSrc}" class="msg-pfp">
-                    <span class="username">${msg.sender}</span>
-                    <span class="msg-timestamp">${timeStr}</span>
-                </div>
-                <div class="text">${escapeHtmlCode(msg.text)}</div>
-                ${attachedMediaHtml}
-            `;
-            chatMessagesPanel.appendChild(item);
+            });
         }
 
-        // Broadcast Interface Actions
-        function performLogBroadcast() {
-            const rawText = messageBoxInput.value;
-            if (!rawText.trim()) return;
+        function renderBadgeHtml(channelId) {
+            const count = unreadCounts[channelId] || 0;
+            return count > 0 ? `<span class="notif-badge">${count}</span>` : "";
+        }
 
-            if (firebaseActive) {
-                const user = firebase.auth().currentUser;
-                const mRef = firebase.database().ref('messages/' + currentChannel).push();
-                mRef.set({
-                    sender: myHandle,
-                    text: rawText,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    pfp: currentUserPfp
-                });
-
-                if (user) {
-                    firebase.database().ref('users/' + user.uid + '/msgCount').transaction(c => (c || 0) + 1);
-                }
+        function updateGlobalTitleBanner() {
+            let totalUnread = 0;
+            Object.keys(unreadCounts).forEach(k => { totalUnread += (unreadCounts[k] || 0); });
+            if (totalUnread > 0) {
+                document.title = `(${totalUnread}) AERO - Profile & Communications Hub`;
             } else {
-                renderMessageBubble({
-                    sender: myHandle,
-                    text: rawText,
-                    timestamp: Date.now(),
-                    pfp: null
-                });
-                chatMessagesPanel.scrollTop = chatMessagesPanel.scrollHeight;
+                document.title = "AERO - Profile & Communications Hub";
+            }
+        }
+
+        /* Typing Events Mechanics */
+        let typingTimeoutRef = null;
+        let activeTypingListenerRef = null;
+
+        messageBox.addEventListener('input', () => {
+            const len = messageBox.value.length;
+            charCountDisplay.innerText = `${len}/500`;
+            triggerMyTypingTransmission();
+        });
+
+        function triggerMyTypingTransmission() {
+            const u = firebase.auth().currentUser;
+            if (!u || !firebaseActive) return;
+            if (!isCurrentlyTypingInFirebase) {
+                isCurrentlyTypingInFirebase = true;
+                firebase.database().ref(`typing/${currentChannel}/${u.uid}`).set({ username: myHandle });
+            }
+            clearTimeout(typingTimeoutRef);
+            typingTimeoutRef = setTimeout(() => { clearMyTypingState(); }, 4000);
+        }
+
+        function clearMyTypingState() {
+            const u = firebase.auth().currentUser;
+            if (u && firebaseActive && isCurrentlyTypingInFirebase) {
+                isCurrentlyTypingInFirebase = false;
+                firebase.database().ref(`typing/${currentChannel}/${u.uid}`).remove();
+            }
+        }
+
+        function listenToTypingEvents(channelId) {
+            if (activeTypingListenerRef) {
+                activeTypingListenerRef.off();
+                activeTypingListenerRef = null;
+            }
+            typingIndicatorBar.innerHTML = "";
+            if (!firebaseActive) return;
+
+            const u = firebase.auth().currentUser;
+            activeTypingListenerRef = firebase.database().ref(`typing/${channelId}`);
+            activeTypingListenerRef.on('value', (snapshot) => {
+                const typersObj = snapshot.val();
+                let typingUsers = [];
+                if (typersObj) {
+                    Object.keys(typersObj).forEach(uid => {
+                        if (!u || uid !== u.uid) typingUsers.push(typersObj[uid].username);
+                    });
+                }
+                if (typingUsers.length > 0) {
+                    typingIndicatorBar.innerHTML = typingUsers.length === 1 ? 
+                        `📝 Node <b>${typingUsers[0]}</b> is preparing log data...` : 
+                        `📝 Multiple communication vectors preparing logs...`;
+                } else {
+                    typingIndicatorBar.innerHTML = "";
+                }
+            });
+        }
+
+        function switchChannel(channelId, layoutTitle, isGlobal) {
+            clearMyTypingState();
+            currentChannel = channelId;
+            isInitialLoad = true;
+            unreadCounts[channelId] = 0;
+            updateGlobalTitleBanner();
+
+            if (channelId.startsWith('dm_')) renderFriendList();
+            else renderChannelsSidebarDOM();
+
+            document.getElementById('active-channel-title').innerText = layoutTitle;
+            chatMessages.innerHTML = '';
+
+            const isDM = channelId.startsWith('dm_');
+            document.getElementById('btn-voice-call').style.display = isDM ? 'inline-block' : 'none';
+            document.getElementById('btn-video-call').style.display = isDM ? 'inline-block' : 'none';
+            if (isDM) setupCallListener(channelId);
+
+            if (activeListenerRef) {
+                activeListenerRef.off();
+                activeListenerRef = null;
             }
 
-            messageBoxInput.value = "";
-            updateCharCounterMetric();
+            const db = firebase.database();
+            const targetQuery = db.ref(`channels/${channelId}`).limitToLast(MAX_VISIBLE_MESSAGES);
+            activeListenerRef = targetQuery;
+
+            targetQuery.on('child_added', (snapshot) => {
+                appendMsgDOM(snapshot.key, snapshot.val());
+                if (!isInitialLoad) playSyntheticPing('click');
+            });
+
+            targetQuery.once('value', () => { isInitialLoad = false; });
+            listenToTypingEvents(channelId);
         }
 
-        sendButtonEl.onclick = performLogBroadcast;
-        messageBoxInput.onkeypress = (e) => { if(e.key === 'Enter') performLogBroadcast(); };
+        let activeListenerRef = null;
 
-        function updateCharCounterMetric() {
-            const count = messageBoxInput.value.length;
-            charCounterEl.innerText = `${count}/500`;
-            charCounterEl.style.color = count >= 460 ? '#ff5555' : 'var(--text-main)';
+        function appendMsgDOM(msgId, data) {
+            if (!data) return;
+            const isOwn = data.username === myHandle;
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg ${isOwn ? 'own' : ''}`;
+
+            let contentHtml = `<div class="text">${escapeHtml(data.text)}</div>`;
+            if (data.text && data.text.includes('http')) {
+                const parts = data.text.split(' ');
+                const targetUrl = parts.find(p => p.startsWith('http'));
+                if (targetUrl) {
+                    if (targetUrl.match(/\.(jpeg|jpg|gif|png|webp)/i)) contentHtml += `<img src="${targetUrl}" class="media-attachment">`;
+                    else if (targetUrl.match(/\.(mp3|ogg|wav)/i)) contentHtml += `<audio src="${targetUrl}" controls class="media-preview-audio"></audio>`;
+                    else if (targetUrl.match(/\.(mp4|webm)/i)) contentHtml += `<video src="${targetUrl}" controls class="media-preview-video"></video>`;
+                }
+            }
+            if (data.mediaUrl) {
+                contentHtml += `<img src="${data.mediaUrl}" class="media-attachment">`;
+            }
+
+            let isSystem = false;
+            if (data.username === "🚨 SYSTEM DIRECTIVE") {
+                msgDiv.style.background = "rgba(194, 45, 45, 0.15)";
+                msgDiv.style.borderColor = "#c22d2d";
+                isSystem = true;
+            }
+
+            const avatarSrc = data.pfp || "https://api.dicebear.com/7.x/identicon/svg?seed=" + data.username;
+            let localizedTimeStr = "Coordinate Unknown";
+            if (data.timestamp) {
+                const dateObj = new Date(data.timestamp);
+                let hr = dateObj.getHours();
+                const min = String(dateObj.getMinutes()).padStart(2, '0');
+                const pfx = hr >= 12 ? 'PM' : 'AM';
+                hr = hr % 12;
+                hr = hr ? hr : 12;
+                localizedTimeStr = `${hr}:${min} ${pfx}`;
+            }
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = "msg-header";
+            headerDiv.innerHTML = `
+                <img src="${avatarSrc}" class="msg-pfp">
+                <span class="username">${data.username}</span>
+                ${data.status ? `<span style="font-size:10px; opacity:0.8; margin-left:3px;">(${data.status})</span>` : ''}
+                <span class="msg-timestamp">${localizedTimeStr}</span>
+            `;
+
+            if (!isSystem && !isOwn) {
+                headerDiv.onclick = () => openMiniProfile(data.username, avatarSrc, data.status);
+            } else if (!isSystem && isOwn) {
+                headerDiv.onclick = () => openSettings();
+            }
+            msgDiv.appendChild(headerDiv);
+
+            if (contentHtml !== '') {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = contentHtml;
+                msgDiv.appendChild(wrapper);
+            }
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-        messageBoxInput.oninput = updateCharCounterMetric;
 
-        // Custom Settings Modules Manipulation Engine
+        document.getElementById('send-button').onclick = dispatchMessagePacket;
+        messageBox.onkeydown = (e) => { if (e.key === 'Enter') dispatchMessagePacket(); };
+
+        function dispatchMessagePacket() {
+            const rawText = messageBox.value.trim();
+            if (rawText === "") return;
+            messageBox.value = "";
+            charCountDisplay.innerText = "0/500";
+            clearMyTypingState();
+
+            if (!firebaseActive) {
+                appendMsgDOM(Date.now().toString(), { username: myHandle, text: rawText, timestamp: Date.now() });
+                return;
+            }
+
+            const u = firebase.auth().currentUser;
+            const payload = {
+                username: myHandle,
+                text: rawText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                pfp: currentUserPfp,
+                status: currentUserStatus
+            };
+
+            firebase.database().ref(`channels/${currentChannel}`).push(payload).then(() => {
+                firebase.database().ref(`users/${u.uid}/msgCount`).set(firebase.database.ServerValue.INCREMENT(1));
+                triggerChannelCleanupPruning(currentChannel);
+            });
+        }
+
+        /* Drag-And-Drop Inline Storage Pipeline */
+        const chatDeckElement = document.querySelector('.chat-deck');
+        const dragOverlay = document.getElementById('drag-overlay');
+
+        chatDeckElement.ondragover = (e) => { e.preventDefault(); dragOverlay.style.display = "flex"; };
+        dragOverlay.ondragleave = () => { dragOverlay.style.display = "none"; };
+        chatDeckElement.ondrop = (e) => {
+            e.preventDefault();
+            dragOverlay.style.display = "none";
+            if (!firebaseActive) return;
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const base64Str = evt.target.result;
+                    const u = firebase.auth().currentUser;
+                    const payload = {
+                        username: myHandle,
+                        text: "[Attached Media Log Matrix Packet]",
+                        mediaUrl: base64Str,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        pfp: currentUserPfp,
+                        status: currentUserStatus
+                    };
+                    firebase.database().ref(`channels/${currentChannel}`).push(payload).then(() => {
+                        firebase.database().ref(`users/${u.uid}/msgCount`).set(firebase.database.ServerValue.INCREMENT(1));
+                        triggerChannelCleanupPruning(currentChannel);
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        /* Settings Mechanics */
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsThemeDropdown = document.getElementById('settings-theme-dropdown');
+        const settingsStatusInput = document.getElementById('settings-status-input');
+        let holdingBase64Pfp = null;
+
         function openSettings() {
-            document.getElementById('settings-theme-dropdown').value = currentUserTheme;
-            document.getElementById('settings-status-input').value = currentUserStatus;
-            selectedSettingsPfpData = null;
+            settingsThemeDropdown.value = currentUserTheme;
+            settingsStatusInput.value = currentUserStatus;
+            holdingBase64Pfp = currentUserPfp;
             settingsModal.style.display = 'flex';
         }
-
         function closeSettings() { settingsModal.style.display = 'none'; }
 
-        function previewSettingsPfp(input) {
-            if (input.files && input.files[0]) {
+        function previewSettingsPfp(inputElement) {
+            if (inputElement.files && inputElement.files[0]) {
                 const reader = new FileReader();
-                reader.onload = (e) => { selectedSettingsPfpData = e.target.result; };
-                reader.readAsDataURL(input.files[0]);
+                reader.onload = function(e) { holdingBase64Pfp = e.target.result; };
+                reader.readAsDataURL(inputElement.files[0]);
             }
         }
 
         function saveSettingsChanges() {
-            const tSel = document.getElementById('settings-theme-dropdown').value;
-            const sSel = document.getElementById('settings-status-input').value.trim();
-
-            if (firebaseActive) {
-                const u = firebase.auth().currentUser;
-                if (u) {
-                    const updates = { theme: tSel, status: sSel };
-                    
-                    if (selectedSettingsPfpData) {
-                        // Store inline as direct string signature profiles block if small enough or upload mock
-                        updates.pfp = selectedSettingsPfpData;
-                    }
-                    
-                    firebase.database().ref('users/' + u.uid).update(updates).then(() => closeSettings());
-                    return;
-                }
-            } else {
-                currentUserTheme = tSel;
-                currentUserStatus = sSel;
-                if (selectedSettingsPfpData) currentUserPfp = selectedSettingsPfpData;
-                runThemeAdjustmentEngine(currentUserTheme);
-                myHandleDisplay.innerText = myHandle;
-                if (currentUserPfp) profileAvatarSlot.innerHTML = `<img src="${currentUserPfp}">`;
-                if(currentUserStatus) myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
+            const activeUser = firebase.auth().currentUser;
+            if (!activeUser) return;
+            firebase.database().ref('users/' + activeUser.uid).update({
+                pfp: holdingBase64Pfp || "",
+                status: settingsStatusInput.value.trim(),
+                theme: settingsThemeDropdown.value
+            }).then(() => {
+                playSyntheticPing('chime');
                 closeSettings();
-            }
-        }
-
-        // Global Pipeline Notifications Matrix
-        let notificationMetricsMap = {};
-        function setupGlobalNotificationTrackers() {
-            firebase.database().ref('messages').on('child_changed', (snap) => {
-                const cId = snap.key;
-                if (cId === currentChannel) return;
-                
-                // Fetch last element record entry info
-                firebase.database().ref('messages/' + cId).limitToLast(1).once('value', (inner) => {
-                    const record = inner.val() || {};
-                    const data = Object.values(record)[0];
-                    if(data && data.sender !== myHandle) {
-                        notificationMetricsMap[cId] = (notificationMetricsMap[cId] || 0) + 1;
-                        renderChannelsSidebarDOM();
-                    }
-                });
             });
         }
 
-        function renderBadgeHtml(cId) {
-            const count = notificationMetricsMap[cId] || 0;
-            return count > 0 ? `<span class="notif-badge">${count}</span>` : '';
-        }
+        let targetMiniProfileHandle = "";
+        const miniProfileModal = document.getElementById('mini-profile-modal');
 
-        function clearNotificationTrack(cId) {
-            if (notificationMetricsMap[cId]) {
-                delete notificationMetricsMap[cId];
-                renderChannelsSidebarDOM();
-            }
-        }
-
-        // Connected Friends Directory Operations Matrix
-        let myFriends = [];
-        function renderFriendList() {
-            friendListContainer.innerHTML = "";
-            if (myFriends.length === 0) {
-                friendListContainer.innerHTML = `<li style="filter:brightness(0.5); font-style:italic; font-size:12px; pointer-events:none;">Empty grid sequence</li>`;
-                return;
-            }
-            myFriends.forEach(fHandle => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>👤 ${fHandle}</span><span style="font-size:10px; color:var(--accent-blue);">[View]</span>`;
-                li.onclick = () => inspectPeerProfile(fHandle);
-                friendListContainer.appendChild(li);
-            });
-        }
-
-        function manualAddFriend() {
-            const target = document.getElementById('add-friend-input').value.trim();
-            if(!target) return;
-            if(target === myHandle) { alert("Self pairing anomaly loop."); return; }
-            
-            if(!firebaseActive) {
-                if(!myFriends.includes(target)) { myFriends.push(target); renderFriendList(); }
-                document.getElementById('add-friend-input').value = "";
-                return;
-            }
-
-            firebase.database().ref('users').orderByChild('handle').equalTo(target).once('value', (snap) => {
-                if(snap.exists()) {
-                    const u = firebase.auth().currentUser;
-                    if(!myFriends.includes(target)) {
-                        myFriends.push(target);
-                        firebase.database().ref('users/' + u.uid + '/friends').set(myFriends);
-                    }
-                    document.getElementById('add-friend-input').value = "";
-                } else alert("Coordinate handle query identity not located.");
-            });
-        }
-
-        function inspectPeerProfile(handleStr) {
-            activeSelectedUserHandle = handleStr;
-            const pSlot = document.getElementById('mini-profile-avatar');
-            const nSlot = document.getElementById('mini-profile-name');
-            const sSlot = document.getElementById('mini-profile-status-wrapper');
-
-            nSlot.innerText = handleStr;
-            pSlot.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${handleStr}" style="width:100%; height:100%; object-fit:cover;">`;
-            sSlot.innerHTML = `<span style="font-size:12px; filter:brightness(0.6);">Fetching remote signature block...</span>`;
+        function openMiniProfile(username, pfpUrl, statusText) {
+            targetMiniProfileHandle = username;
+            document.getElementById('mini-profile-name').innerText = username;
+            document.getElementById('mini-profile-avatar').innerHTML = `<img src="${pfpUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+            document.getElementById('mini-profile-status-wrapper').innerHTML = statusText ? 
+                `<span class="status-bubble-tag">${statusText}</span>` : 
+                `<span class="status-bubble-tag" style="color:grey; border-color:var(--border-color)">Offline Record Matrix</span>`;
             miniProfileModal.style.display = 'flex';
-
-            if(firebaseActive) {
-                firebase.database().ref('users').orderByChild('handle').equalTo(handleStr).once('value', (snap) => {
-                    const data = snap.val();
-                    if(data) {
-                        const obj = Object.values(data)[0];
-                        if(obj.pfp) pSlot.innerHTML = `<img src="${obj.pfp}" style="width:100%; height:100%; object-fit:cover;">`;
-                        if(obj.status) sSlot.innerHTML = `<span class="status-bubble-tag">${obj.status}</span>`;
-                        else sSlot.innerHTML = `<span class="status-bubble-tag" style="opacity:0.5; background:none;">No status broadcasted</span>`;
-                    }
-                });
-            } else {
-                sSlot.innerHTML = `<span class="status-bubble-tag" style="opacity:0.5; background:none;">Offline simulated entity</span>`;
-            }
         }
 
-        function closeMiniProfile() { miniProfileModal.style.display = 'none'; }
+        function closeMiniProfile() {
+            miniProfileModal.style.display = 'none';
+            targetMiniProfileHandle = "";
+        }
 
         function actionAddFriend() {
-            if(activeSelectedUserHandle && !myFriends.includes(activeSelectedUserHandle)) {
-                myFriends.push(activeSelectedUserHandle);
-                if (firebaseActive) {
-                    const u = firebase.auth().currentUser;
-                    firebase.database().ref('users/' + u.uid + '/friends').set(myFriends);
-                } else {
-                    renderFriendList();
-                }
-            }
+            if (targetMiniProfileHandle) submitFriendToDatabase(targetMiniProfileHandle);
             closeMiniProfile();
         }
 
-        // =========================================================================
-        // --- REALTIME WEB RTC GROUP MESH CALL SIGNALLING INTERFACE ---
-        // =========================================================================
-        function synchronizeGroupCallSignalingForChannel() {
-            if (activeGroupCallSignalRef) {
-                activeGroupCallSignalRef.off();
-            }
-            if (!firebaseActive) return;
+        function actionDMUser() {
+            if (!targetMiniProfileHandle) return;
+            const target = targetMiniProfileHandle;
+            closeMiniProfile();
+            const dmRoomId = [myHandle.toLowerCase(), target.toLowerCase()].sort().join('_');
+            switchChannel(`dm_${dmRoomId}`, `DM Connection: ${target}`, false);
+        }
 
-            activeGroupCallSignalRef = firebase.database().ref('groupCalls/' + currentChannel);
-            activeGroupCallSignalRef.on('value', (snap) => {
-                const callInfo = snap.val();
-                if (callInfo && callInfo.status === 'active') {
-                    // There is an ongoing group call session. If we are not part of it, notify user
-                    if (!activeCallChannel || activeCallChannel !== currentChannel) {
-                        // Only trigger incoming broadcast popup if the broadcast didn't initiate from us
-                        if (callInfo.host !== myHandle) {
-                            document.getElementById('incoming-call-title').innerText = `Group Call: ${callInfo.host}`;
-                            incomingCallModal.style.display = 'flex';
-                        }
-                    }
-                } else {
-                    // Call session terminated or cleared
-                    incomingCallModal.style.display = 'none';
-                    if (activeCallChannel === currentChannel) {
-                        endGroupCall(false);
+        /* =========================================================================
+           10. LINK ROSTER NODES PIPELINE
+           ========================================================================= */
+        const friendInput = document.getElementById('add-friend-input');
+        const friendContainer = document.getElementById('friend-list-container');
+        let myFriends = [];
+
+        function manualAddFriend() {
+            const target = friendInput.value.trim().replace(/[^a-zA-Z0-9_]/g, '');
+            if (!target || target.toLowerCase() === myHandle.toLowerCase()) return;
+            submitFriendToDatabase(target);
+            friendInput.value = "";
+        }
+
+        function submitFriendToDatabase(targetHandle) {
+            if (!firebaseActive) return;
+            firebase.database().ref('usernames/' + targetHandle.toLowerCase()).once('value').then((snap) => {
+                if (!snap.exists()) alert("Alias mapping match failure. Vector not discovered on network nodes.");
+                else {
+                    if (!myFriends.includes(targetHandle)) {
+                        myFriends.push(targetHandle);
+                        const u = firebase.auth().currentUser;
+                        firebase.database().ref(`users/${u.uid}/friends`).set(myFriends);
                     }
                 }
             });
         }
 
-        async function startGroupCall(videoOption) {
-            isVideoCallType = videoOption;
-            activeCallChannel = currentChannel;
-            incomingCallModal.style.display = 'none';
-            callModal.style.display = 'flex';
-            callStatusText.innerText = 'Initializing local stream devices...';
+        function renderFriendList() {
+            friendContainer.innerHTML = "";
+            myFriends.forEach(friend => {
+                const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
+                const li = document.createElement('li');
+                li.className = currentChannel === `dm_${dmRoomId}` ? 'active' : '';
+                li.innerHTML = `<span>👤 ${friend}</span> ${renderBadgeHtml(`dm_${dmRoomId}`)}`;
+                li.onclick = () => switchChannel(`dm_${dmRoomId}`, `DM Connection: ${friend}`, false);
+                friendContainer.appendChild(li);
+            });
+        }
 
-            if (isVideoCallType) {
-                videoStageGrid.style.display = 'grid';
-                voiceStageEl.style.display = 'none';
-            } else {
-                videoStageGrid.style.display = 'none';
-                voiceStageEl.style.display = 'flex';
-            }
+        /* =========================================================================
+           11. REALTIME RECURSIVE ARCHIVE PRUNING UTILITY
+           ========================================================================= */
+        let pruneInFlight = {};
+        function triggerChannelCleanupPruning(channelId) {
+            if (!firebaseActive || pruneInFlight[channelId]) return;
+            pruneInFlight[channelId] = true;
 
-            // Flush the current visual display grid tracks
-            videoStageGrid.innerHTML = "";
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: isVideoCallType,
-                    audio: true
-                });
-
-                // Attach your own video window layout template block inside grid architecture
-                appendUserVideoTrackWrapper(myHandle, localStream, true);
-                callStatusText.innerText = 'Synchronizing peer negotiation mesh...';
-
-                if (firebaseActive) {
-                    callGroupRef = firebase.database().ref('groupCalls/' + currentChannel);
-                    
-                    // Create call record node if it doesn't exist
-                    await callGroupRef.transaction((currentData) => {
-                        if (currentData === null) {
-                            return {
-                                status: 'active',
-                                host: myHandle,
-                                type: isVideoCallType ? 'video' : 'voice',
-                                timestamp: firebase.database.ServerValue.TIMESTAMP
-                            };
-                        }
-                        return currentData; // Keep existing session parameters
-                    });
-
-                    // Insert individual peer online notification path structure inside room container
-                    const participantRef = callGroupRef.child('participants').child(myHandle);
-                    await participantRef.set({
-                        joined: true,
-                        mic: micEnabled,
-                        cam: camEnabled,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    });
-
-                    // Track changes inside room to map other participants
-                    callGroupRef.child('participants').on('child_added', (pSnap) => {
-                        const peerHandleId = pSnap.key;
-                        if (peerHandleId !== myHandle && !peerConnections[peerHandleId]) {
-                            initiateNewPeerMeshConnection(peerHandleId, true);
-                        }
-                    });
-
-                    callGroupRef.child('participants').on('child_removed', (pSnap) => {
-                        const peerHandleId = pSnap.key;
-                        teardownPeerConnection(peerHandleId);
-                    });
-
-                    // Listen for incoming RTC negotiation messages addressing this handle node identity block
-                    const signalInboxRef = callGroupRef.child('signals').child(myHandle);
-                    signalInboxRef.on('child_added', async (sSnap) => {
-                        const envelope = sSnap.val();
-                        const senderId = envelope.sender;
-                        sSnap.ref.remove(); // Clean signaling packet message queue immediately
-
-                        if (!peerConnections[senderId]) {
-                            initiateNewPeerMeshConnection(senderId, false);
-                        }
-
-                        const pc = peerConnections[senderId];
-                        if (envelope.sdp) {
-                            await pc.setRemoteDescription(new RTCSessionDescription(envelope.sdp));
-                            if (envelope.sdp.type === 'offer') {
-                                const answerDesc = await pc.createAnswer();
-                                await pc.setLocalDescription(answerDesc);
-                                transmitGroupSignalPacket(senderId, { sdp: answerDesc });
-                            }
-                        } else if (envelope.ice) {
-                            try {
-                                await pc.addIceCandidate(new RTCIceCandidate(envelope.ice));
-                            } catch(e) { console.warn("ICE attachment anomaly: ", e); }
-                        }
-                    });
-
-                    callStatusText.innerText = 'Connected inside Mesh session line.';
-                } else {
-                    callStatusText.innerText = 'Simulated environment call active.';
+            const ref = firebase.database().ref(`channels/${channelId}`);
+            ref.limitToLast(MAX_VISIBLE_MESSAGES + 25).once('value').then((snap) => {
+                const total = snap.numChildren();
+                if (total <= MAX_VISIBLE_MESSAGES) {
+                    pruneInFlight[channelId] = false;
+                    return;
                 }
-
-            } catch (err) {
-                console.error("Local media mapping exception: ", err);
-                callStatusText.innerText = 'Device configuration access failure.';
-            }
-        }
-
-        function initiateNewPeerMeshConnection(peerHandleId, isInitiator) {
-            const pc = new RTCPeerConnection(rtcIceConfig);
-            peerConnections[peerHandleId] = pc;
-
-            // Feed local tracks down into the connection layout stream architecture pipelines
-            if (localStream) {
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            }
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    transmitGroupSignalPacket(peerHandleId, { ice: event.candidate });
-                }
-            };
-
-            pc.ontrack = (event) => {
-                appendUserVideoTrackWrapper(peerHandleId, event.streams[0], false);
-            };
-
-            if (isInitiator) {
-                pc.onnegotiationneeded = async () => {
-                    try {
-                        const offerDesc = await pc.createOffer();
-                        await pc.setLocalDescription(offerDesc);
-                        transmitGroupSignalPacket(peerHandleId, { sdp: offerDesc });
-                    } catch (err) { console.error(err); }
-                };
-            }
-        }
-
-        function transmitGroupSignalPacket(recipientId, packet) {
-            if (!firebaseActive || !callGroupRef) return;
-            packet.sender = myHandle;
-            callGroupRef.child('signals').child(recipientId).push(packet);
-        }
-
-        function appendUserVideoTrackWrapper(userTagId, sourceStream, isLocal) {
-            let wrap = document.getElementById(`wrap-video-${userTagId}`);
-            if (!wrap) {
-                wrap = document.createElement('div');
-                wrap.id = `wrap-video-${userTagId}`;
-                wrap.className = `video-wrapper ${isLocal ? 'local-video-wrap' : ''}`;
-                
-                const label = document.createElement('div');
-                label.className = 'video-label-tag';
-                label.innerText = userTagId;
-
-                const videoEl = document.createElement('video');
-                videoEl.autoplay = true;
-                videoEl.playsinline = true;
-                if (isLocal) videoEl.muted = true; // Avoid feedback looping out locally
-
-                wrap.appendChild(label);
-                wrap.appendChild(videoEl);
-                videoStageGrid.appendChild(wrap);
-            }
-            const videoElem = wrap.querySelector('video');
-            if (videoElem.srcObject !== sourceStream) {
-                videoElem.srcObject = sourceStream;
-            }
-        }
-
-        function teardownPeerConnection(peerHandleId) {
-            if (peerConnections[peerHandleId]) {
-                peerConnections[peerHandleId].close();
-                delete peerConnections[peerHandleId];
-            }
-            const el = document.getElementById(`wrap-video-${peerHandleId}`);
-            if (el) el.remove();
-        }
-
-        function acceptGroupCall() {
-            incomingCallModal.style.display = 'none';
-            if (firebaseActive && activeGroupCallSignalRef) {
-                activeGroupCallSignalRef.once('value', (snap) => {
-                    const info = snap.val();
-                    const typeOption = (info && info.type === 'video');
-                    startGroupCall(typeOption);
+                const removeCount = total - MAX_VISIBLE_MESSAGES;
+                const updates = {};
+                let i = 0;
+                snap.forEach((child) => {
+                    if (i < removeCount) {
+                        updates[child.key] = null;
+                        i++;
+                    } else {
+                        return true;
+                    }
                 });
-            } else {
-                startGroupCall(true);
-            }
+                return ref.update(updates);
+            }).then(() => {
+                pruneInFlight[channelId] = false;
+            }).catch(() => {
+                pruneInFlight[channelId] = false;
+            });
         }
 
-        function rejectGroupCall() {
-            incomingCallModal.style.display = 'none';
-        }
+        /* =========================================================================
+           12. REAL-TIME VOICE / VIDEO CALL ENGINE (WebRTC Pipeline)
+           ========================================================================= */
+        let localStream = null;
+        let peerConnection = null;
+        let callSignalRef = null;
+        let activeCallChannel = null;
+        let incomingCallData = null;
+        let micEnabled = true;
+        let camEnabled = true;
+        let callClockTimer = null;
 
-        async function endGroupCall(shouldBroadcastTermination) {
-            if (firebaseActive && callGroupRef && activeCallChannel) {
-                // Remove listener updates inside targeted node instances
-                callGroupRef.child('participants').off();
-                callGroupRef.child('signals').child(myHandle).off();
-                
-                // Remove self parameter listings entries
-                await callGroupRef.child('participants').child(myHandle).remove();
+        const callModal = document.getElementById('call-modal');
+        const incomingModal = document.getElementById('incoming-call-modal');
+        const callStatusEl = document.getElementById('call-status-text');
+        const callModalTitle = document.getElementById('call-modal-title');
+        const clockEl = document.getElementById('call-duration-clock');
+        const localVideoEl = document.getElementById('local-video');
+        const remoteVideoEl = document.getElementById('remote-video');
+        const videoStage = document.getElementById('video-stage');
+        const voiceStage = document.getElementById('voice-stage');
 
-                if (shouldBroadcastTermination) {
-                    // Check if we are the host node or last one out to decide session deletion cleanup
-                    const snap = await callGroupRef.child('participants').once('value');
-                    if (!snap.exists()) {
-                        await callGroupRef.set(null); // Wipe complete dynamic call directory node block parameters
+        const rtcIceServersConfiguration = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
+
+        function setupCallListener(channelId) {
+            if (!firebaseActive) return;
+            if (callSignalRef) callSignalRef.off();
+
+            callSignalRef = firebase.database().ref(`calls/${channelId}`);
+            callSignalRef.on('value', (snap) => {
+                const data = snap.val();
+                if (!data) {
+                    if (peerConnection) endCall(false);
+                    return;
+                }
+                const remoteParticipantId = Object.keys(data).find(k => k !== myHandle.toLowerCase());
+                if (!remoteParticipantId) return;
+
+                const remoteNode = data[remoteParticipantId];
+                if (remoteNode.action === 'offer' && !peerConnection && incomingModal.style.display !== 'flex' && callModal.style.display !== 'flex') {
+                    incomingCallData = { peer: remoteParticipantId, offer: remoteNode.sdp, isVideo: remoteNode.isVideo };
+                    document.getElementById('incoming-call-text').innerText = `Node coordinate [${remoteParticipantId.toUpperCase()}] requests synchronization...`;
+                    incomingModal.style.display = 'flex';
+                    playSyntheticPing('ring');
+                } else if (remoteNode.action === 'answer' && peerConnection && !peerConnection.currentRemoteDescription) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(remoteNode.sdp))
+                        .then(() => { callStatusEl.innerText = 'Signal synchronized. Matrix pipelines active.'; startCallTimerClock(); })
+                        .catch(e => console.error("Remote synchronization failure:", e));
+                } else if (remoteNode.action === 'candidate' && peerConnection) {
+                    if (remoteNode.candidate) {
+                        peerConnection.addIceCandidate(new RTCIceCandidate(remoteNode.candidate)).catch(e => {});
                     }
                 }
-            }
+            });
+        }
 
+        function startCall(wantsVideo) {
+            if (!firebaseActive || !currentChannel.startsWith('dm_')) return;
+            activeCallChannel = currentChannel;
+            callModalTitle.innerText = `Establishing Communication: ${wantsVideo ? 'Video Vector' : 'Voice Vector'}`;
+            callStatusEl.innerText = 'Requesting dynamic media hardware stream paths...';
+            
+            videoStage.style.display = wantsVideo ? 'block' : 'none';
+            voiceStage.style.display = wantsVideo ? 'none' : 'flex';
+            callModal.style.display = 'flex';
+
+            micEnabled = true;
+            camEnabled = wantsVideo;
+            document.getElementById('btn-toggle-mic').innerText = '🎙️ Mic On';
+            document.getElementById('btn-toggle-mic').classList.remove('btn-off');
+            document.getElementById('btn-toggle-cam').innerText = wantsVideo ? '📹 Cam On' : '📷 Cam Off';
+            document.getElementById('btn-toggle-cam').classList.toggle('btn-off', !wantsVideo);
+
+            navigator.mediaDevices.getUserMedia({ audio: true, video: wantsVideo })
+                .then(stream => {
+                    localStream = stream;
+                    localVideoEl.srcObject = stream;
+                    callStatusEl.innerText = 'Assembling pipeline topologies...';
+                    
+                    peerConnection = new RTCPeerConnection(rtcIceServersConfiguration);
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+                    peerConnection.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
+                                action: 'candidate',
+                                candidate: event.candidate.toJSON()
+                            });
+                        }
+                    };
+
+                    peerConnection.ontrack = (event) => {
+                        if (event.streams && event.streams[0]) {
+                            remoteVideoEl.srcObject = event.streams[0];
+                        }
+                    };
+
+                    return peerConnection.createOffer();
+                })
+                .then(offer => peerConnection.setLocalDescription(offer).then(() => offer))
+                .then(offer => {
+                    return firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
+                        action: 'offer',
+                        sdp: offer.toJSON(),
+                        isVideo: wantsVideo
+                    });
+                })
+                .then(() => { callStatusEl.innerText = 'Awaiting remote endpoint negotiation...'; })
+                .catch(err => {
+                    console.error("Local WebRTC hardware configuration malfunction:", err);
+                    callStatusEl.innerText = `Hardware Link Error: ${err.message}`;
+                    setTimeout(() => endCall(true), 4000);
+                });
+        }
+
+        function acceptIncomingCallSignal() {
+            if (!incomingCallData) return;
+            incomingModal.style.display = 'none';
+            activeCallChannel = currentChannel;
+
+            callModalTitle.innerText = `Connected Pipeline: ${incomingCallData.isVideo ? 'Video Vector' : 'Voice Vector'}`;
+            callStatusEl.innerText = 'Accessing structural processing units...';
+            videoStage.style.display = incomingCallData.isVideo ? 'block' : 'none';
+            voiceStage.style.display = incomingCallData.isVideo ? 'none' : 'flex';
+            callModal.style.display = 'flex';
+
+            micEnabled = true;
+            camEnabled = incomingCallData.isVideo;
+            document.getElementById('btn-toggle-mic').innerText = '🎙️ Mic On';
+            document.getElementById('btn-toggle-mic').classList.remove('btn-off');
+            document.getElementById('btn-toggle-cam').innerText = camEnabled ? '📹 Cam On' : '📷 Cam Off';
+            document.getElementById('btn-toggle-cam').classList.toggle('btn-off', !camEnabled);
+
+            navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.isVideo })
+                .then(stream => {
+                    localStream = stream;
+                    localVideoEl.srcObject = stream;
+                    
+                    peerConnection = new RTCPeerConnection(rtcIceServersConfiguration);
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+                    peerConnection.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
+                                action: 'candidate',
+                                candidate: event.candidate.toJSON()
+                            });
+                        }
+                    };
+
+                    peerConnection.ontrack = (event) => {
+                        if (event.streams && event.streams[0]) {
+                            remoteVideoEl.srcObject = event.streams[0];
+                        }
+                    };
+
+                    return peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+                })
+                .then(() => peerConnection.createAnswer())
+                .then(answer => peerConnection.setLocalDescription(answer).then(() => answer))
+                .then(answer => {
+                    return firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
+                        action: 'answer',
+                        sdp: answer.toJSON(),
+                        isVideo: incomingCallData.isVideo
+                    });
+                })
+                .then(() => { callStatusEl.innerText = 'Synchronized. Direct matrix connection live.'; startCallTimerClock(); })
+                .catch(err => {
+                    console.error("Endpoint assignment configuration failure:", err);
+                    endCall(true);
+                });
+        }
+
+        function rejectIncomingCallSignal() {
+            incomingModal.style.display = 'none';
+            if (currentChannel && firebaseActive) {
+                firebase.database().ref(`calls/${currentChannel}`).remove();
+            }
+            incomingCallData = null;
+        }
+
+        function startCallTimerClock() {
+            clearInterval(callClockTimer);
+            let sec = 0;
+            clockEl.innerText = "00:00";
+            callClockTimer = setInterval(() => {
+                sec++;
+                let m = String(Math.floor(sec / 60)).padStart(2, '0');
+                let s = String(sec % 60).padStart(2, '0');
+                clockEl.innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function endCall(triggerDatabaseWipe) {
+            clearInterval(callClockTimer);
+            clockEl.innerText = "00:00";
+            if (triggerDatabaseWipe && firebaseActive && activeCallChannel) {
+                firebase.database().ref(`calls/${activeCallChannel}`).remove();
+            }
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
-
-            Object.keys(peerConnections).forEach(pId => teardownPeerConnection(pId));
-            peerConnections = {};
-
-            callGroupRef = null;
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
             activeCallChannel = null;
+            incomingCallData = null;
             callModal.style.display = 'none';
-            incomingCallModal.style.display = 'none';
-            videoStageGrid.innerHTML = "";
+            incomingModal.style.display = 'none';
+            localVideoEl.srcObject = null;
+            remoteVideoEl.srcObject = null;
         }
 
         function toggleMic() {
             if (!localStream) return;
             micEnabled = !micEnabled;
-            localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
+            localStream.getAudioTracks().forEach((t) => { t.enabled = micEnabled; });
             const btn = document.getElementById('btn-toggle-mic');
             btn.innerText = micEnabled ? '🎙️ Mic On' : '🔇 Muted';
             btn.classList.toggle('btn-off', !micEnabled);
-
-            if (firebaseActive && callGroupRef) {
-                callGroupRef.child('participants').child(myHandle).update({ mic: micEnabled });
-            }
         }
 
         function toggleCam() {
             if (!localStream) return;
-            const vTracks = localStream.getVideoTracks();
-            if (vTracks.length === 0) return;
-
+            const videoTracks = localStream.getVideoTracks();
+            if (videoTracks.length === 0) {
+                callStatusEl.innerText = 'This is a voice-only call (no camera).';
+                return;
+            }
             camEnabled = !camEnabled;
-            vTracks.forEach(t => t.enabled = camEnabled);
+            videoTracks.forEach((t) => { t.enabled = camEnabled; });
             const btn = document.getElementById('btn-toggle-cam');
-            btn.innerText = camEnabled ? '¼ Cam On' : '📷 Cam Off';
+            btn.innerText = camEnabled ? '📹 Cam On' : '📷 Cam Off';
             btn.classList.toggle('btn-off', !camEnabled);
-
-            const selfWrap = document.getElementById(`wrap-video-${myHandle}`);
-            if (selfWrap) {
-                const v = selfWrap.querySelector('video');
-                if (v) v.style.opacity = camEnabled ? '1' : '0.2';
-            }
-
-            if (firebaseActive && callGroupRef) {
-                callGroupRef.child('participants').child(myHandle).update({ cam: camEnabled });
-            }
+            localVideoEl.style.opacity = camEnabled ? '1' : '0.2';
         }
 
-        // Auxiliary Tools Sanitization Helper Modules
-        function escapeHtmlCode(str) {
-            if(!str) return "";
+        /* =========================================================================
+           13. HELPER FUNCTIONS & SYNTHETIC AUDIO ENGINE
+           ========================================================================= */
+        function escapeHtml(str) {
+            if(!str) return '';
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        window.addEventListener('beforeunload', () => { endGroupCall(true); });
+        function triggerChannelCreationWizard() {
+            document.getElementById('new-channel-name-input').value = "";
+            document.getElementById('create-channel-modal').style.display = 'flex';
+        }
+        function closeChannelCreationWizard() { document.getElementById('create-channel-modal').style.display = 'none'; }
+
+        function commitChannelCreationToDatabase() {
+            const rawTag = document.getElementById('new-channel-name-input').value.trim();
+            const checkedTag = rawTag.replace(/[^a-zA-Z0-9_\s-]/g, '');
+            if(checkedTag.length < 2) return;
+            closeChannelCreationWizard();
+
+            if(!firebaseActive) return;
+            const ref = firebase.database().ref('channels_list').push();
+            const u = firebase.auth().currentUser;
+            const packet = { id: ref.key, name: checkedTag, ownerId: u.uid };
+            ref.set(packet);
+        }
+
+        function removeChannelNode(channelId, clickEvent) {
+            if(clickEvent) clickEvent.stopPropagation();
+            if(!firebaseActive || myHandle !== "DAMXIAFAN69") return;
+            if(confirm("Confirm destructive update to wipe communication log context pipeline?")) {
+                firebase.database().ref(`channels_list`).orderByChild('id').equalTo(channelId).once('value', (snap) => {
+                    snap.forEach((child) => { child.ref.remove(); });
+                });
+                firebase.database().ref(`channels/${channelId}`).remove();
+                if(currentChannel === channelId) switchChannel('global', 'Global Hub', true);
+            }
+        }
+
+        function playSyntheticPing(type) {
+            const el = document.getElementById('audio-synth-ping');
+            if(!el) return;
+            let targetUrl = "";
+            if (type === 'click') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAD";
+            else if (type === 'ping') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAQBA";
+            else if (type === 'chime') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAACA";
+            else if (type === 'ring') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAMDBA";
+            
+            if (targetUrl !== "") {
+                el.src = targetUrl;
+                el.play().catch(() => {});
+            }
+        }
+
+        window.addEventListener('beforeunload', () => { if (peerConnection) endCall(false); });
     </script>
 </body>
 </html>
