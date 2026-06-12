@@ -1113,14 +1113,23 @@
     <script>
         // Insert Firebase Configurations Configured by User
         const firebaseConfig = {
-            apiKey: "AIzaSyAsdfYOUR_API_KEY_HERE",
-            authDomain: "aerosocial-mesh.firebaseapp.com",
-            databaseURL: "https://aerosocial-mesh-default-rtdb.firebaseio.com",
-            projectId: "aerosocial-mesh",
-            storageBucket: "aerosocial-mesh.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef123456"
+            apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
+            authDomain: "aero-419e0.firebaseapp.com",
+            databaseURL: "https://aero-419e0-default-rtdb.firebaseio.com",
+            projectId: "aero-419e0",
+            storageBucket: "aero-419e0.firebasestorage.app",
+            messagingSenderId: "915787528277",
+            appId: "1:915787528277:web:07d756421995531c923cdc",
+            measurementId: "G-L0FH99LT4L"
         };
+
+        let firebaseActive = false;
+        try {
+            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE")) {
+                firebase.initializeApp(firebaseConfig);
+                firebaseActive = true;
+            }
+        } catch(e) { console.error("Firebase initializing anomaly:", e); }
 
         let firebaseActive = false;
         try {
