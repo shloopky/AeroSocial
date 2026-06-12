@@ -22,37 +22,6 @@
             --border-radius: 4px;
         }
 
-        /* Gloopy Purple Glowing Admin Text Styles */
-        .gloopy-glow {
-            color: #d152ff !important;
-            font-weight: bold;
-            text-shadow: 0 0 8px #9400d3, 0 0 15px #ba55d3;
-            animation: purplePulse 2s infinite ease-in-out;
-        }
-        @keyframes purplePulse {
-            0%, 100% { opacity: 0.9; text-shadow: 0 0 6px #9400d3, 0 0 12px #ba55d3; }
-            50% { opacity: 1; text-shadow: 0 0 12px #9400d3, 0 0 22px #ba55d3, 0 0 30px #da70d6; }
-        }
-
-        /* Top Bar System Announcement Banner */
-        #global-system-alert-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(90deg, #ff0055, #99002b);
-            color: #fff;
-            text-align: center;
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: none;
-            box-sizing: border-box;
-            border-bottom: 2px solid #ff99bb;
-        }
-
         /* Rainbow Theme */
         body.theme-rainbow {
             --bg-gradient: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0000ff, #8b00ff);
@@ -136,7 +105,7 @@
             color: #ffffff !important;
         }
 
-        /* Lain Theme */
+        /* Lain Theme (171282.gif) */
         body.theme-lain {
             background-image: linear-gradient(rgba(26, 17, 12, 0.75), rgba(15, 10, 8, 0.85)), url('171282.gif');
             background-size: cover;
@@ -158,7 +127,7 @@
             border: 1px solid #7c5843;
         }
 
-        /* Joy Theme */
+        /* Joy Theme (lalalalal.webp) */
         body.theme-joy {
             background-image: linear-gradient(rgba(18, 0, 36, 0.6), rgba(8, 0, 15, 0.8)), url('lalalalal.webp');
             background-size: cover;
@@ -180,7 +149,7 @@
             text-shadow: 0 0 5px rgba(255, 0, 187, 0.5);
         }
 
-        /* Skibidi Theme */
+        /* Skibidi Theme (Toilet.jpg) */
         body.theme-skibidi {
             background-image: linear-gradient(rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.9)), url('Toilet.jpg');
             background-size: cover;
@@ -203,6 +172,51 @@
         }
         body.theme-skibidi h1, body.theme-skibidi .panel-title {
             letter-spacing: 2px;
+        }
+
+        /* Tribe Theme (Neon Green & White with Falling Eyes) */
+        body.theme-tribe {
+            --bg-gradient: linear-gradient(135deg, #050f05 0%, #000000 100%);
+            --text-main: #ffffff;
+            --panel-bg: rgba(10, 25, 10, 0.88);
+            --inner-panel-bg: rgba(0, 0, 0, 0.6);
+            --accent-blue: #39ff14; /* Neon Green */
+            --border-color: rgba(57, 255, 20, 0.3);
+            --chat-bg: #030a03;
+            --chat-border: #39ff14;
+            --level-color: #ffffff;
+            --nav-bg: #010501;
+            --font-family: 'Courier New', monospace;
+        }
+        body.theme-tribe .showcase-panel {
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.25);
+            border: 1px solid rgba(57, 255, 20, 0.4);
+        }
+
+        /* Falling Eyes System Styling */
+        #tribe-eyes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+            display: none;
+        }
+        body.theme-tribe #tribe-eyes-container {
+            display: block;
+        }
+        @keyframes eyeFallAnimation {
+            0% { transform: translateY(-5vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+        .falling-eye-item {
+            position: absolute;
+            font-size: 22px;
+            animation: eyeFallAnimation linear infinite;
+            pointer-events: none;
         }
 
         body {
@@ -316,7 +330,7 @@
             font-size: 14px;
             border-radius: var(--border-radius);
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s;
         }
         body.theme-asdfmovie .aero-input {
             background: #ffffff;
@@ -337,14 +351,13 @@
             text-decoration: underline;
         }
         .error-banner {
-            background: rgba(194, 45, 45, 0.15);
+            background: rgba(194, 45, 45, 0.2);
             border: 1px solid #c22d2d;
             color: #ff8888;
             font-size: 13px;
-            padding: 12px;
+            padding: 10px;
             border-radius: var(--border-radius);
             display: none;
-            line-height: 1.4;
         }
 
         /* Main Profile Interface Grid Setup */
@@ -525,17 +538,6 @@
             line-height: 1.4;
             white-space: pre-wrap;
             word-break: break-word;
-        }
-
-        .msg-admin-delete-btn {
-            font-size: 10px;
-            color: #ff5555;
-            cursor: pointer;
-            background: rgba(255,0,0,0.1);
-            border: 1px solid rgba(255,0,0,0.3);
-            padding: 1px 4px;
-            border-radius: 3px;
-            margin-left: 5px;
         }
 
         /* Multimedia Embedded Previews */
@@ -762,7 +764,9 @@
             border-bottom: 4px solid #000000;
         }
 
-        /* VOICE / VIDEO CALL ENGINE STYLES */
+        /* ==========================================
+           --- VOICE / VIDEO CALL ENGINE STYLES ---
+           ========================================== */
         .btn-call {
             background: #1f7a3f;
             color: #fff;
@@ -789,34 +793,54 @@
         }
         #call-status-text { color: #8f98a0; font-size: 12px; }
 
-        #video-stage {
-            position: relative;
+        /* Multi-user Group Call Video Grid */
+        #video-stage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
             width: 100%;
             background: #000;
             border: 1px solid #2a475e;
             border-radius: var(--border-radius);
-            aspect-ratio: 16 / 9;
-            overflow: hidden;
+            min-height: 250px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 10px;
+            box-sizing: border-box;
         }
-        #remote-video {
+        .video-wrapper {
+            position: relative;
+            background: #111;
+            border: 1px solid var(--chat-border);
+            border-radius: var(--border-radius);
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .video-wrapper video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             background: #000;
         }
-        #local-video {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 28%;
-            max-width: 180px;
-            border: 2px solid var(--accent-blue);
-            border-radius: var(--border-radius);
-            object-fit: cover;
-            background: #000;
+        .video-wrapper.local-video-wrap video {
             transform: scaleX(-1);
-            transition: opacity 0.2s ease;
         }
+        .video-label-tag {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
         #voice-stage {
             display: none;
             flex-direction: column;
@@ -871,49 +895,25 @@
         }
         .stat-box .count { font-size: 22px; color: var(--text-main); font-family: var(--font-family); }
         .stat-box .label { font-size: 11px; color: var(--text-main); filter: brightness(0.7); }
-
-        /* Admin Dashboard Panel Style rules */
-        .admin-dashboard-container {
-            margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            background: rgba(0,0,0,0.4);
-            border-radius: var(--border-radius);
-            padding: 8px;
-            border: 1px dashed var(--level-color);
-        }
-        .admin-report-item {
-            font-size: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 6px 2px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .admin-report-meta {
-            display: flex;
-            justify-content: space-between;
-            color: var(--accent-blue);
-        }
     </style>
 </head>
 <body>
 
-    <div id="global-system-alert-banner">SYSTEM NOTICE: <span id="global-alert-text-span"></span></div>
+    <div id="tribe-eyes-container"></div>
 
     <nav>
         <div class="nav-container">
             <div class="brand">AERO</div>
-            <span class="nav-btn" onclick="switchChannel('global', 'Global Hub', true)">Channels</span>
-            <span class="nav-btn" onclick="openSettings()">Settings</span>
-            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:var(--text-main); filter:brightness(0.8);" id="nav-user-indicator">Not Signed In</span>
+            <span class="nav-btn" onclick="switchChannel('global', 'Global Hub', true)">Mainframe</span>
+            <span class="nav-btn" onclick="openSettings()">Customization</span>
+            <span class="nav-btn" style="margin-left: auto; font-size:12px; color:var(--text-main); filter:brightness(0.8);" id="nav-user-indicator">Disconnected Node</span>
         </div>
     </nav>
 
     <div id="boot-screen">
         <div class="boot-pod">
             <div class="boot-title">AERO SYSTEM v2.6</div>
-            <button class="btn-action" style="padding: 10px 30px; font-size:14px;" onclick="terminateBootOverlay()">Launch Application</button>
+            <button class="btn-action" style="padding: 10px 30px; font-size:14px;" onclick="terminateBootOverlay()">Synchronize Client Core</button>
         </div>
     </div>
 
@@ -922,103 +922,111 @@
             <div class="auth-title" id="auth-box-title">Sign In</div>
             <div class="error-banner" id="auth-error-display"></div>
             
-            <input type="text" id="auth-username" class="aero-input" placeholder="Username (Letters and numbers only)" maxlength="20" autocomplete="off">
-            <input type="password" id="auth-password" class="aero-input" placeholder="Password Key">
-            <button class="btn-action" id="auth-submit-btn" onclick="processAuthSubmission()">Sign In</button>
+            <input type="text" id="auth-username" class="aero-input" placeholder="User Profile Handle" maxlength="20" autocomplete="off">
+            <input type="password" id="auth-password" class="aero-input" placeholder="Security Code Credentials">
+            
+            <button class="btn-action" id="auth-submit-btn" onclick="processAuthSubmission()">Enter Matrix</button>
+            
             <div class="auth-toggle" id="auth-toggle-link" onclick="toggleAuthMode()">
-                Don't have an account? <span>Create one here</span>
+                New profile sequence? <span>Create Matrix Node</span>
             </div>
         </div>
     </div>
 
     <div id="app-root">
+        
         <div class="main-content">
+            
             <div class="header-section">
                 <div class="avatar-container">
                     <span id="profile-avatar-slot"><img src="https://via.placeholder.com/120" alt="Avatar"></span>
                 </div>
                 <div class="user-info">
-                    <h1 id="my-handle-display">User Profile</h1>
+                    <h1 id="my-handle-display">Profile Node</h1>
                     <div id="my-status-display"></div>
                 </div>
-            </div>
-
-            <div class="showcase-panel" id="admin-reports-panel" style="display:none; border: 1px solid var(--level-color);">
-                <div class="panel-title" style="color:var(--level-color);">🛡️ Gloopy Moderation Panel (Active User Reports)</div>
-                <div class="admin-dashboard-container" id="admin-reports-feed-list">No pending complaints. Excellent job!</div>
             </div>
 
             <div class="showcase-panel">
                 <div class="panel-title">
                     <span id="active-channel-title">Global Hub</span>
                     <span style="display:flex; align-items:center; gap:8px;">
-                        <button id="btn-voice-call" class="btn-call" onclick="startCall(false)" style="display:none;" title="Start a voice call">📞 Voice Call</button>
-                        <button id="btn-video-call" class="btn-call" onclick="startCall(true)" style="display:none;" title="Start a video call">📹 Video Call</button>
-                        <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Secured Pipeline Session</span>
+                        <button id="btn-group-voice-call" class="btn-call" onclick="startGroupCall(false)" style="display:none;" title="Start a group voice call">🔊 Group Voice</button>
+                        <button id="btn-group-video-call" class="btn-call" onclick="startGroupCall(true)" style="display:none;" title="Start a group video call">🎥 Group Video</button>
+                        <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
                     </span>
                 </div>
+                
                 <div class="chat-deck">
                     <div id="chat-messages"></div>
                     <div id="typing-indicator-bar"></div>
+                    
                     <div id="drag-overlay">
-                        <div>⚓ DROP ATTACHMENT IMAGE FILE HERE</div>
+                        <div>⚓ DROP IMAGE ATTACHMENT LOG HERE</div>
                     </div>
+
                     <div class="chat-controls-footer">
-                        <input type="text" id="message-box" class="aero-input" placeholder="Type a message or use commands... (max 500 characters)" maxlength="500">
+                        <input type="text" id="message-box" class="aero-input" placeholder="Transmit logs down link channel (max 500 chars)..." maxlength="500">
                         <span id="char-count" class="char-counter">0/500</span>
-                        <button class="btn-action" id="send-button">Send</button>
+                        <button class="btn-action" id="send-button">Broadcast</button>
                     </div>
                 </div>
             </div>
 
             <div class="showcase-panel">
-                <div class="panel-title">Statistics Engine</div>
+                <div class="panel-title">Collector Modules</div>
                 <div class="collector-stats-display">
                     <div class="stat-box"><div class="count" id="stat-count-items">0</div><div class="label">Items Linked</div></div>
                     <div class="stat-box"><div class="count" id="stat-count-expansions">0</div><div class="label">Expansions</div></div>
-                    <div class="stat-box"><div class="count">2026</div><div class="label">Current Era</div></div>
+                    <div class="stat-box"><div class="count">2026</div><div class="label">Client Stamp</div></div>
                 </div>
             </div>
+
         </div>
 
         <div class="sidebar">
+            
             <div class="level-badge">
                 <div>
-                    <div style="font-size: 16px;">Clearance level</div>
-                    <div style="filter:brightness(0.8); font-size: 11px;">Matrix Experience Points</div>
+                    <div style="font-size: 16px;">Node Class</div>
+                    <div style="filter:brightness(0.8); font-size: 11px;">Matrix Clearance level</div>
                 </div>
                 <div class="level-circle" id="node-level-display">1</div>
             </div>
-            <button class="btn-edit" onclick="openSettings()">Modify Profile Theme</button>
+
+            <button class="btn-edit" onclick="openSettings()">Modify Node Configuration</button>
 
             <div>
                 <div class="status-indicator" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Active Rooms</span>
-                    <span style="font-size:11px; color:var(--accent-blue); cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Create ]</span>
+                    <span>Secure Pipelines</span>
+                    <span style="font-size:11px; color:var(--accent-blue); cursor:pointer;" onclick="triggerChannelCreationWizard()">[ + Add ]</span>
                 </div>
                 <ul class="sidebar-list" id="dynamic-channels-list-container">
                 </ul>
             </div>
 
             <div>
-                <div class="status-indicator">Link Friends</div>
+                <div class="status-indicator">Connected Coordinates</div>
                 <div class="control-row-box" style="margin-bottom:8px;">
-                    <input type="text" id="add-friend-input" class="aero-input" placeholder="Username...">
-                    <button class="btn-action" onclick="manualAddFriend()">Add</button>
+                    <input type="text" id="add-friend-input" class="aero-input" placeholder="Search unique handles...">
+                    <button class="btn-action" onclick="manualAddFriend()">Link</button>
                 </div>
                 <ul class="sidebar-list" id="friend-list-container">
                 </ul>
             </div>
 
-            <button class="btn-edit btn-danger" style="margin-top:20px;" onclick="terminateUserSession()">Log Out Account</button>
+            <button class="btn-edit btn-danger" style="margin-top:20px;" onclick="terminateUserSession()">Sever Connection Node</button>
+
         </div>
+
     </div>
 
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Account Settings Matrix</h3>
+            <h3>Configure Node Meta</h3>
+            
             <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-size:12px; color:#8f98a0;">App Design Theme Matrix</label>
+                <label style="font-size:12px; color:#8f98a0;">Interface Style Matrix Theme</label>
                 <select id="settings-theme-dropdown" class="aero-input" style="width:100%; box-sizing:border-box;">
                     <option value="default">Default Aero Dark</option>
                     <option value="rainbow">🌈 Shifting Rainbow</option>
@@ -1028,19 +1036,23 @@
                     <option value="lain">🌐 Lain (The Wired Animated Graphic)</option>
                     <option value="joy">✨ Joy (Vibrant Neon WebP Illustration)</option>
                     <option value="skibidi">🚽 Skibidi (Industrial Concrete Graphic)</option>
+                    <option value="tribe">👁️ Tribe Theme (Neon Green/White Falling Eyes)</option>
                 </select>
             </div>
+
             <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-size:12px; color:#8f98a0;">Upload Custom Avatar Photo</label>
+                <label style="font-size:12px; color:#8f98a0;">Avatar Node Frame</label>
                 <input type="file" id="settings-file-input" accept="image/*" onchange="previewSettingsPfp(this)" style="font-size:11px; color:var(--text-main);">
             </div>
+
             <div style="display:flex; flex-direction:column; gap:6px;">
-                <label style="font-size:12px; color:#8f98a0;">Custom Bio Text Status Box</label>
-                <input type="text" id="settings-status-input" class="aero-input" placeholder="What's on your mind?..." maxlength="40">
+                <label style="font-size:12px; color:#8f98a0;">Broadcast Signature Phrase</label>
+                <input type="text" id="settings-status-input" class="aero-input" placeholder="Input broadcast vibe status context..." maxlength="40">
             </div>
+
             <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="btn-action btn-danger" style="flex:1;" onclick="closeSettings()">Cancel</button>
-                <button class="btn-action" style="flex:1;" onclick="saveSettingsChanges()">Save Changes</button>
+                <button class="btn-action btn-danger" style="flex:1;" onclick="closeSettings()">Abort</button>
+                <button class="btn-action" style="flex:1;" onclick="saveSettingsChanges()">Commit Changes</button>
             </div>
         </div>
     </div>
@@ -1048,25 +1060,12 @@
     <div id="mini-profile-modal" class="modal-overlay">
         <div class="modal-card" style="text-align:center; align-items:center;">
             <div class="avatar-container" id="mini-profile-avatar" style="width:80px; height:80px;"></div>
-            <h3 id="mini-profile-name" style="border:none; padding:0; margin:5px 0;">Profile</h3>
+            <h3 id="mini-profile-name" style="border:none; padding:0; margin:5px 0;">Coordinates</h3>
             <div id="mini-profile-status-wrapper"></div>
             
-            <div style="display:flex; flex-direction:column; width:100%; gap:8px; margin-top:5px;">
-                <button class="btn-action" id="btn-mini-dm" onclick="initiateDirectMessageFromModal()">Send Direct Message</button>
-                <button class="btn-action btn-danger" id="btn-mini-report" onclick="openReportReasonFormModal()">🚨 Report User</button>
-                <button class="btn-action" style="background:#555;" onclick="closeMiniProfileModal()">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="report-reason-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h3>File User Complaint</h3>
-            <p style="font-size:11px; color:#8f98a0; margin:0;">Please describe the violation reason briefly. All information is reviewed directly by Gloopy.</p>
-            <input type="text" id="report-reason-text-field" class="aero-input" placeholder="Reason (e.g. offensive text, trolling)..." maxlength="150">
-            <div style="display:flex; gap:10px;">
-                <button class="btn-action" style="background:#555; flex:1;" onclick="closeReportReasonFormModal()">Cancel</button>
-                <button class="btn-action btn-danger" style="flex:1;" onclick="submitReportToFirebaseDatabase()">Submit Report</button>
+            <div style="display:flex; gap:10px; width:100%; margin-top:10px;">
+                <button class="btn-action" style="flex:1; font-size:11px;" onclick="actionAddFriend()">Link Coordinate</button>
+                <button class="btn-action btn-danger" style="flex:1; font-size:11px;" onclick="closeMiniProfile()">Close</button>
             </div>
         </div>
     </div>
@@ -1074,36 +1073,34 @@
     <div id="call-modal" class="modal-overlay">
         <div class="modal-card">
             <div class="call-peer-line">
-                <span style="font-weight:bold; font-size:14px;">CALL SESSION IN PROGRESS</span>
-                <span id="call-duration-timer">00:00</span>
+                <span id="call-peer-title">Pipeline Group Session</span>
+                <span id="call-status-text">Synchronizing feeds...</span>
             </div>
-            <div id="call-status-text">Connecting secure signal parameters...</div>
-            
-            <div id="video-stage" style="display:none;">
-                <video id="remote-video" autoplay playsinline></video>
-                <video id="local-video" autoplay playsinline muted></video>
-            </div>
+
+            <div id="video-stage-grid"></div>
+
             <div id="voice-stage">
                 <div class="voice-pulse"></div>
-                <div style="font-size:12px; margin-top:10px;">Voice Connection Maintained</div>
+                <div style="font-size:13px; color:#8f98a0;">Mesh Audio Line Active</div>
             </div>
 
             <div class="call-controls">
-                <button class="btn-action" id="btn-toggle-mic" onclick="toggleMic()">🎙️ Mic On</button>
-                <button class="btn-action" id="btn-toggle-cam" onclick="toggleCam()">📹 Cam On</button>
-                <button class="btn-action btn-danger" onclick="endCall(true)">🛑 Disconnect</button>
+                <button id="btn-toggle-mic" class="btn-action" onclick="toggleMic()">🎙️ Mic On</button>
+                <button id="btn-toggle-cam" class="btn-action" onclick="toggleCam()">📹 Cam On</button>
+                <button class="btn-action btn-danger" onclick="endGroupCall(true)">Disconnect</button>
             </div>
         </div>
     </div>
 
     <div id="incoming-call-modal" class="modal-overlay">
         <div class="modal-card">
-            <div class="incoming-ring">🔔</div>
-            <h3 style="border:none; margin-bottom:5px;" id="incoming-call-title-text">Incoming Connection Request</h3>
-            <p style="font-size:12px; color:#8f98a0; margin-top:0;" id="incoming-call-meta-text">User is establishing a feed stream...</p>
-            <div style="display:flex; gap:12px; width:100%;">
-                <button class="btn-action btn-danger" style="flex:1;" onclick="rejectIncomingCallSignal()">Decline</button>
-                <button class="btn-action" style="flex:1; background:#1f7a3f;" onclick="acceptIncomingCallSignal()">Accept Feed</button>
+            <div class="incoming-ring">🔊</div>
+            <h3 style="border:none; margin:5px 0 0 0;" id="incoming-call-title">Group Call Broadcast</h3>
+            <p style="font-size:12px; color:#8f98a0; margin:5px 0 15px 0;">Pipeline session incoming on current channel...</p>
+            
+            <div style="display:flex; gap:15px; width:100%;">
+                <button class="btn-action btn-danger" style="flex:1;" onclick="rejectGroupCall()">Ignore</button>
+                <button class="btn-action" style="flex:1;" onclick="acceptGroupCall()">Connect</button>
             </div>
         </div>
     </div>
@@ -1114,755 +1111,870 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
-        // UPDATED SECURITY INITIALIZATION PARAMETERS WITH YOUR NEW PROD TARGET COORDINATES
+        // Insert Firebase Configurations Configured by User
         const firebaseConfig = {
-            apiKey: "AIzaSyBSyz1wEZgHwFPc8QkDFkovK0RzpSJOpaU",
-            authDomain: "aero-419e0.firebaseapp.com",
-            databaseURL: "https://aero-419e0-default-rtdb.firebaseio.com",
-            projectId: "aero-419e0",
-            storageBucket: "aero-419e0.firebasestorage.app",
-            messagingSenderId: "915787528277",
-            appId: "1:915787528277:web:07d756421995531c923cdc",
-            measurementId: "G-L0FH99LT4L"
+            apiKey: "AIzaSyAsdfYOUR_API_KEY_HERE",
+            authDomain: "aerosocial-mesh.firebaseapp.com",
+            databaseURL: "https://aerosocial-mesh-default-rtdb.firebaseio.com",
+            projectId: "aerosocial-mesh",
+            storageBucket: "aerosocial-mesh.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        let firebaseActive = false;
+        try {
+            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE")) {
+                firebase.initializeApp(firebaseConfig);
+                firebaseActive = true;
+            }
+        } catch(e) { console.error("Firebase initializing anomaly:", e); }
 
-        // DOM Element Cache Pointers
+        // Localized Memory Variables
+        let myHandle = "Profile_Node";
+        let currentUserPfp = null;
+        let currentUserStatus = "";
+        let currentUserTheme = "default";
+        let currentChannel = "global";
+        let isAuthLoginMode = true;
+        let selectedSettingsPfpData = null;
+        let activeSelectedUserHandle = null;
+
+        // Group Call Mesh Engine States
+        let localStream = null;
+        let peerConnections = {}; // Track multiple connections: userId -> RTCPeerConnection
+        let activeCallChannel = null;
+        let micEnabled = true;
+        let camEnabled = true;
+        let isVideoCallType = false;
+        let callGroupRef = null;
+
+        // Dynamic System DOM Connectors
         const bootScreen = document.getElementById('boot-screen');
         const authScreen = document.getElementById('auth-screen');
         const appRoot = document.getElementById('app-root');
-        const authBoxTitle = document.getElementById('auth-box-title');
-        const authSubmitBtn = document.getElementById('auth-submit-btn');
-        const authToggleLink = document.getElementById('auth-toggle-link');
         const authErrorDisplay = document.getElementById('auth-error-display');
-        const authUsername = document.getElementById('auth-username');
-        const authPassword = document.getElementById('auth-password');
-        
         const myHandleDisplay = document.getElementById('my-handle-display');
+        const navUserIndicator = document.getElementById('nav-user-indicator');
         const myStatusDisplay = document.getElementById('my-status-display');
         const profileAvatarSlot = document.getElementById('profile-avatar-slot');
-        const chatMessages = document.getElementById('chat-messages');
-        const messageBox = document.getElementById('message-box');
-        const sendButton = document.getElementById('send-button');
-        const charCount = document.getElementById('char-count');
         const activeChannelTitle = document.getElementById('active-channel-title');
-        const dynamicChannelsListContainer = document.getElementById('dynamic-channels-list-container');
+        const dynamicChannelsContainer = document.getElementById('dynamic-channels-list-container');
         const friendListContainer = document.getElementById('friend-list-container');
-        const nodeLevelDisplay = document.getElementById('node-level-display');
-        const navUserIndicator = document.getElementById('nav-user-indicator');
+        const chatMessagesPanel = document.getElementById('chat-messages');
+        const messageBoxInput = document.getElementById('message-box');
+        const charCounterEl = document.getElementById('char-count');
+        const sendButtonEl = document.getElementById('send-button');
 
+        // Modal Elements
         const settingsModal = document.getElementById('settings-modal');
-        const settingsThemeDropdown = document.getElementById('settings-theme-dropdown');
-        const settingsStatusInput = document.getElementById('settings-status-input');
-        const settingsFileInput = document.getElementById('settings-file-input');
-
         const miniProfileModal = document.getElementById('mini-profile-modal');
-        const miniProfileAvatar = document.getElementById('mini-profile-avatar');
-        const miniProfileName = document.getElementById('mini-profile-name');
-        const miniProfileStatusWrapper = document.getElementById('mini-profile-status-wrapper');
+        const callModal = document.getElementById('call-modal');
+        const incomingCallModal = document.getElementById('incoming-call-modal');
+        const videoStageGrid = document.getElementById('video-stage-grid');
+        const voiceStageEl = document.getElementById('voice-stage');
+        const callStatusText = document.getElementById('call-status-text');
 
-        const reportReasonModal = document.getElementById('report-reason-modal');
-        const reportReasonTextField = document.getElementById('report-reason-text-field');
-        const adminReportsPanel = document.getElementById('admin-reports-panel');
-        const adminReportsFeedList = document.getElementById('admin-reports-feed-list');
+        // WebRTC Infrastructure Constants
+        const rtcIceConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
 
-        // Internal State Engine Flags
-        let isSignUpMode = false;
-        let currentUserObj = null;
-        let myHandle = '';
-        let myBioPhrase = '';
-        let myAvatarUrl = '';
-        let currentChannel = 'global'; 
-        let channelListeners = {};
-        let myFriends = [];
-        let unreadCounts = {};
-        let globalSystemAlertTimeout = null;
+        // Falling Eyes Theme Engine
+        let eyeLoopInterval = null;
+        function runThemeAdjustmentEngine(targetTheme) {
+            document.body.className = "";
+            if(targetTheme && targetTheme !== 'default') {
+                document.body.classList.add(`theme-${targetTheme}`);
+            }
+            if (targetTheme === 'tribe') {
+                initializeFallingEyes();
+            } else {
+                terminateFallingEyes();
+            }
+        }
 
-        // Stats Counter Simulation Flags
-        let countItemsLinked = 0;
-        let countExpansions = 0;
+        function initializeFallingEyes() {
+            terminateFallingEyes();
+            const container = document.getElementById('tribe-eyes-container');
+            eyeLoopInterval = setInterval(() => {
+                if (!document.body.classList.contains('theme-tribe')) return;
+                const eyeItem = document.createElement('div');
+                eyeItem.className = 'falling-eye-item';
+                eyeItem.innerText = '👁️';
+                eyeItem.style.left = Math.random() * 100 + 'vw';
+                eyeItem.style.animationDuration = (Math.random() * 3 + 2.5) + 's';
+                eyeItem.style.fontSize = (Math.random() * 18 + 16) + 'px';
+                container.appendChild(eyeItem);
+                setTimeout(() => eyeItem.remove(), 5500);
+            }, 350);
+        }
 
-        // MLG Inspired Audio-Visual Funny Death Messages Matrix Array 
-        const mlgBanMessages = [
-            "❌ RECKT!! 360 NO-SCOPED BY ADMIN GLOOPY. GET OUT OF MY LOBBY MUM GET THE CAMERA!!! 🎮",
-            "❌ WOW! 😲 SMALL LOAN OF A MILLION BANS. LOOMINARTY CONFIRMED. GO CRY TO DEW AND DORITOS!! 🔺",
-            "❌ ACCESS DENIED SKILL ISSUE! 420 BLAZED INTO THE BAN DIMENSION. SANIC SPEED DELETION. 🦔",
-            "❌ COMPILATION DROPPED! Gloopy executed an MLG Pro hitmarker chain on your file sync node. 💸",
-            "❌ SAD VIOLIN TIME. 🎻 Hit up a mountain dew box because your access node was crushed by the intervention sniper rifle! 🎯"
-        ];
+        function terminateFallingEyes() {
+            if (eyeLoopInterval) clearInterval(eyeLoopInterval);
+            document.getElementById('tribe-eyes-container').innerHTML = '';
+        }
 
-        // System Preloader Dismiss Pipeline
         function terminateBootOverlay() {
             bootScreen.style.opacity = '0';
             setTimeout(() => {
                 bootScreen.style.display = 'none';
-                firebase.auth().onAuthStateChanged(handleFirebaseStateResponse);
+                evaluateGlobalDisplayState();
             }, 500);
         }
 
-        // Toggle Sign-In / Register Mode Text
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            authErrorDisplay.style.display = 'none';
-            if (isSignUpMode) {
-                authBoxTitle.innerText = "Create Profile Room Account";
-                authSubmitBtn.innerText = "Register New Account";
-                authToggleLink.innerHTML = "Already have an account? <span>Sign In here</span>";
-                authUsername.placeholder = "New Username (No spaces or symbols)";
+        function evaluateGlobalDisplayState() {
+            if (!firebaseActive) {
+                appRoot.style.display = 'grid';
+                authScreen.style.display = 'none';
+                switchChannel('global', 'Local Demo Mode Hub', true);
+                renderFriendList();
+                return;
+            }
+            const user = firebase.auth().currentUser;
+            if (user) {
+                appRoot.style.display = 'grid';
+                authScreen.style.display = 'none';
             } else {
-                authBoxTitle.innerText = "Sign In";
-                authSubmitBtn.innerText = "Sign In";
-                authToggleLink.innerHTML = "Don't have an account? <span>Create one here</span>";
-                authUsername.placeholder = "Username";
+                appRoot.style.display = 'none';
+                authScreen.style.display = 'block';
             }
         }
 
-        // Run client regex verification and credential operations 
-        function processAuthSubmission() {
-            const emailOrHandle = authUsername.value.trim();
-            const password = authPassword.value;
-            authErrorDisplay.style.display = "none";
+        // Authentication Framework Handlers
+        function toggleAuthMode() {
+            isAuthLoginMode = !isAuthLoginMode;
+            document.getElementById('auth-box-title').innerText = isAuthLoginMode ? 'Sign In' : 'Create Node Profile';
+            document.getElementById('auth-submit-btn').innerText = isAuthLoginMode ? 'Enter Matrix' : 'Initialize Profile Matrix';
+            document.getElementById('auth-toggle-link').innerHTML = isAuthLoginMode ? 
+                'New profile sequence? <span>Create Matrix Node</span>' : 'Existing parameters? <span>Sign In Here</span>';
+        }
 
-            if (!emailOrHandle || !password) {
-                displayAuthFeedback("Please fill out all credential verification text boxes properly.");
+        function processAuthSubmission() {
+            const handleText = document.getElementById('auth-username').value.trim();
+            const passwordText = document.getElementById('auth-password').value;
+            authErrorDisplay.style.display = 'none';
+
+            if (!handleText || !passwordText) {
+                displayAuthError("Credentials block parameters incomplete.");
                 return;
             }
 
-            if (isSignUpMode) {
-                // Strict alphanumeric validation rule checking implementation
-                const alphaNumericCheck = /^[a-zA-Z0-9]+$/;
-                if (!alphaNumericCheck.test(emailOrHandle)) {
-                    displayAuthFeedback("Invalid Username entry! Empty spaces, special symbols, and characters are strictly blocked. Please choose only letters and numbers.");
-                    return;
-                }
-
-                const pseudoEmail = `${emailOrHandle.toLowerCase()}@aerosocial.internal`;
-                
-                // Inspect inside real-time database to prevent duplicate handle claims
-                firebase.database().ref('handles/' + emailOrHandle.toLowerCase()).once('value').then((snap) => {
+            if (isAuthLoginMode) {
+                const syntheticEmail = `${handleText.toLowerCase()}@aero.local`;
+                firebase.auth().signInWithEmailAndPassword(syntheticEmail, passwordText)
+                .catch(err => displayAuthError(err.message));
+            } else {
+                // Ensure unique handle constraint checked first
+                firebase.database().ref('users').orderByChild('handle').equalTo(handleText).once('value', (snap) => {
                     if (snap.exists()) {
-                        displayAuthFeedback("This profile handle is already registered by another user node.");
+                        displayAuthError("Handle identity already locked into network.");
                     } else {
-                        firebase.auth().createUserWithEmailAndPassword(pseudoEmail, password)
-                            .then((credential) => {
-                                const uid = credential.user.uid;
-                                const defaultProfileData = {
-                                    handle: emailOrHandle,
-                                    bio: "Active node inside communication hub grid.",
-                                    avatarUrl: "https://via.placeholder.com/120",
-                                    xp: 15,
-                                    isBanned: false
-                                };
-                                
-                                let updates = {};
-                                updates['users/' + uid] = defaultProfileData;
-                                updates['handles/' + emailOrHandle.toLowerCase()] = uid;
-                                
-                                firebase.database().ref().update(updates).then(() => {
-                                    authUsername.value = '';
-                                    authPassword.value = '';
-                                });
-                            })
-                            .catch((err) => { displayAuthFeedback(err.message); });
+                        const syntheticEmail = `${handleText.toLowerCase()}@aero.local`;
+                        firebase.auth().createUserWithEmailAndPassword(syntheticEmail, passwordText)
+                        .then((cred) => {
+                            firebase.database().ref('users/' + cred.user.uid).set({
+                                handle: handleText,
+                                theme: 'default',
+                                status: '',
+                                msgCount: 0,
+                                friends: []
+                            });
+                        })
+                        .catch(err => displayAuthError(err.message));
                     }
                 });
-            } else {
-                // Account Login Strategy
-                const targetEmail = emailOrHandle.includes('@') ? emailOrHandle : `${emailOrHandle.toLowerCase()}@aerosocial.internal`;
-                firebase.auth().signInWithEmailAndPassword(targetEmail, password)
-                    .then(() => {
-                        authUsername.value = '';
-                        authPassword.value = '';
-                    })
-                    .catch((err) => { displayAuthFeedback("Authentication failed: Check input username rules or security passwords."); });
             }
         }
 
-        function displayAuthFeedback(text) {
-            authErrorDisplay.innerText = text;
-            authErrorDisplay.style.display = "block";
-        }
-
-        // Firebase Sync Context State Evaluator
-        function handleFirebaseStateResponse(user) {
-            if (user) {
-                currentUserObj = user;
-                // Attach main user details profile download hook
-                firebase.database().ref('users/' + user.uid).on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (!data) {
-                        terminateUserSession();
-                        return;
-                    }
-
-                    // Enforce MLG Funny ban structure restriction layout if user has been banned
-                    if (data.isBanned === true) {
-                        let preservedTheme = document.body.className;
-                        document.body.className = "theme-mlg"; // Enforce Pro MLG Theme for the ban layout screen
-                        
-                        let mlgAlertMsg = mlgBanMessages[Math.floor(Math.random() * mlgBanMessages.length)];
-                        
-                        document.body.innerHTML = `
-                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:40px; background:#000; color:#00ff00; font-family:'Impact', sans-serif;">
-                                <h1 style="font-size:75px; color:#ff0000; text-shadow:4px 4px #ffff00; margin-bottom:10px;">❌ UTTERLY DEPRECATRECKTED ❌</h1>
-                                <p style="font-size:28px; color:#fff; text-shadow:2px 2px #ff00ff; max-width:800px; line-height:1.4; margin:20px 0;">${mlgAlertMsg}</p>
-                                <div style="margin:20px; font-size:18px; color:#00ffff;">BANNED NODE: [ ${data.handle} ] • MODERATOR RECKONER: Gloopy</div>
-                                <button class="btn-action" style="padding:15px 40px; font-size:20px; margin-top:30px; background:#ff0000 !important; color:#fff !important; border:3px solid #fff;" onclick="location.reload()">RE-TRY MATRIX CONNECT</button>
-                            </div>
-                        `;
-                        // Instantly disconnect network authorization layer backend sessions
-                        firebase.auth().signOut();
-                        return;
-                    }
-
-                    myHandle = data.handle;
-                    myBioPhrase = data.bio || '';
-                    myAvatarUrl = data.avatarUrl || 'https://via.placeholder.com/120';
-                    const scoreXp = data.xp || 0;
-                    const calculatedLevel = Math.floor(Math.sqrt(scoreXp / 15)) || 1;
-
-                    // Hydrate elements fields
-                    myHandleDisplay.innerText = myHandle;
-                    myHandleDisplay.className = (myHandle.toLowerCase() === "gloopy") ? "gloopy-glow" : "";
-                    
-                    myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${escapeHtml(myBioPhrase)}</span>`;
-                    profileAvatarSlot.innerHTML = `<img src="${escapeHtml(myAvatarUrl)}" alt="User Avatar">`;
-                    nodeLevelDisplay.innerText = calculatedLevel;
-                    navUserIndicator.innerText = `Logged in as: ${myHandle}`;
-
-                    // Turn on Admin Reports Control Deck panel view if user matches master handle name criteria
-                    if (myHandle.toLowerCase() === "gloopy") {
-                        adminReportsPanel.style.display = "block";
-                        initializeAdminReportDashboardListener();
-                    } else {
-                        adminReportsPanel.style.display = "none";
-                    }
-
-                    authScreen.style.display = "none";
-                    appRoot.style.display = "grid";
-
-                    // Trigger structural data lists update tasks
-                    syncGlobalChannelsPipelines();
-                    listenToSystemAlertMessages();
-                    firebase.database().ref('users/' + currentUserObj.uid + '/friends').on('value', (fSnap) => {
-                        myFriends = fSnap.val() || [];
-                        renderFriendList();
-                    });
-                });
-            } else {
-                // Clear state variables
-                currentUserObj = null;
-                myHandle = '';
-                appRoot.style.display = "none";
-                adminReportsPanel.style.display = "none";
-                authScreen.style.display = "block";
-                navUserIndicator.innerText = "Not Signed In";
-                detachAllChatListeners();
-            }
+        function displayAuthError(msg) {
+            authErrorDisplay.innerText = msg;
+            authErrorDisplay.style.display = 'block';
         }
 
         function terminateUserSession() {
-            clearMyTypingState();
-            detachAllChatListeners();
-            firebase.auth().signOut();
+            endGroupCall(false);
+            if (firebaseActive) firebase.auth().signOut();
+            else location.reload();
         }
 
-        // Live Monitor Alerts Engine for Admin Alert broadcast commands 
-        function listenToSystemAlertMessages() {
-            firebase.database().ref('system_announcement').on('value', (snap) => {
-                const alertObj = snap.val();
-                const alertBanner = document.getElementById('global-system-alert-banner');
-                const alertTextSpan = document.getElementById('global-alert-text-span');
-                
-                if (globalSystemAlertTimeout) {
-                    clearTimeout(globalSystemAlertTimeout);
-                }
+        // System Initialization Monitors
+        if (firebaseActive) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    firebase.database().ref('users/' + user.uid).on('value', (snap) => {
+                        const userData = snap.val() || {};
+                        myHandle = userData.handle || "Profile_Node";
+                        currentUserPfp = userData.pfp || null;
+                        currentUserStatus = userData.status || "";
+                        currentUserTheme = userData.theme || "default";
+                        const msgCount = userData.msgCount || 0;
 
-                if (alertObj && alertObj.message && alertObj.expiresAt > Date.now()) {
-                    alertTextSpan.innerText = alertObj.message;
-                    alertBanner.style.display = "block";
-                    
-                    const durationRemaining = alertObj.expiresAt - Date.now();
-                    globalSystemAlertTimeout = setTimeout(() => {
-                        alertBanner.style.display = "none";
-                    }, durationRemaining);
-                } else {
-                    alertBanner.style.display = "none";
-                }
-            });
-        }
+                        myHandleDisplay.innerText = myHandle;
+                        navUserIndicator.innerText = `Node: ${myHandle}`;
+                        runThemeAdjustmentEngine(currentUserTheme);
 
-        // Administrative View Dashboard Loop Strategy
-        function initializeAdminReportDashboardListener() {
-            firebase.database().ref('reports').on('value', (snap) => {
-                const logs = snap.val();
-                if (!logs) {
-                    adminReportsFeedList.innerHTML = `<div style="font-size:12px; color:#8f98a0; font-style:italic;">No pending reports recorded. Secure platform matrix maintained.</div>`;
-                    return;
-                }
-                
-                let markupHtml = '';
-                Object.keys(logs).forEach((reportId) => {
-                    const report = logs[reportId];
-                    markupHtml += `
-                        <div class="admin-report-item">
-                            <div class="admin-report-meta">
-                                <span>⚠️ Target User: <strong>${escapeHtml(report.target)}</strong></span>
-                                <span style="color:#ff5555; cursor:pointer;" onclick="dismissAdminReportLog('${reportId}')">[ Resolve / Dismiss ]</span>
-                            </div>
-                            <div style="color:#fff; margin:2px 0;">Reason description: "${escapeHtml(report.reason)}"</div>
-                            <div style="font-size:10px; color:#8f98a0;">Filed by node handle: ${escapeHtml(report.reportedBy)}</div>
-                        </div>
-                    `;
-                });
-                adminReportsFeedList.innerHTML = markupHtml;
-            });
-        }
+                        if(currentUserPfp) profileAvatarSlot.innerHTML = `<img src="${currentUserPfp}">`;
+                        else profileAvatarSlot.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${myHandle}">`;
 
-        function dismissAdminReportLog(id) {
-            firebase.database().ref('reports/' + id).remove();
-        }
+                        if(currentUserStatus) {
+                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
+                        } else {
+                            myStatusDisplay.innerHTML = `<span class="status-bubble-tag" style="color:var(--text-main); opacity:0.6; border-color:var(--border-color); background:none;">No profile summary data broadcasted</span>`;
+                        }
 
-        // Build channel structure listings inside room navigator side deck
-        function syncGlobalChannelsPipelines() {
-            firebase.database().ref('channels').on('value', (snap) => {
-                const channelsMap = snap.val() || {};
-                // Insert fallback initial state channel loops if database structure is fresh
-                if (!channelsMap['global']) {
-                    firebase.database().ref('channels/global').set({ name: "Global Hub", type: "public" });
-                    return;
-                }
+                        const calculatedLevel = Math.floor(1 + Math.sqrt(msgCount));
+                        const itemsLinked = Math.floor(msgCount * 0.375);
+                        const expansions = Math.floor(calculatedLevel * 0.92);
 
-                dynamicChannelsListContainer.innerHTML = '';
-                Object.keys(channelsMap).forEach((id) => {
-                    const room = channelsMap[id];
-                    const li = document.createElement('li');
-                    li.className = (currentChannel === id) ? 'active' : '';
-                    
-                    const unreadBadgeMarkup = (unreadCounts[id] && currentChannel !== id) ? `<span class="notif-badge">${unreadCounts[id]}</span>` : '';
-                    
-                    li.innerHTML = `
-                        <span># 🚪 ${escapeHtml(room.name)} ${unreadBadgeMarkup}</span>
-                    `;
-                    li.onclick = () => switchChannel(id, room.name, true);
-                    dynamicChannelsListContainer.appendChild(li);
-                });
-            });
-        }
+                        document.getElementById('node-level-display').innerText = calculatedLevel;
+                        document.getElementById('stat-count-items').innerText = itemsLinked;
+                        document.getElementById('stat-count-expansions').innerText = expansions;
 
-        // Switch messaging feeds safely 
-        function switchChannel(channelId, customTitle, clearDms = true) {
-            clearMyTypingState();
-            currentChannel = channelId;
-            activeChannelTitle.innerText = customTitle;
-            unreadCounts[channelId] = 0;
-            
-            // Repaint channel highlights
-            syncGlobalChannelsPipelines();
-            renderFriendList();
+                        const rawFriends = userData.friends;
+                        if (rawFriends && Array.isArray(rawFriends)) myFriends = rawFriends;
+                        else if (rawFriends && typeof rawFriends === 'object') myFriends = Object.values(rawFriends).filter(v => typeof v === 'string');
+                        else myFriends = [];
 
-            // Toggle multimedia streaming call availability triggers
-            const voiceBtn = document.getElementById('btn-voice-call');
-            const videoBtn = document.getElementById('btn-video-call');
-            if (currentChannel.startsWith('dm_')) {
-                voiceBtn.style.display = 'inline-block';
-                videoBtn.style.display = 'inline-block';
-            } else {
-                voiceBtn.style.display = 'none';
-                videoBtn.style.display = 'none';
-            }
+                        renderFriendList();
 
-            attachChatStreamChannelListener(channelId);
-        }
-
-        function detachAllChatListeners() {
-            Object.keys(channelListeners).forEach((cId) => {
-                firebase.database().ref('messages/' + cId).off();
-            });
-            channelListeners = {};
-        }
-
-        // Realtime logs fetch loop framework
-        function attachChatStreamChannelListener(cId) {
-            if (channelListeners[cId]) return; // Already listening to the feed
-            
-            channelListeners[cId] = true;
-            firebase.database().ref('messages/' + cId).limitToLast(50).on('value', (snap) => {
-                // If it is an isolated feed room skip painting if it's no longer focus target
-                if (cId !== currentChannel) {
-                    const totalCount = snap.numChildren();
-                    return;
-                }
-
-                chatMessages.innerHTML = '';
-                const messagesPayload = snap.val();
-                if (!messagesPayload) {
-                    chatMessages.innerHTML = `<div style="text-align:center; padding:20px; font-size:12px; color:#8f98a0; font-style:italic;">No logged audio-visual text files in this hub yet. Say hello!</div>`;
-                    return;
-                }
-
-                Object.keys(messagesPayload).forEach((msgId) => {
-                    const row = messagesPayload[msgId];
-                    const isMe = row.sender === myHandle;
-                    
-                    const div = document.createElement('div');
-                    div.className = `msg ${isMe ? 'own' : ''}`;
-                    
-                    const timeStr = row.timestamp ? new Date(row.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    const cleanSender = escapeHtml(row.sender);
-                    
-                    // Gloopy Admin Name Glowing style rules checks
-                    const usernameClassStyle = (cleanSender.toLowerCase() === "gloopy") ? "username gloopy-glow" : "username";
-                    
-                    // Render interactive delete button context fields if logged in user is admin Gloopy
-                    const adminActionDeleteMarkup = (myHandle.toLowerCase() === "gloopy") 
-                        ? `<span class="msg-admin-delete-btn" onclick="executeAdminMessageRemoval('${cId}', '${msgId}', event)">✕ Delete</span>` 
-                        : '';
-
-                    let mediaAttachmentHtml = '';
-                    if (row.mediaType === 'image' && row.mediaUrl) {
-                        mediaAttachmentHtml = `<img src="${escapeHtml(row.mediaUrl)}" class="media-attachment" alt="Sent graphic attachment file">`;
-                    } else if (row.mediaType === 'audio' && row.mediaUrl) {
-                        mediaAttachmentHtml = `<audio src="${escapeHtml(row.mediaUrl)}" controls class="media-preview-audio"></audio>`;
-                    } else if (row.mediaType === 'video' && row.mediaUrl) {
-                        mediaAttachmentHtml = `<video src="${escapeHtml(row.mediaUrl)}" controls class="media-preview-video"></video>`;
-                    }
-
-                    div.innerHTML = `
-                        <div class="msg-header" onclick="inspectUserProfileNodeCard('${cleanSender}')">
-                            <img src="${escapeHtml(row.senderAvatar || 'https://via.placeholder.com/120')}" class="msg-pfp" alt="Pfp">
-                            <span class="${usernameClassStyle}">${cleanSender}</span>
-                            ${adminActionDeleteMarkup}
-                            <span class="msg-timestamp">${timeStr}</span>
-                        </div>
-                        <div class="text">${escapeHtml(row.text)}</div>
-                        ${mediaAttachmentHtml}
-                    `;
-                    chatMessages.appendChild(div);
-                });
-                
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                incrementClientStatsCounters();
-            });
-        }
-
-        // Administrative message purge execution strategy
-        function executeAdminMessageRemoval(channelId, messageId, event) {
-            event.stopPropagation(); // Avoid triggering mini-profile selection layout loops
-            if (confirm("Confirm log data drop action? Message will be purged globally across database.")) {
-                firebase.database().ref(`messages/${channelId}/${messageId}`).remove()
-                    .then(() => { incrementClientStatsCounters(); })
-                    .catch((err) => { alert("Database rejection execution error: " + err.message); });
-            }
-        }
-
-        // Interactive profile details viewer modal script
-        let targetedProfileLookupHandle = '';
-        function inspectUserProfileNodeCard(handle) {
-            targetedProfileLookupHandle = handle;
-            miniProfileName.innerText = handle;
-            miniProfileName.className = (handle.toLowerCase() === "gloopy") ? "gloopy-glow" : "";
-            
-            // Don't report yourself or allow duplicate triggers
-            const reportBtn = document.getElementById('btn-mini-report');
-            if (handle.toLowerCase() === myHandle.toLowerCase()) {
-                reportBtn.style.display = "none";
-            } else {
-                reportBtn.style.display = "block";
-            }
-
-            // Read secondary bio contexts parameters live 
-            firebase.database().ref('handles/' + handle.toLowerCase()).once('value').then((snap) => {
-                if(snap.exists()) {
-                    const uid = snap.val();
-                    firebase.database().ref('users/' + uid).once('value').then((uSnap) => {
-                        const profile = uSnap.val();
-                        if(profile) {
-                            miniProfileAvatar.innerHTML = `<img src="${escapeHtml(profile.avatarUrl || 'https://via.placeholder.com/120')}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" alt="Avatar">`;
-                            miniProfileStatusWrapper.innerHTML = `
-                                <div style="font-size:13px; color:#c7d5e0; margin-top:5px; font-style:italic;">"${escapeHtml(profile.bio || 'No status written yet.')}"</div>
-                                <div style="font-size:11px; color:var(--accent-blue); margin-top:4px;">Experience Points: ${profile.xp || 0} XP</div>
-                            `;
+                        if (appRoot.style.display === 'none' || appRoot.style.display === '') {
+                            evaluateGlobalDisplayState();
+                            syncChannelsListListener();
+                            switchChannel('global', 'Global Hub', true);
+                            setupGlobalNotificationTrackers();
                         }
                     });
-                }
-            });
-
-            miniProfileModal.style.display = "flex";
-        }
-
-        function closeMiniProfileModal() {
-            miniProfileModal.style.display = "none";
-        }
-
-        // Report flow operations strategies
-        function openReportReasonFormModal() {
-            closeMiniProfileModal();
-            reportReasonTextField.value = '';
-            reportReasonModal.style.display = "flex";
-        }
-
-        function closeReportReasonFormModal() {
-            reportReasonModal.style.display = "none";
-        }
-
-        function submitReportToFirebaseDatabase() {
-            const reason = reportReasonTextField.value.trim();
-            if (!reason) {
-                alert("Please explain why you are reporting this user profile node.");
-                return;
-            }
-
-            const payload = {
-                reportedBy: myHandle,
-                target: targetedProfileLookupHandle,
-                reason: reason,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            };
-
-            firebase.database().ref('reports').push(payload).then(() => {
-                alert(`Report on ${targetedProfileLookupHandle} submitted successfully. Gloopy will review it shortly!`);
-                closeReportReasonFormModal();
-            }).catch((err) => {
-                alert("Error sending report parameters: " + err.message);
+                } else evaluateGlobalDisplayState();
             });
         }
 
-        // Transmit messages down the link network setup pipeline
-        function dispatchUserChatMessage() {
-            const messageRawText = messageBox.value.trim();
-            if (!messageRawText) return;
+        // Pipeline Channel Topology Subsystems
+        let dynamicChannelsCache = {};
+        let activeMessagesListenerRef = null;
+        let activeGroupCallSignalRef = null;
 
-            // PARSE COMMAND SEQUENCES MATRIX
-            if (messageRawText.startsWith('/')) {
-                executeSystemConsoleCommands(messageRawText);
-                messageBox.value = '';
-                charCount.innerText = `0/500`;
-                return;
-            }
-
-            // Increment sender XP nodes to incentivize activity metrics logs
-            firebase.database().ref('users/' + currentUserObj.uid + '/xp').set(firebase.database.ServerValue.increment(2));
-
-            const msgPayload = {
-                sender: myHandle,
-                senderAvatar: myAvatarUrl,
-                text: messageRawText,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            };
-
-            firebase.database().ref('messages/' + currentChannel).push(msgPayload).then(() => {
-                messageBox.value = '';
-                charCount.innerText = `0/500`;
-                clearMyTypingState();
+        function syncChannelsListListener() {
+            if (!firebaseActive) return;
+            firebase.database().ref('channels').on('value', (snap) => {
+                dynamicChannelsCache = snap.val() || {};
+                renderChannelsSidebarDOM();
             });
         }
 
-        // SYSTEM COMMAND STRATEGY ENGINE
-        function executeSystemConsoleCommands(cmdText) {
-            const bits = cmdText.split(' ');
-            const primaryDirective = bits[0].toLowerCase();
-
-            if (primaryDirective === '/ban') {
-                if (myHandle.toLowerCase() !== "gloopy") {
-                    appendSystemFeedbackNotice("Inbound permission failure! Only the master administrator Gloopy can use the ban command line.");
-                    return;
-                }
-                
-                const userTargetName = bits[1];
-                if (!userTargetName) {
-                    appendSystemFeedbackNotice("Format syntax syntax mismatch! Usage structure error. Correct pattern: /ban <username>");
-                    return;
-                }
-
-                firebase.database().ref('handles/' + userTargetName.toLowerCase()).once('value').then((snap) => {
-                    if (!snap.exists()) {
-                        appendSystemFeedbackNotice(`Target username entry "${userTargetName}" is not registered on the current node coordinates.`);
-                    } else {
-                        const targetUid = snap.val();
-                        firebase.database().ref(`users/${targetUid}/isBanned`).set(true).then(() => {
-                            appendSystemFeedbackNotice(`💥 SUCCESSFUL RECKONING! User node [${userTargetName}] has been permanently blocked from the system matrix!`);
-                        });
-                    }
-                });
-            } 
-            else if (primaryDirective === '/alert') {
-                if (myHandle.toLowerCase() !== "gloopy") {
-                    appendSystemFeedbackNotice("Inbound access denied! Global system alert commands require Gloopy access clearance levels.");
-                    return;
-                }
-
-                const durationSecs = parseInt(bits[1], 10);
-                const bannerTextMessage = bits.slice(2).join(' ');
-
-                if (isNaN(durationSecs) || !bannerTextMessage) {
-                    appendSystemFeedbackNotice("Format syntax syntax mismatch! Correct pattern: /alert <duration_in_seconds> <your announcement message text here>");
-                    return;
-                }
-
-                const expirationTimestamp = Date.now() + (durationSecs * 1000);
-                const announcementPayload = {
-                    message: bannerTextMessage,
-                    expiresAt: expirationTimestamp,
-                    triggeredBy: "Gloopy"
-                };
-
-                firebase.database().ref('system_announcement').set(announcementPayload).then(() => {
-                    appendSystemFeedbackNotice(`Broadcast initialized! Top banner text set for ${durationSecs} seconds.`);
-                });
-            }
-            else {
-                appendSystemFeedbackNotice(`Unknown command variable target "${primaryDirective}". Please audit typed rules inputs structure values.`);
-            }
-        }
-
-        function appendSystemFeedbackNotice(text) {
-            const div = document.createElement('div');
-            div.className = "msg";
-            div.style.background = "rgba(255, 235, 59, 0.1)";
-            div.style.borderColor = "#fbc02d";
-            div.innerHTML = `
-                <div class="msg-header" style="color:#fbc02d; font-weight:bold;">⚙️ SYSTEM DIAGNOSTIC MONITOR</div>
-                <div class="text" style="color:#fffdd0;">${escapeHtml(text)}</div>
+        function renderChannelsSidebarDOM() {
+            dynamicChannelsContainer.innerHTML = `
+                <li class="${currentChannel === 'global' ? 'active' : ''}" onclick="switchChannel('global', 'Global Hub', true)">
+                    <span>🌐 Global Mainframe</span>
+                    ${renderBadgeHtml('global')}
+                </li>
             `;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Secondary Utility Helpers
-        function incrementClientStatsCounters() {
-            countItemsLinked += Math.floor(Math.random() * 2) + 1;
-            if(countItemsLinked % 12 === 0) countExpansions++;
-            document.getElementById('stat-count-items').innerText = countItemsLinked;
-            document.getElementById('stat-count-expansions').innerText = countExpansions;
+            Object.values(dynamicChannelsCache).forEach(chan => {
+                const li = document.createElement('li');
+                li.className = currentChannel === chan.id ? 'active' : '';
+                let deleteIconHtml = "";
+                if (myHandle === "DAMXIAFAN69") {
+                    deleteIconHtml = `<span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeChannelNode('${chan.id}', event)">🗑️</span>`;
+                }
+                li.innerHTML = `
+                    <span>💬 ${chan.name}</span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        ${renderBadgeHtml(chan.id)}
+                        ${deleteIconHtml}
+                    </div>
+                `;
+                li.onclick = () => switchChannel(chan.id, chan.name, false);
+                dynamicChannelsContainer.appendChild(li);
+            });
         }
 
         function triggerChannelCreationWizard() {
-            const name = prompt("Enter text designation for new text room:");
-            if(!name) return;
-            const cleanRoomId = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if(!cleanRoomId) {
-                alert("Invalid characters parsed for room identity validation tracking.");
+            const label = prompt("Input new pipeline descriptor channel title:");
+            if(!label || !label.trim()) return;
+            if(!firebaseActive) { alert("Matrix offline. Operation canceled."); return; }
+            
+            const generatedId = 'chan_' + Date.now();
+            firebase.database().ref('channels/' + generatedId).set({
+                id: generatedId,
+                name: label.trim(),
+                creator: myHandle
+            }).then(() => switchChannel(generatedId, label.trim(), false));
+        }
+
+        function removeChannelNode(chanId, event) {
+            if (event) event.stopPropagation();
+            if (confirm("Sever this specific logic pipeline container permanently?")) {
+                firebase.database().ref('channels/' + chanId).remove();
+                firebase.database().ref('messages/' + chanId).remove();
+                firebase.database().ref('groupCalls/' + chanId).remove();
+                if(currentChannel === chanId) switchChannel('global', 'Global Hub', true);
+            }
+        }
+
+        // Live Channel Messaging Engine Execution
+        function switchChannel(channelId, channelTitle, isGlobalHub) {
+            currentChannel = channelId;
+            activeChannelTitle.innerText = channelTitle;
+            renderChannelsSidebarDOM();
+            clearNotificationTrack(channelId);
+
+            document.getElementById('btn-group-voice-call').style.display = 'inline-block';
+            document.getElementById('btn-group-video-call').style.display = 'inline-block';
+
+            if (activeMessagesListenerRef) {
+                activeMessagesListenerRef.off();
+            }
+
+            // Sync Group Call Signaling state for this active pipeline channel
+            synchronizeGroupCallSignalingForChannel();
+
+            if (!firebaseActive) {
+                chatMessagesPanel.innerHTML = `<div style="text-align:center; padding:20px; filter:brightness(0.6);">Local isolation sandbox. Messaging pipelines unlinked.</div>`;
                 return;
             }
-            firebase.database().ref('channels/' + cleanRoomId).set({
-                name: name,
-                type: "public"
+
+            activeMessagesListenerRef = firebase.database().ref('messages/' + channelId).limitToLast(40);
+            activeMessagesListenerRef.on('value', (snap) => {
+                chatMessagesPanel.innerHTML = "";
+                const data = snap.val() || {};
+                Object.keys(data).sort((a,b) => data[a].timestamp - data[b].timestamp).forEach(mId => {
+                    renderMessageBubble(data[mId]);
+                });
+                chatMessagesPanel.scrollTop = chatMessagesPanel.scrollHeight;
             });
         }
 
-        // Add Friend Logic Loop
-        function manualAddFriend() {
-            const target = document.getElementById('add-friend-input').value.trim();
-            if(!target || target === myHandle) return;
-            
-            firebase.database().ref('handles/' + target.toLowerCase()).once('value').then((snap) => {
-                if(!snap.exists()) {
-                    alert("Requested handle string is not located inside index tables database logs.");
+        function renderMessageBubble(msg) {
+            const isMe = msg.sender === myHandle;
+            const item = document.createElement('div');
+            item.className = `msg ${isMe ? 'own' : ''}`;
+
+            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const pfpSrc = msg.pfp ? msg.pfp : `https://api.dicebear.com/7.x/identicon/svg?seed=${msg.sender}`;
+
+            let attachedMediaHtml = "";
+            if (msg.mediaUrl) {
+                if(msg.mediaType && msg.mediaType.startsWith('audio/')) {
+                    attachedMediaHtml = `<audio src="${msg.mediaUrl}" controls class="media-preview-audio"></audio>`;
+                } else if(msg.mediaType && msg.mediaType.startsWith('video/')) {
+                    attachedMediaHtml = `<video src="${msg.mediaUrl}" controls class="media-preview-video"></video>`;
                 } else {
-                    if(!myFriends.includes(target)) {
-                        myFriends.push(target);
-                        firebase.database().ref('users/' + currentUserObj.uid + '/friends').set(myFriends).then(() => {
-                            document.getElementById('add-friend-input').value = '';
-                        });
-                    }
+                    attachedMediaHtml = `<img src="${msg.mediaUrl}" class="media-attachment" onclick="window.open('${msg.mediaUrl}', '_blank')" style="cursor:pointer;" alt="Attached log element">`;
                 }
+            }
+
+            item.innerHTML = `
+                <div class="msg-header" onclick="inspectPeerProfile('${msg.sender}')">
+                    <img src="${pfpSrc}" class="msg-pfp">
+                    <span class="username">${msg.sender}</span>
+                    <span class="msg-timestamp">${timeStr}</span>
+                </div>
+                <div class="text">${escapeHtmlCode(msg.text)}</div>
+                ${attachedMediaHtml}
+            `;
+            chatMessagesPanel.appendChild(item);
+        }
+
+        // Broadcast Interface Actions
+        function performLogBroadcast() {
+            const rawText = messageBoxInput.value;
+            if (!rawText.trim()) return;
+
+            if (firebaseActive) {
+                const user = firebase.auth().currentUser;
+                const mRef = firebase.database().ref('messages/' + currentChannel).push();
+                mRef.set({
+                    sender: myHandle,
+                    text: rawText,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    pfp: currentUserPfp
+                });
+
+                if (user) {
+                    firebase.database().ref('users/' + user.uid + '/msgCount').transaction(c => (c || 0) + 1);
+                }
+            } else {
+                renderMessageBubble({
+                    sender: myHandle,
+                    text: rawText,
+                    timestamp: Date.now(),
+                    pfp: null
+                });
+                chatMessagesPanel.scrollTop = chatMessagesPanel.scrollHeight;
+            }
+
+            messageBoxInput.value = "";
+            updateCharCounterMetric();
+        }
+
+        sendButtonEl.onclick = performLogBroadcast;
+        messageBoxInput.onkeypress = (e) => { if(e.key === 'Enter') performLogBroadcast(); };
+
+        function updateCharCounterMetric() {
+            const count = messageBoxInput.value.length;
+            charCounterEl.innerText = `${count}/500`;
+            charCounterEl.style.color = count >= 460 ? '#ff5555' : 'var(--text-main)';
+        }
+        messageBoxInput.oninput = updateCharCounterMetric;
+
+        // Custom Settings Modules Manipulation Engine
+        function openSettings() {
+            document.getElementById('settings-theme-dropdown').value = currentUserTheme;
+            document.getElementById('settings-status-input').value = currentUserStatus;
+            selectedSettingsPfpData = null;
+            settingsModal.style.display = 'flex';
+        }
+
+        function closeSettings() { settingsModal.style.display = 'none'; }
+
+        function previewSettingsPfp(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => { selectedSettingsPfpData = e.target.result; };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function saveSettingsChanges() {
+            const tSel = document.getElementById('settings-theme-dropdown').value;
+            const sSel = document.getElementById('settings-status-input').value.trim();
+
+            if (firebaseActive) {
+                const u = firebase.auth().currentUser;
+                if (u) {
+                    const updates = { theme: tSel, status: sSel };
+                    
+                    if (selectedSettingsPfpData) {
+                        // Store inline as direct string signature profiles block if small enough or upload mock
+                        updates.pfp = selectedSettingsPfpData;
+                    }
+                    
+                    firebase.database().ref('users/' + u.uid).update(updates).then(() => closeSettings());
+                    return;
+                }
+            } else {
+                currentUserTheme = tSel;
+                currentUserStatus = sSel;
+                if (selectedSettingsPfpData) currentUserPfp = selectedSettingsPfpData;
+                runThemeAdjustmentEngine(currentUserTheme);
+                myHandleDisplay.innerText = myHandle;
+                if (currentUserPfp) profileAvatarSlot.innerHTML = `<img src="${currentUserPfp}">`;
+                if(currentUserStatus) myStatusDisplay.innerHTML = `<span class="status-bubble-tag">${currentUserStatus}</span>`;
+                closeSettings();
+            }
+        }
+
+        // Global Pipeline Notifications Matrix
+        let notificationMetricsMap = {};
+        function setupGlobalNotificationTrackers() {
+            firebase.database().ref('messages').on('child_changed', (snap) => {
+                const cId = snap.key;
+                if (cId === currentChannel) return;
+                
+                // Fetch last element record entry info
+                firebase.database().ref('messages/' + cId).limitToLast(1).once('value', (inner) => {
+                    const record = inner.val() || {};
+                    const data = Object.values(record)[0];
+                    if(data && data.sender !== myHandle) {
+                        notificationMetricsMap[cId] = (notificationMetricsMap[cId] || 0) + 1;
+                        renderChannelsSidebarDOM();
+                    }
+                });
             });
         }
 
+        function renderBadgeHtml(cId) {
+            const count = notificationMetricsMap[cId] || 0;
+            return count > 0 ? `<span class="notif-badge">${count}</span>` : '';
+        }
+
+        function clearNotificationTrack(cId) {
+            if (notificationMetricsMap[cId]) {
+                delete notificationMetricsMap[cId];
+                renderChannelsSidebarDOM();
+            }
+        }
+
+        // Connected Friends Directory Operations Matrix
+        let myFriends = [];
         function renderFriendList() {
-            friendListContainer.innerHTML = '';
-            myFriends.forEach((friend) => {
+            friendListContainer.innerHTML = "";
+            if (myFriends.length === 0) {
+                friendListContainer.innerHTML = `<li style="filter:brightness(0.5); font-style:italic; font-size:12px; pointer-events:none;">Empty grid sequence</li>`;
+                return;
+            }
+            myFriends.forEach(fHandle => {
                 const li = document.createElement('li');
-                const dmRoomId = [myHandle.toLowerCase(), friend.toLowerCase()].sort().join('_');
-                li.className = currentChannel === `dm_${dmRoomId}` ? 'active' : '';
-                li.innerHTML = `
-                    <span>👤 ${escapeHtml(friend)}</span>
-                    <span style="color:#ff5555; font-weight:bold; cursor:pointer;" onclick="removeFriendLink('${friend}', event)">✕</span>
-                `;
-                li.onclick = () => switchChannel(`dm_${dmRoomId}`, `Direct Line: ${friend}`, false);
+                li.innerHTML = `<span>👤 ${fHandle}</span><span style="font-size:10px; color:var(--accent-blue);">[View]</span>`;
+                li.onclick = () => inspectPeerProfile(fHandle);
                 friendListContainer.appendChild(li);
             });
         }
 
-        function removeFriendLink(target, event) {
-            event.stopPropagation();
-            const list = myFriends.filter(f => f !== target);
-            firebase.database().ref('users/' + currentUserObj.uid + '/friends').set(list);
-        }
-
-        function initiateDirectMessageFromModal() {
-            closeMiniProfileModal();
-            const dmRoomId = [myHandle.toLowerCase(), targetedProfileLookupHandle.toLowerCase()].sort().join('_');
-            switchChannel(`dm_${dmRoomId}`, `Direct Line: ${targetedProfileLookupHandle}`, false);
-        }
-
-        // Live Custom UI Theme Modifiers
-        function openSettings() {
-            settingsStatusInput.value = myBioPhrase;
-            settingsThemeDropdown.value = document.body.className.replace('theme-', '') || 'default';
-            settingsModal.style.display = "flex";
-        }
-        function closeSettings() { settingsModal.style.display = "none"; }
-        
-        function saveSettingsChanges() {
-            const choiceTheme = settingsThemeDropdown.value;
-            document.body.className = choiceTheme === 'default' ? '' : `theme-${choiceTheme}`;
+        function manualAddFriend() {
+            const target = document.getElementById('add-friend-input').value.trim();
+            if(!target) return;
+            if(target === myHandle) { alert("Self pairing anomaly loop."); return; }
             
-            const txtBio = settingsStatusInput.value.trim();
-            myBioPhrase = txtBio;
-            
-            let patches = { bio: txtBio };
-            if(pendingBase64Avatar) {
-                patches.avatarUrl = pendingBase64Avatar;
-                myAvatarUrl = pendingBase64Avatar;
+            if(!firebaseActive) {
+                if(!myFriends.includes(target)) { myFriends.push(target); renderFriendList(); }
+                document.getElementById('add-friend-input').value = "";
+                return;
             }
 
-            firebase.database().ref('users/' + currentUserObj.uid).update(patches).then(() => {
-                closeSettings();
-                pendingBase64Avatar = '';
+            firebase.database().ref('users').orderByChild('handle').equalTo(target).once('value', (snap) => {
+                if(snap.exists()) {
+                    const u = firebase.auth().currentUser;
+                    if(!myFriends.includes(target)) {
+                        myFriends.push(target);
+                        firebase.database().ref('users/' + u.uid + '/friends').set(myFriends);
+                    }
+                    document.getElementById('add-friend-input').value = "";
+                } else alert("Coordinate handle query identity not located.");
             });
         }
 
-        let pendingBase64Avatar = '';
-        function previewSettingsPfp(element) {
-            const file = element.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onloadend = function() { pendingBase64Avatar = reader.result; };
-            reader.readAsDataURL(file);
+        function inspectPeerProfile(handleStr) {
+            activeSelectedUserHandle = handleStr;
+            const pSlot = document.getElementById('mini-profile-avatar');
+            const nSlot = document.getElementById('mini-profile-name');
+            const sSlot = document.getElementById('mini-profile-status-wrapper');
+
+            nSlot.innerText = handleStr;
+            pSlot.innerHTML = `<img src="https://api.dicebear.com/7.x/identicon/svg?seed=${handleStr}" style="width:100%; height:100%; object-fit:cover;">`;
+            sSlot.innerHTML = `<span style="font-size:12px; filter:brightness(0.6);">Fetching remote signature block...</span>`;
+            miniProfileModal.style.display = 'flex';
+
+            if(firebaseActive) {
+                firebase.database().ref('users').orderByChild('handle').equalTo(handleStr).once('value', (snap) => {
+                    const data = snap.val();
+                    if(data) {
+                        const obj = Object.values(data)[0];
+                        if(obj.pfp) pSlot.innerHTML = `<img src="${obj.pfp}" style="width:100%; height:100%; object-fit:cover;">`;
+                        if(obj.status) sSlot.innerHTML = `<span class="status-bubble-tag">${obj.status}</span>`;
+                        else sSlot.innerHTML = `<span class="status-bubble-tag" style="opacity:0.5; background:none;">No status broadcasted</span>`;
+                    }
+                });
+            } else {
+                sSlot.innerHTML = `<span class="status-bubble-tag" style="opacity:0.5; background:none;">Offline simulated entity</span>`;
+            }
         }
 
-        function clearMyTypingState() {
-            // Typing infrastructure logic indicators layout
+        function closeMiniProfile() { miniProfileModal.style.display = 'none'; }
+
+        function actionAddFriend() {
+            if(activeSelectedUserHandle && !myFriends.includes(activeSelectedUserHandle)) {
+                myFriends.push(activeSelectedUserHandle);
+                if (firebaseActive) {
+                    const u = firebase.auth().currentUser;
+                    firebase.database().ref('users/' + u.uid + '/friends').set(myFriends);
+                } else {
+                    renderFriendList();
+                }
+            }
+            closeMiniProfile();
         }
 
-        function escapeHtml(str) {
-            if(!str) return '';
+        // =========================================================================
+        // --- REALTIME WEB RTC GROUP MESH CALL SIGNALLING INTERFACE ---
+        // =========================================================================
+        function synchronizeGroupCallSignalingForChannel() {
+            if (activeGroupCallSignalRef) {
+                activeGroupCallSignalRef.off();
+            }
+            if (!firebaseActive) return;
+
+            activeGroupCallSignalRef = firebase.database().ref('groupCalls/' + currentChannel);
+            activeGroupCallSignalRef.on('value', (snap) => {
+                const callInfo = snap.val();
+                if (callInfo && callInfo.status === 'active') {
+                    // There is an ongoing group call session. If we are not part of it, notify user
+                    if (!activeCallChannel || activeCallChannel !== currentChannel) {
+                        // Only trigger incoming broadcast popup if the broadcast didn't initiate from us
+                        if (callInfo.host !== myHandle) {
+                            document.getElementById('incoming-call-title').innerText = `Group Call: ${callInfo.host}`;
+                            incomingCallModal.style.display = 'flex';
+                        }
+                    }
+                } else {
+                    // Call session terminated or cleared
+                    incomingCallModal.style.display = 'none';
+                    if (activeCallChannel === currentChannel) {
+                        endGroupCall(false);
+                    }
+                }
+            });
+        }
+
+        async function startGroupCall(videoOption) {
+            isVideoCallType = videoOption;
+            activeCallChannel = currentChannel;
+            incomingCallModal.style.display = 'none';
+            callModal.style.display = 'flex';
+            callStatusText.innerText = 'Initializing local stream devices...';
+
+            if (isVideoCallType) {
+                videoStageGrid.style.display = 'grid';
+                voiceStageEl.style.display = 'none';
+            } else {
+                videoStageGrid.style.display = 'none';
+                voiceStageEl.style.display = 'flex';
+            }
+
+            // Flush the current visual display grid tracks
+            videoStageGrid.innerHTML = "";
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: isVideoCallType,
+                    audio: true
+                });
+
+                // Attach your own video window layout template block inside grid architecture
+                appendUserVideoTrackWrapper(myHandle, localStream, true);
+                callStatusText.innerText = 'Synchronizing peer negotiation mesh...';
+
+                if (firebaseActive) {
+                    callGroupRef = firebase.database().ref('groupCalls/' + currentChannel);
+                    
+                    // Create call record node if it doesn't exist
+                    await callGroupRef.transaction((currentData) => {
+                        if (currentData === null) {
+                            return {
+                                status: 'active',
+                                host: myHandle,
+                                type: isVideoCallType ? 'video' : 'voice',
+                                timestamp: firebase.database.ServerValue.TIMESTAMP
+                            };
+                        }
+                        return currentData; // Keep existing session parameters
+                    });
+
+                    // Insert individual peer online notification path structure inside room container
+                    const participantRef = callGroupRef.child('participants').child(myHandle);
+                    await participantRef.set({
+                        joined: true,
+                        mic: micEnabled,
+                        cam: camEnabled,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    // Track changes inside room to map other participants
+                    callGroupRef.child('participants').on('child_added', (pSnap) => {
+                        const peerHandleId = pSnap.key;
+                        if (peerHandleId !== myHandle && !peerConnections[peerHandleId]) {
+                            initiateNewPeerMeshConnection(peerHandleId, true);
+                        }
+                    });
+
+                    callGroupRef.child('participants').on('child_removed', (pSnap) => {
+                        const peerHandleId = pSnap.key;
+                        teardownPeerConnection(peerHandleId);
+                    });
+
+                    // Listen for incoming RTC negotiation messages addressing this handle node identity block
+                    const signalInboxRef = callGroupRef.child('signals').child(myHandle);
+                    signalInboxRef.on('child_added', async (sSnap) => {
+                        const envelope = sSnap.val();
+                        const senderId = envelope.sender;
+                        sSnap.ref.remove(); // Clean signaling packet message queue immediately
+
+                        if (!peerConnections[senderId]) {
+                            initiateNewPeerMeshConnection(senderId, false);
+                        }
+
+                        const pc = peerConnections[senderId];
+                        if (envelope.sdp) {
+                            await pc.setRemoteDescription(new RTCSessionDescription(envelope.sdp));
+                            if (envelope.sdp.type === 'offer') {
+                                const answerDesc = await pc.createAnswer();
+                                await pc.setLocalDescription(answerDesc);
+                                transmitGroupSignalPacket(senderId, { sdp: answerDesc });
+                            }
+                        } else if (envelope.ice) {
+                            try {
+                                await pc.addIceCandidate(new RTCIceCandidate(envelope.ice));
+                            } catch(e) { console.warn("ICE attachment anomaly: ", e); }
+                        }
+                    });
+
+                    callStatusText.innerText = 'Connected inside Mesh session line.';
+                } else {
+                    callStatusText.innerText = 'Simulated environment call active.';
+                }
+
+            } catch (err) {
+                console.error("Local media mapping exception: ", err);
+                callStatusText.innerText = 'Device configuration access failure.';
+            }
+        }
+
+        function initiateNewPeerMeshConnection(peerHandleId, isInitiator) {
+            const pc = new RTCPeerConnection(rtcIceConfig);
+            peerConnections[peerHandleId] = pc;
+
+            // Feed local tracks down into the connection layout stream architecture pipelines
+            if (localStream) {
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            }
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    transmitGroupSignalPacket(peerHandleId, { ice: event.candidate });
+                }
+            };
+
+            pc.ontrack = (event) => {
+                appendUserVideoTrackWrapper(peerHandleId, event.streams[0], false);
+            };
+
+            if (isInitiator) {
+                pc.onnegotiationneeded = async () => {
+                    try {
+                        const offerDesc = await pc.createOffer();
+                        await pc.setLocalDescription(offerDesc);
+                        transmitGroupSignalPacket(peerHandleId, { sdp: offerDesc });
+                    } catch (err) { console.error(err); }
+                };
+            }
+        }
+
+        function transmitGroupSignalPacket(recipientId, packet) {
+            if (!firebaseActive || !callGroupRef) return;
+            packet.sender = myHandle;
+            callGroupRef.child('signals').child(recipientId).push(packet);
+        }
+
+        function appendUserVideoTrackWrapper(userTagId, sourceStream, isLocal) {
+            let wrap = document.getElementById(`wrap-video-${userTagId}`);
+            if (!wrap) {
+                wrap = document.createElement('div');
+                wrap.id = `wrap-video-${userTagId}`;
+                wrap.className = `video-wrapper ${isLocal ? 'local-video-wrap' : ''}`;
+                
+                const label = document.createElement('div');
+                label.className = 'video-label-tag';
+                label.innerText = userTagId;
+
+                const videoEl = document.createElement('video');
+                videoEl.autoplay = true;
+                videoEl.playsinline = true;
+                if (isLocal) videoEl.muted = true; // Avoid feedback looping out locally
+
+                wrap.appendChild(label);
+                wrap.appendChild(videoEl);
+                videoStageGrid.appendChild(wrap);
+            }
+            const videoElem = wrap.querySelector('video');
+            if (videoElem.srcObject !== sourceStream) {
+                videoElem.srcObject = sourceStream;
+            }
+        }
+
+        function teardownPeerConnection(peerHandleId) {
+            if (peerConnections[peerHandleId]) {
+                peerConnections[peerHandleId].close();
+                delete peerConnections[peerHandleId];
+            }
+            const el = document.getElementById(`wrap-video-${peerHandleId}`);
+            if (el) el.remove();
+        }
+
+        function acceptGroupCall() {
+            incomingCallModal.style.display = 'none';
+            if (firebaseActive && activeGroupCallSignalRef) {
+                activeGroupCallSignalRef.once('value', (snap) => {
+                    const info = snap.val();
+                    const typeOption = (info && info.type === 'video');
+                    startGroupCall(typeOption);
+                });
+            } else {
+                startGroupCall(true);
+            }
+        }
+
+        function rejectGroupCall() {
+            incomingCallModal.style.display = 'none';
+        }
+
+        async function endGroupCall(shouldBroadcastTermination) {
+            if (firebaseActive && callGroupRef && activeCallChannel) {
+                // Remove listener updates inside targeted node instances
+                callGroupRef.child('participants').off();
+                callGroupRef.child('signals').child(myHandle).off();
+                
+                // Remove self parameter listings entries
+                await callGroupRef.child('participants').child(myHandle).remove();
+
+                if (shouldBroadcastTermination) {
+                    // Check if we are the host node or last one out to decide session deletion cleanup
+                    const snap = await callGroupRef.child('participants').once('value');
+                    if (!snap.exists()) {
+                        await callGroupRef.set(null); // Wipe complete dynamic call directory node block parameters
+                    }
+                }
+            }
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            Object.keys(peerConnections).forEach(pId => teardownPeerConnection(pId));
+            peerConnections = {};
+
+            callGroupRef = null;
+            activeCallChannel = null;
+            callModal.style.display = 'none';
+            incomingCallModal.style.display = 'none';
+            videoStageGrid.innerHTML = "";
+        }
+
+        function toggleMic() {
+            if (!localStream) return;
+            micEnabled = !micEnabled;
+            localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
+            const btn = document.getElementById('btn-toggle-mic');
+            btn.innerText = micEnabled ? '🎙️ Mic On' : '🔇 Muted';
+            btn.classList.toggle('btn-off', !micEnabled);
+
+            if (firebaseActive && callGroupRef) {
+                callGroupRef.child('participants').child(myHandle).update({ mic: micEnabled });
+            }
+        }
+
+        function toggleCam() {
+            if (!localStream) return;
+            const vTracks = localStream.getVideoTracks();
+            if (vTracks.length === 0) return;
+
+            camEnabled = !camEnabled;
+            vTracks.forEach(t => t.enabled = camEnabled);
+            const btn = document.getElementById('btn-toggle-cam');
+            btn.innerText = camEnabled ? '¼ Cam On' : '📷 Cam Off';
+            btn.classList.toggle('btn-off', !camEnabled);
+
+            const selfWrap = document.getElementById(`wrap-video-${myHandle}`);
+            if (selfWrap) {
+                const v = selfWrap.querySelector('video');
+                if (v) v.style.opacity = camEnabled ? '1' : '0.2';
+            }
+
+            if (firebaseActive && callGroupRef) {
+                callGroupRef.child('participants').child(myHandle).update({ cam: camEnabled });
+            }
+        }
+
+        // Auxiliary Tools Sanitization Helper Modules
+        function escapeHtmlCode(str) {
+            if(!str) return "";
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Register Action Click Core Event Triggers Handlers
-        sendButton.onclick = dispatchUserChatMessage;
-        messageBox.onkeydown = (e) => { if(e.key === 'Enter') dispatchUserChatMessage(); };
-        messageBox.oninput = () => { charCount.innerText = `${messageBox.value.length}/500`; };
-
-        // VOICE / VIDEO COMMUNICATION INFRASTRUCTURE PLACEHOLDERS
-        let localStream, peerConnection, micEnabled=true, camEnabled=true;
-        function startCall(video) {
-            document.getElementById('call-status-text').innerText = `Dialing secure routing target logs connection channel...`;
-            document.getElementById('call-modal').style.display = 'flex';
-            document.getElementById('video-stage').style.display = video ? 'block' : 'none';
-            document.getElementById('voice-stage').style.display = video ? 'none' : 'flex';
-        }
-        function endCall(sig) { document.getElementById('call-modal').style.display = 'none'; }
-        function toggleMic() { micEnabled=!micEnabled; document.getElementById('btn-toggle-mic').innerText = micEnabled ? "🎙️ Mic On" : "🔇 Muted"; }
-        function toggleCam() { camEnabled=!camEnabled; document.getElementById('btn-toggle-cam').innerText = camEnabled ? "📹 Cam On" : "📷 Cam Off"; }
-        function acceptIncomingCallSignal() { document.getElementById('incoming-call-modal').style.display = 'none'; startCall(false); }
-        function rejectIncomingCallSignal() { document.getElementById('incoming-call-modal').style.display = 'none'; }
+        window.addEventListener('beforeunload', () => { endGroupCall(true); });
     </script>
 </body>
 </html>
