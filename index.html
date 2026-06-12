@@ -105,11 +105,7 @@
             color: #ffffff !important;
         }
 
-        /* ==========================================
-           --- NEW THEMES UTILIZING LOCAL IMAGES ---
-           ========================================== */
-        
-        /* 1. Lain Theme (171282.gif) */
+        /* Lain Theme */
         body.theme-lain {
             background-image: linear-gradient(rgba(26, 17, 12, 0.75), rgba(15, 10, 8, 0.85)), url('171282.gif');
             background-size: cover;
@@ -131,7 +127,7 @@
             border: 1px solid #7c5843;
         }
 
-        /* 2. Joy Theme (lalalalal.webp) */
+        /* Joy Theme */
         body.theme-joy {
             background-image: linear-gradient(rgba(18, 0, 36, 0.6), rgba(8, 0, 15, 0.8)), url('lalalalal.webp');
             background-size: cover;
@@ -153,7 +149,7 @@
             text-shadow: 0 0 5px rgba(255, 0, 187, 0.5);
         }
 
-        /* 3. Skibidi Theme (Toilet.jpg) */
+        /* Skibidi Theme */
         body.theme-skibidi {
             background-image: linear-gradient(rgba(30, 30, 30, 0.7), rgba(10, 10, 10, 0.9)), url('Toilet.jpg');
             background-size: cover;
@@ -177,8 +173,6 @@
         body.theme-skibidi h1, body.theme-skibidi .panel-title {
             letter-spacing: 2px;
         }
-
-        /* ========================================== */
 
         body {
             margin: 0;
@@ -726,7 +720,7 @@
         }
 
         /* ==========================================
-           --- VOICE / VIDEO CALL ENGINE STYLES ---
+           --- UPGRADED DYNAMIC GRID ENGINE STYLES ---
            ========================================== */
         .btn-call {
             background: #1f7a3f;
@@ -742,8 +736,8 @@
         .btn-call:hover { filter: brightness(1.25); }
 
         #call-modal .modal-card {
-            width: min(720px, 92vw);
-            max-width: 92vw;
+            width: min(850px, 95vw);
+            max-width: 95vw;
         }
         .call-peer-line {
             display: flex;
@@ -754,34 +748,43 @@
         }
         #call-status-text { color: #8f98a0; font-size: 12px; }
 
+        /* Dynamic Grid Structure accommodating multi-peer boxes */
         #video-stage {
-            position: relative;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
             width: 100%;
             background: #000;
             border: 1px solid #2a475e;
             border-radius: var(--border-radius);
+            padding: 10px;
+            box-sizing: border-box;
+            min-height: 250px;
+        }
+        .video-container {
+            position: relative;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: var(--border-radius);
             aspect-ratio: 16 / 9;
             overflow: hidden;
         }
-        #remote-video {
+        .video-container video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background: #000;
         }
-        #local-video {
+        .video-label {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 28%;
-            max-width: 180px;
-            border: 2px solid var(--accent-blue);
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 2px 6px;
+            font-size: 11px;
             border-radius: var(--border-radius);
-            object-fit: cover;
-            background: #000;
-            transform: scaleX(-1); /* mirror self-view */
-            transition: opacity 0.2s ease;
         }
+
         #voice-stage {
             display: none;
             flex-direction: column;
@@ -814,16 +817,6 @@
             background: #555 !important;
             color: #ddd;
             opacity: 0.85;
-        }
-        #incoming-call-modal .modal-card { text-align: center; align-items: center; }
-        .incoming-ring {
-            font-size: 40px;
-            animation: incomingShake 0.9s ease-in-out infinite;
-        }
-        @keyframes incomingShake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-18deg); }
-            75% { transform: rotate(18deg); }
         }
 
         .collector-stats-display {
@@ -890,8 +883,8 @@
                 <div class="panel-title">
                     <span id="active-channel-title">Global Hub</span>
                     <span style="display:flex; align-items:center; gap:8px;">
-                        <button id="btn-voice-call" class="btn-call" onclick="startCall(false)" style="display:none;" title="Start a voice call">📞 Voice</button>
-                        <button id="btn-video-call" class="btn-call" onclick="startCall(true)" style="display:none;" title="Start a video call">📹 Video</button>
+                        <button id="btn-voice-call" class="btn-call" onclick="startGroupCall(false)" title="Start a group voice call">📞 Voice Call</button>
+                        <button id="btn-video-call" class="btn-call" onclick="startGroupCall(true)" title="Start a group video call">📹 Video Call</button>
                         <span style="font-size:11px; filter:brightness(0.8); text-transform:none;">Enforced Secure Line</span>
                     </span>
                 </div>
@@ -1023,37 +1016,22 @@
     <div id="call-modal" class="modal-overlay">
         <div class="modal-card">
             <div class="call-peer-line">
-                <span id="call-modal-title" style="font-weight:bold; font-size:14px;">Secure WebRTC Initialization Pipeline</span>
+                <span id="call-modal-title" style="font-weight:bold; font-size:14px;">Secure Group Mesh Signaling Network</span>
                 <span id="call-duration-clock">00:00</span>
             </div>
-            <div id="call-status-text">Synchronizing parameters with target interface coordinate...</div>
+            <div id="call-status-text">Synchronizing parameters with channel pool...</div>
             
-            <div id="video-stage">
-                <video id="remote-video" autoplay playsinline></video>
-                <video id="local-video" autoplay playsinline muted></video>
-            </div>
+            <div id="video-stage"></div>
 
             <div id="voice-stage">
                 <div class="voice-pulse"></div>
-                <div style="font-size:13px; color:var(--accent-blue); margin-top:10px;">Enforced Audio Matrix Stream Engaged</div>
+                <div style="font-size:13px; color:var(--accent-blue); margin-top:10px;">Group Audio Matrix Stream Active</div>
             </div>
 
             <div class="call-controls">
-                <button id="btn-toggle-mic" class="btn-action" onclick="toggleMic()">🎙️ Mic On</button>
-                <button id="btn-toggle-cam" class="btn-action" onclick="toggleCam()">📹 Cam On</button>
-                <button class="btn-action btn-danger" onclick="endCall(true)">🛑 Sever Connection</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="incoming-call-modal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="incoming-ring">🔔</div>
-            <h3 style="border:none; margin:10px 0 5px 0;">Incoming Pipeline Sync Request</h3>
-            <div id="incoming-call-text" style="font-size:13px; color:#8f98a0; margin-bottom:15px;">Remote coordinate offering signaling path...</div>
-            <div style="display:flex; gap:12px; width:100%;">
-                <button class="btn-action btn-danger" style="flex:1;" onclick="rejectIncomingCallSignal()">Decline</button>
-                <button class="btn-action" style="flex:1; background:linear-gradient(to right, #2faf5e 0%, #1f7a3f 100%);" onclick="acceptIncomingCallSignal()">Synchronize</button>
+                <button id="btn-toggle-mic" class="btn-action" onclick="toggleGroupMic()">🎙️ Mic On</button>
+                <button id="btn-toggle-cam" class="btn-action" onclick="toggleGroupCam()">📹 Cam On</button>
+                <button class="btn-action btn-danger" onclick="leaveGroupCall(true)">🛑 Disconnect Line</button>
             </div>
         </div>
     </div>
@@ -1082,13 +1060,12 @@
         let firebaseActive = false;
         let isCurrentlyTypingInFirebase = false;
 
-try {
+        try {
             if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE")) {
-                // Check if there are any initialized apps already. If not, initialize.
                 if (!firebase.apps.length) {
                     firebase.initializeApp(firebaseConfig);
                 } else {
-                    firebase.app(); // Use the already initialized instance
+                    firebase.app();
                 }
                 firebaseActive = true;
             }
@@ -1208,7 +1185,7 @@ try {
                 }).catch((err) => { displayAuthAnomaly(err.message); });
             } else {
                 firebase.auth().signInWithEmailAndPassword(virtualEmail, passText)
-                    .catch((err) => { displayAuthAnomaly("Access verification breakdown. Parameter values rejected by node encryption algorithm."); });
+                    .catch((err) => { displayAuthAnomaly(err.message); });
             }
         }
 
@@ -1295,9 +1272,7 @@ try {
             });
         }
 
-        /* =========================================================================
-           SIDEBAR PIPELINE MANAGEMENT ROUTINES
-           ========================================================================= */
+        /* SIDEBAR PIPELINE MANAGEMENT ROUTINES */
         function syncChannelsListListener() {
             if (!firebaseActive) return;
             firebase.database().ref('channels_list').on('value', (snap) => {
@@ -1474,11 +1449,6 @@ try {
             document.getElementById('active-channel-title').innerText = layoutTitle;
             chatMessages.innerHTML = '';
 
-            const isDM = channelId.startsWith('dm_');
-            document.getElementById('btn-voice-call').style.display = isDM ? 'inline-block' : 'none';
-            document.getElementById('btn-video-call').style.display = isDM ? 'inline-block' : 'none';
-            if (isDM) setupCallListener(channelId);
-
             if (activeListenerRef) {
                 activeListenerRef.off();
                 activeListenerRef = null;
@@ -1593,7 +1563,7 @@ try {
             });
         }
 
-        /* Drag-And-Drop Inline Storage Pipeline */
+        /* Drag-And-Drop Storage Pipeline */
         const chatDeckElement = document.querySelector('.chat-deck');
         const dragOverlay = document.getElementById('drag-overlay');
 
@@ -1767,73 +1737,46 @@ try {
         }
 
         /* =========================================================================
-           12. REAL-TIME VOICE / VIDEO CALL ENGINE (WebRTC Pipeline)
+           12. MULTI-USER GROUP VOICE & VIDEO MESH ENGINE (WebRTC Mesh Topology)
            ========================================================================= */
         let localStream = null;
-        let peerConnection = null;
-        let callSignalRef = null;
-        let activeCallChannel = null;
-        let incomingCallData = null;
-        let micEnabled = true;
-        let camEnabled = true;
-        let callClockTimer = null;
+        let activeCallRoomId = null;
+        let isVideoCallMode = false;
+        let groupMicEnabled = true;
+        let groupCamEnabled = true;
+        let groupCallClockTimer = null;
+        
+        // Track collections of peer connections and signaling channels
+        let peerConnections = {}; // Keyed by: remoteParticipantHandle
+        let roomSignalingRef = null;
 
         const callModal = document.getElementById('call-modal');
-        const incomingModal = document.getElementById('incoming-call-modal');
         const callStatusEl = document.getElementById('call-status-text');
         const callModalTitle = document.getElementById('call-modal-title');
         const clockEl = document.getElementById('call-duration-clock');
-        const localVideoEl = document.getElementById('local-video');
-        const remoteVideoEl = document.getElementById('remote-video');
         const videoStage = document.getElementById('video-stage');
         const voiceStage = document.getElementById('voice-stage');
 
         const rtcIceServersConfiguration = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
 
-        function setupCallListener(channelId) {
-            if (!firebaseActive) return;
-            if (callSignalRef) callSignalRef.off();
+        function startGroupCall(wantsVideo) {
+            if (!firebaseActive) {
+                alert("Firebase database must be active to host a group signaling pool.");
+                return;
+            }
+            activeCallRoomId = currentChannel;
+            isVideoCallMode = wantsVideo;
 
-            callSignalRef = firebase.database().ref(`calls/${channelId}`);
-            callSignalRef.on('value', (snap) => {
-                const data = snap.val();
-                if (!data) {
-                    if (peerConnection) endCall(false);
-                    return;
-                }
-                const remoteParticipantId = Object.keys(data).find(k => k !== myHandle.toLowerCase());
-                if (!remoteParticipantId) return;
-
-                const remoteNode = data[remoteParticipantId];
-                if (remoteNode.action === 'offer' && !peerConnection && incomingModal.style.display !== 'flex' && callModal.style.display !== 'flex') {
-                    incomingCallData = { peer: remoteParticipantId, offer: remoteNode.sdp, isVideo: remoteNode.isVideo };
-                    document.getElementById('incoming-call-text').innerText = `Node coordinate [${remoteParticipantId.toUpperCase()}] requests synchronization...`;
-                    incomingModal.style.display = 'flex';
-                    playSyntheticPing('ring');
-                } else if (remoteNode.action === 'answer' && peerConnection && !peerConnection.currentRemoteDescription) {
-                    peerConnection.setRemoteDescription(new RTCSessionDescription(remoteNode.sdp))
-                        .then(() => { callStatusEl.innerText = 'Signal synchronized. Matrix pipelines active.'; startCallTimerClock(); })
-                        .catch(e => console.error("Remote synchronization failure:", e));
-                } else if (remoteNode.action === 'candidate' && peerConnection) {
-                    if (remoteNode.candidate) {
-                        peerConnection.addIceCandidate(new RTCIceCandidate(remoteNode.candidate)).catch(e => {});
-                    }
-                }
-            });
-        }
-
-        function startCall(wantsVideo) {
-            if (!firebaseActive || !currentChannel.startsWith('dm_')) return;
-            activeCallChannel = currentChannel;
-            callModalTitle.innerText = `Establishing Communication: ${wantsVideo ? 'Video Vector' : 'Voice Vector'}`;
-            callStatusEl.innerText = 'Requesting dynamic media hardware stream paths...';
+            callModalTitle.innerText = `Matrix Room Pool: ${wantsVideo ? 'Video Grid Mesh' : 'Audio Mesh'}`;
+            callStatusEl.innerText = 'Requesting local hardware media streams...';
             
-            videoStage.style.display = wantsVideo ? 'block' : 'none';
+            videoStage.style.display = wantsVideo ? 'grid' : 'none';
             voiceStage.style.display = wantsVideo ? 'none' : 'flex';
+            videoStage.innerHTML = ''; // clear stage
             callModal.style.display = 'flex';
 
-            micEnabled = true;
-            camEnabled = wantsVideo;
+            groupMicEnabled = true;
+            groupCamEnabled = wantsVideo;
             document.getElementById('btn-toggle-mic').innerText = '🎙️ Mic On';
             document.getElementById('btn-toggle-mic').classList.remove('btn-off');
             document.getElementById('btn-toggle-cam').innerText = wantsVideo ? '📹 Cam On' : '📷 Cam Off';
@@ -1842,117 +1785,223 @@ try {
             navigator.mediaDevices.getUserMedia({ audio: true, video: wantsVideo })
                 .then(stream => {
                     localStream = stream;
-                    localVideoEl.srcObject = stream;
-                    callStatusEl.innerText = 'Assembling pipeline topologies...';
+                    callStatusEl.innerText = 'Local stream bound. Mounting interface wrapper...';
                     
-                    peerConnection = new RTCPeerConnection(rtcIceServersConfiguration);
-                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-
-                    peerConnection.onicecandidate = (event) => {
-                        if (event.candidate) {
-                            firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
-                                action: 'candidate',
-                                candidate: event.candidate.toJSON()
-                            });
-                        }
-                    };
-
-                    peerConnection.ontrack = (event) => {
-                        if (event.streams && event.streams[0]) {
-                            remoteVideoEl.srcObject = event.streams[0];
-                        }
-                    };
-
-                    return peerConnection.createOffer();
+                    // Create and add local self-view block inside stage if video call
+                    if(wantsVideo) {
+                        appendVideoContainerDOM('local-self-stream', `${myHandle} (Self)`, stream, true);
+                    }
+                    
+                    // Connect and attach live listeners to the room's dynamic signaling path
+                    initializeMeshSignalingPipeline();
+                    startGroupCallTimerClock();
                 })
-                .then(offer => peerConnection.setLocalDescription(offer).then(() => offer))
-                .then(offer => {
-                    return firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
-                        action: 'offer',
-                        sdp: offer.toJSON(),
-                        isVideo: wantsVideo
-                    });
-                })
-                .then(() => { callStatusEl.innerText = 'Awaiting remote endpoint negotiation...'; })
                 .catch(err => {
-                    console.error("Local WebRTC hardware configuration malfunction:", err);
+                    console.error("Local hardware access error:", err);
                     callStatusEl.innerText = `Hardware Link Error: ${err.message}`;
-                    setTimeout(() => endCall(true), 4000);
+                    setTimeout(() => leaveGroupCall(false), 4000);
                 });
         }
 
-        function acceptIncomingCallSignal() {
-            if (!incomingCallData) return;
-            incomingModal.style.display = 'none';
-            activeCallChannel = currentChannel;
-
-            callModalTitle.innerText = `Connected Pipeline: ${incomingCallData.isVideo ? 'Video Vector' : 'Voice Vector'}`;
-            callStatusEl.innerText = 'Accessing structural processing units...';
-            videoStage.style.display = incomingCallData.isVideo ? 'block' : 'none';
-            voiceStage.style.display = incomingCallData.isVideo ? 'none' : 'flex';
-            callModal.style.display = 'flex';
-
-            micEnabled = true;
-            camEnabled = incomingCallData.isVideo;
-            document.getElementById('btn-toggle-mic').innerText = '🎙️ Mic On';
-            document.getElementById('btn-toggle-mic').classList.remove('btn-off');
-            document.getElementById('btn-toggle-cam').innerText = camEnabled ? '📹 Cam On' : '📷 Cam Off';
-            document.getElementById('btn-toggle-cam').classList.toggle('btn-off', !camEnabled);
-
-            navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.isVideo })
-                .then(stream => {
-                    localStream = stream;
-                    localVideoEl.srcObject = stream;
+        function initializeMeshSignalingPipeline() {
+            const selfKey = myHandle.toLowerCase();
+            roomSignalingRef = firebase.database().ref(`calls/${activeCallRoomId}`);
+            
+            // Announce presence in call room pool list
+            roomSignalingRef.child(selfKey).child('presence').set({
+                handle: myHandle,
+                joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                isVideo: isVideoCallMode
+            });
+            
+            // Listen to any changes in the signaling pool path
+            roomSignalingRef.on('value', (snap) => {
+                const roomData = snap.val() || {};
+                callStatusEl.innerText = `Connected mesh node nodes: ${Object.keys(roomData).length}`;
+                
+                Object.keys(roomData).forEach(peerKey => {
+                    if (peerKey === selfKey) return; // skip self
                     
-                    peerConnection = new RTCPeerConnection(rtcIceServersConfiguration);
-                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-
-                    peerConnection.onicecandidate = (event) => {
-                        if (event.candidate) {
-                            firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
-                                action: 'candidate',
-                                candidate: event.candidate.toJSON()
-                            });
-                        }
-                    };
-
-                    peerConnection.ontrack = (event) => {
-                        if (event.streams && event.streams[0]) {
-                            remoteVideoEl.srcObject = event.streams[0];
-                        }
-                    };
-
-                    return peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
-                })
-                .then(() => peerConnection.createAnswer())
-                .then(answer => peerConnection.setLocalDescription(answer).then(() => answer))
-                .then(answer => {
-                    return firebase.database().ref(`calls/${activeCallChannel}/${myHandle.toLowerCase()}`).set({
-                        action: 'answer',
-                        sdp: answer.toJSON(),
-                        isVideo: incomingCallData.isVideo
-                    });
-                })
-                .then(() => { callStatusEl.innerText = 'Synchronized. Direct matrix connection live.'; startCallTimerClock(); })
-                .catch(err => {
-                    console.error("Endpoint assignment configuration failure:", err);
-                    endCall(true);
+                    const peerPresence = roomData[peerKey].presence;
+                    if (!peerPresence) return;
+                    
+                    const remoteHandle = peerPresence.handle;
+                    
+                    // If a peer joined before us, we send them an SDP Offer
+                    if (!peerConnections[peerKey] && peerPresence.joinedAt < Date.now()) {
+                        initiatePeerMeshConnection(peerKey, remoteHandle, true);
+                    }
+                    
+                    // Process incoming transactions/signals from this specific peer
+                    const incomingSignals = roomData[peerKey].signals;
+                    if (incomingSignals && incomingSignals[selfKey]) {
+                        handleIncomingMeshSignal(peerKey, remoteHandle, incomingSignals[selfKey]);
+                    }
                 });
+            });
+
+            // Monitor node departures to clean up elements
+            roomSignalingRef.on('child_removed', (oldChildSnap) => {
+                const disconnectedPeerKey = oldChildSnap.key;
+                if (peerConnections[disconnectedPeerKey]) {
+                    closeSinglePeerMeshNode(disconnectedPeerKey);
+                }
+            });
         }
 
-        function rejectIncomingCallSignal() {
-            incomingModal.style.display = 'none';
-            if (currentChannel && firebaseActive) {
-                firebase.database().ref(`calls/${currentChannel}`).remove();
+        function initiatePeerMeshConnection(peerKey, remoteHandle, isCaller) {
+            if (peerConnections[peerKey]) return;
+            
+            const pc = new RTCPeerConnection(rtcIceServersConfiguration);
+            peerConnections[peerKey] = pc;
+
+            // Push tracks from our local media source down the pipe
+            if (localStream) {
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
             }
-            incomingCallData = null;
+
+            // Stream ICE candidates immediately up to Firebase node matching this target peer
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    firebase.database().ref(`calls/${activeCallRoomId}/${myHandle.toLowerCase()}/signals/${peerKey}`).set({
+                        type: 'candidate',
+                        candidate: event.candidate.toJSON()
+                    });
+                }
+            };
+
+            // Catch the incoming incoming multi-media streams sent by the remote client
+            pc.ontrack = (event) => {
+                if (event.streams && event.streams[0]) {
+                    if (isVideoCallMode) {
+                        appendVideoContainerDOM(`video-peer-${peerKey}`, remoteHandle, event.streams[0], false);
+                    } else {
+                        // For audio calls, attach hidden audio elements dynamically to preserve sound routing
+                        let audioNode = document.getElementById(`audio-peer-${peerKey}`);
+                        if(!audioNode) {
+                            audioNode = document.createElement('audio');
+                            audioNode.id = `audio-peer-${peerKey}`;
+                            audioNode.autoplay = true;
+                            document.body.appendChild(audioNode);
+                        }
+                        audioNode.srcObject = event.streams[0];
+                    }
+                }
+            };
+
+            if (isCaller) {
+                pc.createOffer()
+                    .then(offer => pc.setLocalDescription(offer).then(() => offer))
+                    .then(offer => {
+                        firebase.database().ref(`calls/${activeCallRoomId}/${myHandle.toLowerCase()}/signals/${peerKey}`).set({
+                            type: 'offer',
+                            sdp: offer.toJSON()
+                        });
+                    }).catch(e => console.error("Mesh Offer exception generation:", e));
+            }
         }
 
-        function startCallTimerClock() {
-            clearInterval(callClockTimer);
+        function handleIncomingMeshSignal(peerKey, remoteHandle, signalData) {
+            // Ensure connection instance layers exist before ingestion processing runs
+            if (!peerConnections[peerKey]) {
+                initiatePeerMeshConnection(peerKey, remoteHandle, false);
+            }
+            
+            const pc = peerConnections[peerKey];
+            
+            if (signalData.type === 'offer' && !pc.currentRemoteDescription) {
+                pc.setRemoteDescription(new RTCSessionDescription(signalData.sdp))
+                    .then(() => pc.createAnswer())
+                    .then(answer => pc.setLocalDescription(answer).then(() => answer))
+                    .then(answer => {
+                        firebase.database().ref(`calls/${activeCallRoomId}/${myHandle.toLowerCase()}/signals/${peerKey}`).set({
+                            type: 'answer',
+                            sdp: answer.toJSON()
+                        });
+                    }).catch(e => console.error("Mesh Answer processing exception:", e));
+            } 
+            else if (signalData.type === 'answer' && !pc.currentRemoteDescription) {
+                pc.setRemoteDescription(new RTCSessionDescription(signalData.sdp)).catch(e => console.error("Setting answer failure:", e));
+            } 
+            else if (signalData.type === 'candidate') {
+                if (signalData.candidate) {
+                    pc.addIceCandidate(new RTCIceCandidate(signalData.candidate)).catch(e => {});
+                }
+            }
+        }
+
+        function appendVideoContainerDOM(elementId, labelName, streamInstance, isMuted) {
+            let container = document.getElementById(elementId);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = elementId;
+                container.className = 'video-container';
+                
+                const videoEl = document.createElement('video');
+                videoEl.autoplay = true;
+                videoEl.playsInline = true;
+                if(isMuted) {
+                    videoEl.muted = true;
+                    videoEl.style.transform = "scaleX(-1)"; // mirror effect for user self view
+                }
+                
+                const label = document.createElement('div');
+                label.className = 'video-label';
+                label.innerText = labelName;
+                
+                container.appendChild(videoEl);
+                container.appendChild(label);
+                videoStage.appendChild(container);
+                
+                videoEl.srcObject = streamInstance;
+            }
+        }
+
+        function closeSinglePeerMeshNode(peerKey) {
+            if (peerConnections[peerKey]) {
+                peerConnections[peerKey].close();
+                delete peerConnections[peerKey];
+            }
+            const videoBlock = document.getElementById(`video-peer-${peerKey}`);
+            if (videoBlock) videoBlock.remove();
+            
+            const audioBlock = document.getElementById(`audio-peer-${peerKey}`);
+            if (audioBlock) audioBlock.remove();
+        }
+
+        function leaveGroupCall(cleanupDatabase) {
+            clearInterval(groupCallClockTimer);
+            clockEl.innerText = "00:00";
+            
+            if (cleanupDatabase && firebaseActive && activeCallRoomId) {
+                firebase.database().ref(`calls/${activeCallRoomId}/${myHandle.toLowerCase()}`).remove();
+            }
+            if (roomSignalingRef) {
+                roomSignalingRef.off();
+                roomSignalingRef = null;
+            }
+            
+            // Kill all separate peer connections
+            Object.keys(peerConnections).forEach(k => {
+                peerConnections[k].close();
+            });
+            peerConnections = {};
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            
+            videoStage.innerHTML = '';
+            callModal.style.display = 'none';
+            activeCallRoomId = null;
+        }
+
+        function startGroupCallTimerClock() {
+            clearInterval(groupCallClockTimer);
             let sec = 0;
             clockEl.innerText = "00:00";
-            callClockTimer = setInterval(() => {
+            groupCallClockTimer = setInterval(() => {
                 sec++;
                 let m = String(Math.floor(sec / 60)).padStart(2, '0');
                 let s = String(sec % 60).padStart(2, '0');
@@ -1960,50 +2009,30 @@ try {
             }, 1000);
         }
 
-        function endCall(triggerDatabaseWipe) {
-            clearInterval(callClockTimer);
-            clockEl.innerText = "00:00";
-            if (triggerDatabaseWipe && firebaseActive && activeCallChannel) {
-                firebase.database().ref(`calls/${activeCallChannel}`).remove();
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            activeCallChannel = null;
-            incomingCallData = null;
-            callModal.style.display = 'none';
-            incomingModal.style.display = 'none';
-            localVideoEl.srcObject = null;
-            remoteVideoEl.srcObject = null;
-        }
-
-        function toggleMic() {
+        function toggleGroupMic() {
             if (!localStream) return;
-            micEnabled = !micEnabled;
-            localStream.getAudioTracks().forEach((t) => { t.enabled = micEnabled; });
+            groupMicEnabled = !groupMicEnabled;
+            localStream.getAudioTracks().forEach((t) => { t.enabled = groupMicEnabled; });
             const btn = document.getElementById('btn-toggle-mic');
-            btn.innerText = micEnabled ? '🎙️ Mic On' : '🔇 Muted';
-            btn.classList.toggle('btn-off', !micEnabled);
+            btn.innerText = groupMicEnabled ? '🎙️ Mic On' : '🔇 Muted';
+            btn.classList.toggle('btn-off', !groupMicEnabled);
         }
 
-        function toggleCam() {
+        function toggleGroupCam() {
             if (!localStream) return;
             const videoTracks = localStream.getVideoTracks();
             if (videoTracks.length === 0) {
-                callStatusEl.innerText = 'This is a voice-only call (no camera).';
+                callStatusEl.innerText = 'This is an audio-only matrix call.';
                 return;
             }
-            camEnabled = !camEnabled;
-            videoTracks.forEach((t) => { t.enabled = camEnabled; });
+            groupCamEnabled = !groupCamEnabled;
+            videoTracks.forEach((t) => { t.enabled = groupCamEnabled; });
             const btn = document.getElementById('btn-toggle-cam');
-            btn.innerText = camEnabled ? '📹 Cam On' : '📷 Cam Off';
-            btn.classList.toggle('btn-off', !camEnabled);
-            localVideoEl.style.opacity = camEnabled ? '1' : '0.2';
+            btn.innerText = groupCamEnabled ? '📹 Cam On' : '📷 Cam Off';
+            btn.classList.toggle('btn-off', !groupCamEnabled);
+            
+            const selfView = document.getElementById('local-self-stream');
+            if (selfView) selfView.style.opacity = groupCamEnabled ? '1' : '0.2';
         }
 
         /* =========================================================================
@@ -2052,7 +2081,6 @@ try {
             if (type === 'click') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAD";
             else if (type === 'ping') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAQBA";
             else if (type === 'chime') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAACA";
-            else if (type === 'ring') targetUrl = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAMDBA";
             
             if (targetUrl !== "") {
                 el.src = targetUrl;
@@ -2060,7 +2088,7 @@ try {
             }
         }
 
-        window.addEventListener('beforeunload', () => { if (peerConnection) endCall(false); });
+        window.addEventListener('beforeunload', () => { leaveGroupCall(true); });
     </script>
 </body>
 </html>
